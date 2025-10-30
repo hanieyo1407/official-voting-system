@@ -1,0 +1,2 @@
+2025-10-18 12:20:56 [INFO]: Audit Event | {"service":"voting-system","auditEvent":"CACHE_DEL","details":{"key":"users:all"},"category":"AUDIT"}
+2025-10-18 12:20:57 [INFO]: Audit Event | {"service":"voting-system","auditEvent":"CACHE_EXPIRED","details":{"key":"users:all"},"category":"AUDIT"}

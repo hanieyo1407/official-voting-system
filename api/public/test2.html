@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Voting API Test</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Optional: Configure Tailwind if needed, e.g., for custom colors/fonts
+    tailwind.config = {
+      // You can add custom settings here if desired
+    }
+  </script>
+</head>
+<body class="bg-gray-50 p-4 sm:p-8 font-sans text-gray-800">
+  <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-indigo-700">Voting API Test Page</h2>
+
+  <div class="mb-6 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
+    <h3 class="text-xl font-semibold mb-3 text-indigo-600">Authentication</h3>
+    
+    <form id="loginForm" class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
+      <input name="voucher" placeholder="voucher (8 chars)" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">Login (sets httpOnly cookie)</button>
+    </form>
+
+    <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">Logout (clear cookie)</button>
+  </div>
+
+  <hr class="my-6 border-gray-300"/>
+
+  <div class="mb-6 p-4 border border-gray-200 rounded-lg shadow-sm bg-white space-y-4">
+    <h3 class="text-xl font-semibold mb-3 text-indigo-600">Creation Endpoints</h3>
+    
+    <form id="createUserForm" class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+      <input name="voucher" placeholder="new voucher" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">Create User</button>
+    </form>
+
+    <form id="createPositionForm" class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+      <input name="position_name" placeholder="position name" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">Create Position</button>
+    </form>
+
+    <form id="createCandidateForm" class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+      <input name="positionId" placeholder="position id" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <input name="name" placeholder="candidate name" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <input name="manifesto" placeholder="manifesto (optional)" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">Create Candidate</button>
+    </form>
+
+    <form id="castVoteForm" class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+      <input name="voucher" placeholder="voucher" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <input name="candidateId" placeholder="candidate id" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <input name="positionId" placeholder="position id" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <input name="verificationCode" placeholder="verification code" required class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto" />
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">Cast Vote (protected)</button>
+    </form>
+  </div>
+
+  <hr class="my-6 border-gray-300"/>
+
+  <div class="mb-6 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
+    <h3 class="text-xl font-semibold mb-3 text-indigo-600">GET/Check Endpoints</h3>
+    <div class="flex flex-wrap gap-2">
+        <button id="getUsersBtn" class="bg-teal-500 hover:bg-teal-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">GET /users (protected)</button>
+        <button id="getPositionsBtn" class="bg-teal-500 hover:bg-teal-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">GET /positions</button>
+        <button id="getCandidatesBtn" class="bg-teal-500 hover:bg-teal-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">GET /positions/1/candidates</button>
+        <button id="authCheckBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md transition duration-150">POST /auth (check voucher)</button>
+    </div>
+  </div>
+
+  <h3 class="text-xl font-semibold mb-2 text-indigo-600">Response</h3>
+  <pre id="output" class="bg-gray-800 text-green-300 p-4 rounded-lg shadow-inner max-h-96 overflow-auto text-sm whitespace-pre-wrap">Ready</pre>
+
+  <script>
+    // The JavaScript remains the same, as it only handles logic, not presentation.
+    //const base = location.origin; // expects page served from API origin e.g. http://127.0.0.1:3000
+    const base = location.origin + '/api/v1';
+    const out = document.getElementById('output');
+
+    function show(r) { out.textContent = JSON.stringify(r, null, 2); }
+
+    async function doFetch(path, opts = {}) {
+      opts.credentials = opts.credentials || 'include'; // send cookies
+      opts.headers = opts.headers || {};
+      if (opts.body && typeof opts.body === 'object') {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(opts.body);
+      }
+
+    const res = await fetch(base + path, opts);
+      const raw = await res.text();             // read body once
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch (e) { parsed = raw; }
+      show({ status: res.status, ok: res.ok, body: parsed, headers: Object.fromEntries(res.headers) });
+     return { res, body: parsed };
+    }
+
+    // login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const voucher = e.target.voucher.value.trim();
+      if (!voucher) return alert('voucher required');
+      await doFetch('/login', { method: 'POST', body: { voucher } });
+    });
+
+    // logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await doFetch('/logout', { method: 'POST' });
+    });
+
+    // create user
+    document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const voucher = e.target.voucher.value.trim();
+      await doFetch('/users', { method: 'POST', body: { voucher } });
+    });
+
+    // create position
+    document.getElementById('createPositionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const position_name = e.target.position_name.value.trim();
+      await doFetch('/positions', { method: 'POST', body: { position_name } });
+    });
+
+    // create candidate
+    document.getElementById('createCandidateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const positionId = e.target.positionId.value.trim();
+      const name = e.target.name.value.trim();
+      const manifesto = e.target.manifesto.value.trim();
+      await doFetch(`/positions/${positionId}/candidates`, { method: 'POST', body: { name, manifesto } });
+    });
+
+    // cast vote
+    document.getElementById('castVoteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        voucher: e.target.voucher.value.trim(),
+        candidateId: Number(e.target.candidateId.value),
+        positionId: Number(e.target.positionId.value),
+        verificationCode: e.target.verificationCode.value.trim()
+      };
+      await doFetch('/vote', { method: 'POST', body: data });
+    });
+
+    // get users (protected)
+    document.getElementById('getUsersBtn').addEventListener('click', async () => {
+      await doFetch('/users', { method: 'GET' });
+    });
+
+    // get positions
+    document.getElementById('getPositionsBtn').addEventListener('click', async () => {
+      await doFetch('/positions', { method: 'GET' });
+    });
+
+    // get candidates for position 1
+    document.getElementById('getCandidatesBtn').addEventListener('click', async () => {
+      await doFetch('/positions/1/candidates', { method: 'GET' });
+    });
+
+    // auth check
+    document.getElementById('authCheckBtn').addEventListener('click', async () => {
+      const voucher = prompt('voucher to check');
+      if (!voucher) return;
+      await doFetch('/auth', { method: 'POST', body: { voucher } });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Custom PostgreSQL Dockerfile for SJBU Voting System
+FROM postgres:15-alpine
+
+# Set environment variables
+ENV POSTGRES_DB=sjbu_voting
+ENV POSTGRES_USER=avnadmin
+
+# Copy initialization scripts
+COPY ../src/db/migrations/001_initial_schema.sql /docker-entrypoint-initdb.d/
+COPY ../src/db/migrations/002_add_user_created_at.sql /docker-entrypoint-initdb.d/
+COPY ../src/db/migrations/003_setup_president_vice_president.sql /docker-entrypoint-initdb.d/
+COPY ../src/db/migrations/004_add_election_management_tables.sql /docker-entrypoint-initdb.d/
+
+# Set proper permissions
+RUN chmod +r /docker-entrypoint-initdb.d/*.sql
+
+# Create health check script
+RUN echo '#!/bin/bash\npg_isready -U $POSTGRES_USER -d $POSTGRES_DB' > /usr/local/bin/healthcheck.sh && \
+    chmod +x /usr/local/bin/healthcheck.sh
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+    CMD /usr/local/bin/healthcheck.sh
+
+# Expose port
+EXPOSE 5432

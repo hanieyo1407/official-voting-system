@@ -1,0 +1,5 @@
+{
+  "name": "SJBU Voting System",
+  "description": "A secure, transparent, and accessible electronic voting platform for SJBU, built with React and Tailwind CSS.",
+  "requestFramePermissions": []
+}
