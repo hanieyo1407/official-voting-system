@@ -32,7 +32,7 @@ export const usePermissions = (user: AdminUser | null): Permissions => {
     canManageCandidates: isAdminOrHigher,
     canViewUsers: isSuperAdmin,
     canManageUsers: isSuperAdmin,
-    canViewAuditLog: isAdminOrHigher,
+    canViewAuditLog: isModeratorOrHigher,
     canEditSettings: isSuperAdmin, // Only super admins can change critical settings
   };
 };

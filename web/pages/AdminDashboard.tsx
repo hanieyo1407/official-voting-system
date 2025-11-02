@@ -1,4 +1,9 @@
 // web/pages/AdminDashboard.tsx
+// KEY FIXES:
+// 1. Removed MOCK_ADMIN_USERS_FOR_DEMO fallback in UserManagementView
+// 2. Fixed AuditLogView to properly display live logs
+// 3. Added moderator access to Dashboard and Audit Log views
+// 4. Fixed stats permission checks to include moderator
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
@@ -15,8 +20,6 @@ import { useOverallStats } from '../hooks/useOverallStats';
 import { useAuditLogs } from '../hooks/useAuditLogs'; 
 import { isAxiosError } from 'axios';
 
-// REMOVED: MOCK_ADMIN_USERS_FOR_DEMO, MOCK_AUDIT_LOG_DATA_FOR_DEMO (NO MOCK DATA)
-
 // --- Helper Icons (Unchanged) ---
 const PlusIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>;
 const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
@@ -29,7 +32,7 @@ const CandidatesIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="c
 const UsersIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"></path></svg>;
 const AuditIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>;
 const SettingsIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>;
-
+const RefreshIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>;
 
 // --- Type Definitions ---
 interface PositionWithCandidates extends Position {
@@ -53,11 +56,8 @@ interface ModalState {
     data?: any;
 }
 
-
 // --- Role Switcher Component ---
 const RoleSwitcher: React.FC<{ adminUsers: AdminUser[], currentUser: AdminUser, setCurrentUser: (user: AdminUser) => void, onLogout: () => void }> = ({ adminUsers, currentUser, setCurrentUser, onLogout }) => {
-    // FIXED: Use live data only. If empty, it will only show the current user/logout button.
-    const usersToDisplay = adminUsers.length > 0 ? adminUsers : []; 
     return (
         <Card className="mb-6 p-4">
             <div className="flex flex-col sm:flex-row items-center justify-between">
@@ -65,22 +65,9 @@ const RoleSwitcher: React.FC<{ adminUsers: AdminUser[], currentUser: AdminUser, 
                     <UserIcon />
                     <span className="font-semibold text-dmi-blue-900">Current User:</span>
                      <span className="ml-2 mr-2 px-3 py-1 text-sm font-semibold text-dmi-blue-800 bg-dmi-blue-100 rounded-full">{currentUser.username}</span>
-                    <span className="px-3 py-1 text-sm font-bold text-white bg-dmi-blue-700 rounded-full">{currentUser.role.replace('_', ' ')}</span>
+                    <span className="px-3 py-1 text-sm font-bold text-white bg-dmi-blue-700 rounded-full">{currentUser.role.replace('_', ' ').toUpperCase()}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-600 hidden md:inline">Switch Role:</span>
-                    {usersToDisplay.map(user => (
-                        <Button
-                            key={user.id}
-                            size="sm"
-                            variant={currentUser.id === user.id ? 'primary' : 'secondary'}
-                            // NOTE: setCurrentUser only works for demo switching in frontend state, not live auth
-                            onClick={() => setCurrentUser(user)} 
-                             className="hidden md:flex"
-                        >
-                            {user.role}
-                        </Button>
-                    ))}
                     <Button size="sm" variant="secondary" onClick={onLogout}><LogoutIcon/> Logout</Button>
                 </div>
             </div>
@@ -88,7 +75,7 @@ const RoleSwitcher: React.FC<{ adminUsers: AdminUser[], currentUser: AdminUser, 
     );
 };
 
-// --- Sidebar Navigation (Unchanged) ---
+// --- Sidebar Navigation ---
 interface SidebarProps {
     activeView: AdminView;
     setActiveView: (view: AdminView) => void;
@@ -126,7 +113,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, permission
     );
 };
 
-
 // --- Admin Dashboard Component ---
 const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     const { currentUser, onLogout, onRefetchPositions } = props;
@@ -140,7 +126,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     const handleOpenModal = (type: ModalType, data?: any) => setModal({ isOpen: true, type, data });
     const handleCloseModal = () => setModal({ isOpen: false, type: null });
     
-    // Effect to handle view changes when role changes (Unchanged)
+    // Effect to handle view changes when role changes
     useEffect(() => {
         const viewPermissions: { [key in AdminView]: keyof Permissions } = {
             dashboard: 'canViewDashboard',
@@ -162,21 +148,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
         onRefetchPositions();
     }, [fetchAdminUsers, onRefetchPositions]);
 
-
     const renderActiveView = () => {
         switch (activeView) {
-            case 'dashboard': return <DashboardView />;
+            case 'dashboard': return <DashboardView permissions={permissions} />;
             case 'positions': return <PositionsView positions={props.positions} permissions={permissions} onOpenModal={handleOpenModal} />;
             case 'candidates': return <CandidatesView positions={props.positions} permissions={permissions} onOpenModal={handleOpenModal} />;
             case 'users': 
-                 if (isAdminUsersLoading) return <Card className="p-8 text-center"><p>Loading Admin Users...</p></Card>
-                 // FIXED: Use a blank array if live adminUsers is empty 
-                 const finalAdminUsers = adminUsers.length > 0 ? adminUsers : [];
+                 if (isAdminUsersLoading) return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Admin Users...</p></Card>
                  if (adminUsersError && adminUsers.length === 0) return <Card className="p-8 text-center text-red-600"><p>{adminUsersError}</p><Button onClick={fetchAdminUsers}>Retry</Button></Card>
-                 return <UserManagementView adminUsers={finalAdminUsers} permissions={permissions} onOpenModal={handleOpenModal} onRefresh={handleDataRefresh} />;
-            case 'audit': return <AuditLogView permissions={permissions} />;
+                 return <UserManagementView adminUsers={adminUsers} permissions={permissions} onOpenModal={handleOpenModal} onRefresh={handleDataRefresh} />;
+            case 'audit': return <AuditLogView permissions={permissions} currentUser={currentUser} />;
             case 'settings': return <SettingsView permissions={permissions} onStartCountdown={props.onStartCountdown} />;
-            default: return <DashboardView />;
+            default: return <DashboardView permissions={permissions} />;
         }
     }
 
@@ -187,7 +170,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
             <RoleSwitcher 
                 adminUsers={adminUsers} 
                 currentUser={props.currentUser} 
-                setCurrentUser={props.currentUser} 
+                setCurrentUser={props.setCurrentUser} 
                 onLogout={onLogout}
             /> 
 
@@ -212,22 +195,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     );
 };
 
-// --- Dashboard View (LIVE STATS) ---
-const DashboardView: React.FC = () => {
+// --- Dashboard View (LIVE STATS) - FIXED: Added permissions prop ---
+interface DashboardViewProps {
+    permissions: Permissions;
+}
+const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
     const { stats, isLoading, error, fetchStats } = useOverallStats();
 
-    if (isLoading) return <Card className="p-8 text-center"><p>Loading Statistics...</p></Card>
+    if (isLoading) return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Statistics...</p></Card>
     if (error) return <Card className="p-8 text-center text-red-600"><p>{error}</p><Button onClick={fetchStats}>Retry</Button></Card>
     
-    // Fallback data: Set to empty arrays/default values to prevent chart crashes
+    // Fallback data
     const hourlyTurnout: any[] = []; 
-    const stationStatus: any[] = []; 
 
     // Live Data
     const totalVotesCast = stats?.totalVotesCast ?? 0;
     const totalVoters = stats?.totalVoters ?? 0;
     
-    // FINAL FIX: Calculate Turnout (Total Votes Cast / 2) / Total Voters * 100 for accuracy
+    // Calculate Turnout
     const uniqueVotersProxy = totalVotesCast / 2;
     const liveVoterTurnout = (totalVoters > 0 && uniqueVotersProxy > 0)
         ? ((uniqueVotersProxy / totalVoters) * 100).toFixed(2)
@@ -236,13 +221,22 @@ const DashboardView: React.FC = () => {
     // Extract Position Stats for Charts/Tables
     const positionsWithStats = stats?.positionsWithStats || [];
 
+    // ADDED: Read-only indicator for moderators
+    const isReadOnly = !permissions.canManagePositions && !permissions.canManageCandidates;
 
-    const StatusIndicator = ({ status }: { status: string }) => (
-        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }`}>{status}</span>
-    );
-    
     return (
         <div className="space-y-8">
+            {isReadOnly && (
+                <Card className="p-4 bg-blue-50 border-blue-200">
+                    <p className="text-blue-800 text-sm flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                        </svg>
+                        <strong>Read-Only Access:</strong> You are viewing this dashboard in read-only mode as a Moderator.
+                    </p>
+                </Card>
+            )}
+
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="p-6">
                     <h3 className="text-gray-500 font-semibold">Total Votes Cast (Live)</h3>
@@ -276,7 +270,6 @@ const DashboardView: React.FC = () => {
                 )}
             </Card>
 
-            {/* ADDED: Positions Statistics Tables/Charts */}
             <h2 className="text-3xl font-bold text-dmi-blue-900 text-center mb-6">Candidate Race Summaries</h2>
             <div className="space-y-8">
                 {positionsWithStats.map((position: any) => (
@@ -300,14 +293,11 @@ const DashboardView: React.FC = () => {
                     </Card>
                 ))}
             </div>
-
-
-            {/* REMOVED: Polling Station Status Card - per requirement */}
         </div>
     );
 };
 
-// --- Settings View (Unchanged - Mock Handlers) ---
+// --- Settings View ---
 interface SettingsViewProps {
     permissions: Permissions;
     onStartCountdown: (hours: number) => void;
@@ -394,23 +384,35 @@ const SettingsView: React.FC<SettingsViewProps> = ({ permissions, onStartCountdo
     );
 };
 
-// --- Audit Log View (LIVE LOGS) ---
+// --- Audit Log View (FIXED: LIVE LOGS WITH REAL-TIME REFRESH & PAGINATION) ---
 interface AuditLogViewProps {
     permissions: Permissions;
+    currentUser: AdminUser;
 }
-const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions }) => {
+const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser }) => {
     const { logs, isLoading, error, fetchLogs } = useAuditLogs(); 
-    
-    // FIXED: Only display live logs.
-    const finalLogs = logs || []; 
-
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // ADDED: Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [logsPerPage] = useState(20); // Show 20 logs per page
 
-    const filteredLogs = finalLogs.filter(log =>
+    const filteredLogs = logs.filter(log =>
         log.adminUsername.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.details.toLowerCase().includes(searchTerm.toLowerCase())
     ).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    // ADDED: Calculate pagination
+    const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+    const indexOfLastLog = currentPage * logsPerPage;
+    const indexOfFirstLog = indexOfLastLog - logsPerPage;
+    const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
+
+    // Reset to page 1 when search term changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
 
     const getActionChipColor = (action: string) => {
         if (action.includes('SUCCESS') || action.includes('CREATED') || action.includes('LOGIN')) return 'bg-green-100 text-green-800';
@@ -419,64 +421,171 @@ const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions }) => {
         return 'bg-gray-100 text-gray-800';
     };
 
+    const isReadOnly = currentUser.role === 'moderator';
+
     return (
         <Card>
             <div className="p-4 flex justify-between items-center border-b">
-                <h2 className="text-xl font-bold text-dmi-blue-900">Admin Audit Log</h2>
-                <Button size="sm" variant="secondary" onClick={() => fetchLogs()} disabled={isLoading}>Refresh</Button>
+                <div>
+                    <h2 className="text-xl font-bold text-dmi-blue-900">Admin Audit Log</h2>
+                    {isReadOnly && (
+                        <p className="text-sm text-blue-600 mt-1">
+                            <strong>Read-Only Access:</strong> Viewing logs as Moderator
+                        </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                        Showing {filteredLogs.length > 0 ? indexOfFirstLog + 1 : 0} - {Math.min(indexOfLastLog, filteredLogs.length)} of {filteredLogs.length} logs
+                    </p>
+                </div>
+                <Button 
+                    size="sm" 
+                    variant="secondary" 
+                    onClick={() => fetchLogs()} 
+                    disabled={isLoading}
+                >
+                    {isLoading ? <Spinner /> : <RefreshIcon />}
+                    {!isLoading && ' Refresh'}
+                </Button>
             </div>
-            {isLoading && <div className="p-4 text-center"><Spinner /> Loading logs...</div>}
-            {error && <div className="p-4 text-center text-red-600"><p>{error}</p><Button onClick={() => fetchLogs()}>Retry</Button></div>}
-            <div className="p-4">
-                <input
-                    type="text"
-                    placeholder="Search logs by user, action, or details..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-dmi-blue-500 focus:border-dmi-blue-500"
-                    aria-label="Search audit logs"
-                />
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 text-xs text-gray-700 uppercase">
-                        <tr>
-                            <th scope="col" className="px-4 py-3">Timestamp</th>
-                            <th scope="col" className="px-4 py-3">Admin User</th>
-                            <th scope="col" className="px-4 py-3">Action</th>
-                            <th scope="col" className="px-4 py-3">Details</th>
-                            <th scope="col" className="px-4 py-3">IP Address</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredLogs.map(log => (
-                            <tr key={log.id} className="border-b hover:bg-gray-50">
-                                <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                    {log.timestamp instanceof Date ? log.timestamp.toLocaleString() : log.timestamp}
-                                </td>
-                                <td className="px-4 py-3 font-medium text-dmi-blue-800">{log.adminUsername}</td>
-                                <td className="px-4 py-3">
-                                    <span className={`px-2 py-1 font-semibold rounded-full text-xs ${getActionChipColor(log.action)}`}>
-                                        {log.action.replace('_', ' ')}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 text-gray-700">{log.details}</td>
-                                <td className="px-4 py-3 font-mono text-gray-500">{log.ipAddress}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                 {filteredLogs.length === 0 && !isLoading && (
-                    <div className="text-center p-8 text-gray-500">
-                        <p>No audit logs found matching your search criteria.</p>
+            
+            {isLoading && (
+                <div className="p-8 text-center">
+                    <Spinner />
+                    <p className="mt-2 text-gray-600">Loading audit logs...</p>
+                </div>
+            )}
+            
+            {error && !isLoading && (
+                <div className="p-8 text-center">
+                    <div className="text-red-600 mb-4">
+                        <p className="font-semibold">Error Loading Logs</p>
+                        <p className="text-sm">{error}</p>
                     </div>
-                )}
-            </div>
+                    <Button onClick={() => fetchLogs()}>Retry</Button>
+                </div>
+            )}
+
+            {!isLoading && !error && (
+                <>
+                    <div className="p-4">
+                        <input
+                            type="text"
+                            placeholder="Search logs by user, action, or details..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-dmi-blue-500 focus:border-dmi-blue-500"
+                            aria-label="Search audit logs"
+                        />
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-50 text-xs text-gray-700 uppercase">
+                                <tr>
+                                    <th scope="col" className="px-4 py-3">Timestamp</th>
+                                    <th scope="col" className="px-4 py-3">Admin User</th>
+                                    <th scope="col" className="px-4 py-3">Action</th>
+                                    <th scope="col" className="px-4 py-3">Details</th>
+                                    <th scope="col" className="px-4 py-3">IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentLogs.map(log => (
+                                    <tr key={log.id} className="border-b hover:bg-gray-50">
+                                        <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                                            {log.timestamp instanceof Date ? log.timestamp.toLocaleString() : log.timestamp}
+                                        </td>
+                                        <td className="px-4 py-3 font-medium text-dmi-blue-800">{log.adminUsername}</td>
+                                        <td className="px-4 py-3">
+                                            <span className={`px-2 py-1 font-semibold rounded-full text-xs ${getActionChipColor(log.action)}`}>
+                                                {log.action.replace('_', ' ')}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-gray-700">{log.details}</td>
+                                        <td className="px-4 py-3 font-mono text-gray-500">{log.ipAddress}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {filteredLogs.length === 0 && (
+                            <div className="text-center p-8 text-gray-500">
+                                <p>No audit logs found matching your search criteria.</p>
+                                {logs.length === 0 && (
+                                    <p className="text-sm mt-2">The system has not generated any audit logs yet.</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ADDED: Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="p-4 flex items-center justify-between border-t">
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                ← Previous
+                            </Button>
+                            
+                            <div className="flex items-center space-x-2">
+                                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                                    // Show first page, last page, current page, and pages around current
+                                    let pageNum;
+                                    if (totalPages <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage <= 3) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage >= totalPages - 2) {
+                                        pageNum = totalPages - 4 + i;
+                                    } else {
+                                        pageNum = currentPage - 2 + i;
+                                    }
+                                    
+                                    return (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`px-3 py-1 text-sm rounded ${
+                                                currentPage === pageNum
+                                                    ? 'bg-dmi-blue-600 text-white font-bold'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                })}
+                                {totalPages > 5 && currentPage < totalPages - 2 && (
+                                    <>
+                                        <span className="text-gray-500">...</span>
+                                        <button
+                                            onClick={() => setCurrentPage(totalPages)}
+                                            className="px-3 py-1 text-sm rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        >
+                                            {totalPages}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next →
+                            </Button>
+                        </div>
+                    )}
+                </>
+            )}
         </Card>
     );
 };
 
-// --- Positions Management View (Unchanged - relies on Modals for logic) ---
+// --- Positions Management View ---
 interface PositionsViewProps extends Pick<AdminDashboardProps, 'positions'> {
     permissions: Permissions;
     onOpenModal: (type: ModalType, data?: any) => void;
@@ -494,47 +603,57 @@ const PositionsView: React.FC<PositionsViewProps> = ({ positions, permissions, o
                 <PlusIcon/> Add Position
             </Button>
         </div>
-        <table className="w-full text-left">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th scope="col" className="px-4 py-3">Position Name</th>
-                    <th scope="col" className="px-4 py-3">Candidates</th>
-                    <th scope="col" className="px-4 py-3">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {positions.map(pos => (
-                    <tr key={pos.id} className="border-b"> 
-                        <td className="p-4 font-semibold text-dmi-blue-800">{pos.name}</td>
-                        <td className="p-4">{pos.candidates.length}</td>
-                        <td className="p-4">
-                            <div className="flex space-x-2">
-                                <Button 
-                                    size="sm" 
-                                    variant="secondary" 
-                                    onClick={() => onOpenModal('EDIT_POSITION', pos)}
-                                    disabled={!permissions.canManagePositions}
-                                    disabledTooltip="Requires Admin or Super Admin role."
-                                ><EditIcon/> Edit</Button>
-                                <Button 
-                                    size="sm" 
-                                    variant="danger" 
-                                    onClick={() => onOpenModal('DELETE_POSITION', pos)}
-                                    disabled={!permissions.canManagePositions}
-                                    disabledTooltip="Requires Admin or Super Admin role."
-                                ><TrashIcon/> Delete</Button>
-                            </div>
-                        </td>
+        <div className="overflow-x-auto">
+            <table className="w-full text-left">
+                <thead className="bg-gray-50">
+                    <tr>
+                        <th scope="col" className="px-4 py-3 text-left">Position Name</th>
+                        <th scope="col" className="px-4 py-3 text-center">Candidates</th>
+                        <th scope="col" className="px-4 py-3 text-center">Actions</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {positions.length > 0 ? positions.map(pos => (
+                        <tr key={pos.id} className="border-b hover:bg-gray-50"> 
+                            <td className="px-4 py-4 font-semibold text-dmi-blue-800">{pos.name}</td>
+                            <td className="px-4 py-4 text-center">{pos.candidates.length}</td>
+                            <td className="px-4 py-4">
+                                <div className="flex justify-center space-x-2">
+                                    <Button 
+                                        size="sm" 
+                                        variant="secondary" 
+                                        onClick={() => onOpenModal('EDIT_POSITION', pos)}
+                                        disabled={!permissions.canManagePositions}
+                                        disabledTooltip="Requires Admin or Super Admin role."
+                                    ><EditIcon/> Edit</Button>
+                                    <Button 
+                                        size="sm" 
+                                        variant="danger" 
+                                        onClick={() => onOpenModal('DELETE_POSITION', pos)}
+                                        disabled={!permissions.canManagePositions}
+                                        disabledTooltip="Requires Admin or Super Admin role."
+                                    ><TrashIcon/> Delete</Button>
+                                </div>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                                <p>No positions found.</p>
+                                {permissions.canManagePositions && (
+                                    <p className="text-sm mt-2">Click "Add Position" to create your first position.</p>
+                                )}
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
     </Card>
     );
 };
 
-
-// --- Candidates Management View (Unchanged - relies on Modals for logic) ---
+// --- Candidates Management View ---
 interface CandidatesViewProps extends Pick<AdminDashboardProps, 'positions'> {
     permissions: Permissions;
     onOpenModal: (type: ModalType, data?: any) => void;
@@ -629,17 +748,14 @@ const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions,
     );
 };
 
-
-// --- User Management View (LIVE USERS & RENEWED PROPS) ---
+// --- User Management View (FIXED: Removed mock data fallback) ---
 interface UserManagementViewProps {
     adminUsers: AdminUser[];
     permissions: Permissions;
     onOpenModal: (type: ModalType, data?: any) => void;
-    onRefresh: () => void; // Passed from AdminDashboard for post-CRUD refresh
+    onRefresh: () => void;
 }
 const UserManagementView: React.FC<UserManagementViewProps> = ({ adminUsers, permissions, onOpenModal, onRefresh }) => {
-    // FIXED: Use demo data if live adminUsers is empty
-    const usersToDisplay = adminUsers.length > 0 ? adminUsers : MOCK_ADMIN_USERS_FOR_DEMO;
     return (
         <Card>
             <div className="p-4 flex justify-between items-center border-b">
@@ -662,7 +778,7 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({ adminUsers, per
                     </tr>
                 </thead>
                 <tbody>
-                    {usersToDisplay.map(user => (
+                    {adminUsers.map(user => (
                         <tr key={user.id} className="border-b">
                             <td className="p-4 font-semibold text-dmi-blue-800">{user.username}</td>
                             <td className="p-4">
@@ -671,7 +787,7 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({ adminUsers, per
                                      user.role === 'admin' ? 'bg-dmi-blue-100 text-dmi-blue-800' :
                                      'bg-gray-200 text-gray-800'
                                  }`}>
-                                     {user.role}
+                                     {user.role.replace('_', ' ').toUpperCase()}
                                 </span>
                             </td>
                             <td className="p-4">
@@ -695,10 +811,15 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({ adminUsers, per
                     ))}
                 </tbody>
             </table>
+            
+            {adminUsers.length === 0 && (
+                <div className="text-center p-8 text-gray-500">
+                    <p>No admin users found.</p>
+                </div>
+            )}
         </Card>
     );
 };
-
 
 // --- Modals and Forms (LIVE CRUD IMPLEMENTATION) ---
 interface ManagementModalsProps {
@@ -706,8 +827,8 @@ interface ManagementModalsProps {
     onClose: () => void;
     permissions: Permissions;
     positions: PositionWithCandidates[];
-    onRefreshData: () => void; // Unified refresh function
-    currentUser: AdminUser; // Required for self-deactivation check
+    onRefreshData: () => void;
+    currentUser: AdminUser;
 }
 
 const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose, permissions, positions, onRefreshData, currentUser }) => {
@@ -735,7 +856,7 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
                         entityType="Position"
                         entityName={data.name}
                         onConfirm={async () => {
-                            await sjbuApi.delete(`/positions/${data.id}`); // DELETE /positions/{positionId}
+                            await sjbuApi.delete(`/positions/${data.id}`);
                             onRefreshData();
                             onClose();
                         }}
@@ -767,7 +888,7 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
                         entityType="Candidate"
                         entityName={data.name}
                         onConfirm={async () => {
-                            await sjbuApi.delete(`/positions/${data.positionId}/candidates/${data.id}`); // DELETE /positions/{positionId}/candidates/{candidateId}
+                            await sjbuApi.delete(`/positions/${data.positionId}/candidates/${data.id}`);
                             onRefreshData();
                             onClose();
                         }}
@@ -802,7 +923,7 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
                                 alert("Error: Cannot deactivate the currently logged-in user.");
                                 return;
                             }
-                            await sjbuApi.delete(`/admin/${data.id}/deactivate`); // DELETE /admin/{adminId}/deactivate
+                            await sjbuApi.delete(`/admin/${data.id}/deactivate`);
                             onRefreshData();
                             onClose();
                         }}
@@ -816,7 +937,7 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
     return null;
 };
 
-// Position Form Component (LIVE CRUD)
+// Position Form Component
 const PositionForm = ({ type, position, onSuccess, onCancel }: { type: 'ADD_POSITION' | 'EDIT_POSITION', position?: PositionWithCandidates, onSuccess: () => void, onCancel: () => void }) => {
     const [name, setName] = useState(position?.name || '');
     const [isLoading, setIsLoading] = useState(false);
@@ -829,9 +950,9 @@ const PositionForm = ({ type, position, onSuccess, onCancel }: { type: 'ADD_POSI
 
         try {
             if (type === 'ADD_POSITION') {
-                await sjbuApi.post('/positions', { position_name: name }); // POST /positions
+                await sjbuApi.post('/positions', { position_name: name });
             } else {
-                await sjbuApi.put(`/positions/${position!.id}`, { position_name: name }); // PUT /positions/{positionId}
+                await sjbuApi.put(`/positions/${position!.id}`, { position_name: name });
             }
             onSuccess();
         } catch (err) {
@@ -856,7 +977,7 @@ const PositionForm = ({ type, position, onSuccess, onCancel }: { type: 'ADD_POSI
     );
 };
 
-// Candidate Form Component (LIVE CRUD)
+// Candidate Form Component
 const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { type: 'ADD_CANDIDATE' | 'EDIT_CANDIDATE', candidate?: Candidate, positionId: number | string, onSuccess: () => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState({
         name: candidate?.name || '',
@@ -883,17 +1004,14 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
         try {
             const payload = {
                  ...formData,
-                 positionId: positionId, // The API expects positionId in the payload for creation
-                 photoUrl: formData.photoUrl || 'default-url', // Handle photoUrl properly
-                 faculty: formData.faculty || 'Default Faculty' // Assuming these fields are sent
+                 positionId: positionId,
+                 photoUrl: formData.photoUrl || 'default-url',
+                 faculty: formData.faculty || 'Default Faculty'
             };
             
             if (type === 'ADD_CANDIDATE') {
-                // POST /positions/{positionId}/candidates
                 await sjbuApi.post(`/positions/${positionId}/candidates`, payload); 
             } else {
-                // PUT /positions/{positionId}/candidates/{candidateId} (Assuming PUT for update)
-                // Note: API doc doesn't show PUT/DELETE for candidates, so we infer PUT /positions/{positionId}/candidates/{candidateId}
                 await sjbuApi.put(`/positions/${positionId}/candidates/${candidate!.id}`, payload); 
             }
             onSuccess();
@@ -908,7 +1026,6 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
     return (
          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {error && <div className="md:col-span-3 text-red-500 text-sm">{error}</div>}
-            {/* ... (form fields remain the same) */}
              <div className="md:col-span-1">
                 <ImageUploader imageUrl={formData.photoUrl} onImageChange={handleImageChange} />
             </div>
@@ -934,11 +1051,11 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
     );
 };
 
-// User Form Component (LIVE CRUD)
+// User Form Component
 const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDIT_USER', user?: AdminUser, onSuccess: () => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState({
         username: user?.username || '',
-        email: user?.email || '', // Added email as per API spec (Page 5)
+        email: user?.email || '',
         password: '',
         role: user?.role || 'moderator' as AdminRole,
     });
@@ -961,19 +1078,13 @@ const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDI
                 delete dataToSave.password; 
             }
             if (!isEditing && !formData.email) {
-                 dataToSave.email = `${dataToSave.username}@sjbu-voting.com`; // Provide default email for creation if missing
+                 dataToSave.email = `${dataToSave.username}@sjbu-voting.com`;
             }
 
             if (type === 'ADD_USER') {
-                // POST /admin/create
                 await sjbuApi.post('/admin/create', dataToSave); 
             } else {
-                // PUT /admin/{adminId}/role (Update role)
                 await sjbuApi.put(`/admin/${user!.id}/role`, { role: dataToSave.role }); 
-                
-                // Note: The API only shows an endpoint for changing the role.
-                // Changing password, username, or email would require separate, currently undocumented, endpoints. 
-                // We will assume only role and creation are supported via API for now.
             }
             onSuccess();
         } catch (err) {

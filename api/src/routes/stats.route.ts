@@ -1,3 +1,6 @@
+// api/src/routes/stats.route.ts
+// FIXED: Changed middleware to allow moderators read-only access to stats
+
 import { Router } from "express";
 import {
   getOverallStats,
@@ -7,7 +10,7 @@ import {
   getTopPerformingCandidates,
   getElectionSummary
 } from "../controllers/stats.controller";
-import { verifyAdminToken, requireAdminOrSuperAdmin } from "../middleware/admin.middleware";
+import { verifyAdminToken } from "../middleware/admin.middleware";
 
 /**
  * @swagger
@@ -18,9 +21,9 @@ import { verifyAdminToken, requireAdminOrSuperAdmin } from "../middleware/admin.
 
 const statsRoute = Router();
 
-// All stats routes require admin authentication and appropriate role
+// FIXED: All stats routes now only require admin authentication (no role restriction)
+// The controller functions handle role checking and allow moderator, admin, super_admin
 statsRoute.use(verifyAdminToken);
-statsRoute.use(requireAdminOrSuperAdmin);
 
 /**
  * @swagger
@@ -29,7 +32,7 @@ statsRoute.use(requireAdminOrSuperAdmin);
  *     tags:
  *       - Statistics
  *     summary: Get overall voting statistics
- *     description: Retrieve comprehensive voting statistics including voter turnout, total votes, and position breakdowns
+ *     description: Retrieve comprehensive voting statistics including voter turnout, total votes, and position breakdowns (Admin, Super Admin, Moderator)
  *     security:
  *       - adminCookieAuth: []
  *     responses:
@@ -61,7 +64,7 @@ statsRoute.get("/overall", getOverallStats);
  *     tags:
  *       - Statistics
  *     summary: Get position-specific statistics
- *     description: Retrieve detailed statistics for a specific voting position
+ *     description: Retrieve detailed statistics for a specific voting position (Admin, Super Admin, Moderator)
  *     security:
  *       - adminCookieAuth: []
  *     parameters:
@@ -104,7 +107,7 @@ statsRoute.get("/position/:positionId", getPositionStats);
  *     tags:
  *       - Statistics
  *     summary: Get voting trends
- *     description: Retrieve voting activity trends over the last 30 days
+ *     description: Retrieve voting activity trends over the last 30 days (Admin, Super Admin, Moderator)
  *     security:
  *       - adminCookieAuth: []
  *     responses:
@@ -158,7 +161,7 @@ statsRoute.get("/trends", getVotingTrends);
  *     tags:
  *       - Statistics
  *     summary: Get voter demographics
- *     description: Retrieve voter registration trends and voting frequency distribution
+ *     description: Retrieve voter registration trends and voting frequency distribution (Admin, Super Admin, Moderator)
  *     security:
  *       - adminCookieAuth: []
  *     responses:
@@ -210,7 +213,7 @@ statsRoute.get("/demographics", getVoterDemographics);
  *     tags:
  *       - Statistics
  *     summary: Get top performing candidates
- *     description: Retrieve list of top performing candidates across all positions
+ *     description: Retrieve list of top performing candidates across all positions (Admin, Super Admin, Moderator)
  *     security:
  *       - adminCookieAuth: []
  *     parameters:
@@ -251,7 +254,7 @@ statsRoute.get("/top-candidates", getTopPerformingCandidates);
  *     tags:
  *       - Statistics
  *     summary: Get election summary
- *     description: Retrieve comprehensive election summary with overview, highlights, and insights
+ *     description: Retrieve comprehensive election summary with overview, highlights, and insights (Admin, Super Admin, Moderator)
  *     security:
  *       - adminCookieAuth: []
  *     responses:

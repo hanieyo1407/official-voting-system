@@ -17,8 +17,8 @@ interface AuthenticationPageProps {
 
 // ESCALATING RATE LIMIT CONSTANTS
 const LOCKOUT_LEVELS = [
-    { threshold: 5, minutes: 5 }, // 5 failures -> 5 min lock
-    { threshold: 10, minutes: 15 }, // 10 failures -> 15 min lock
+    { threshold: 4, minutes: 15 }, // 5 failures -> 15 min lock
+    { threshold: 4, minutes: 15 }, // 5 failures -> 15 min lock
 ];
 const GLOBAL_ATTEMPT_LIMIT = LOCKOUT_LEVELS[1].threshold; // Max allowed attempts before 15 min lock
 

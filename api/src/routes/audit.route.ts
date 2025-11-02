@@ -231,16 +231,26 @@ auditRoute.get("/suspicious", requireAdminOrSuperAdmin, getSuspiciousVotes);
  *                 data:
  *                   type: object
  *                   properties:
- *                     totalAuditsPerformed:
+ *                     logs:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           timestamp:
+ *                             type: string
+ *                             format: date-time
+ *                           adminUsername:
+ *                             type: string
+ *                           action:
+ *                             type: string
+ *                           details:
+ *                             type: string
+ *                           ipAddress:
+ *                             type: string
+ *                     total:
  *                       type: integer
- *                     lastAuditDate:
- *                       type: string
- *                       format: date-time
- *                       nullable: true
- *                     mostCommonIssues:
- *                       type: array
- *                     auditTrends:
- *                       type: array
  *       401:
  *         description: Unauthorized
  *       403:

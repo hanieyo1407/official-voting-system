@@ -29,6 +29,7 @@ export const useAuditLogs = (): AuditLogState => {
             // CRITICAL FIX: Pull the 'logs' array from the nested data object
             // The backend returns: { success: true, data: { logs: [...] } }
             const liveLogs: any[] = response.data.data.logs || [];
+            console.log('Raw audit logs response:', response.data);
             
             // Final Mapping to ensure Date objects are created for filtering/sorting
             const mappedLogs: AuditLogEntry[] = liveLogs.map(log => ({
@@ -40,7 +41,7 @@ export const useAuditLogs = (): AuditLogState => {
                 action: log.action || 'Unknown Action',
                 details: log.details || 'N/A',
                 ipAddress: log.ipAddress || 'N/A',
-            }));
+            })).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
             
             setLogs(mappedLogs);
 
@@ -69,3 +70,178 @@ export const useAuditLogs = (): AuditLogState => {
 
     return { logs, isLoading, error, fetchLogs };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

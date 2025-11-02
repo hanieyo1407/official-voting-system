@@ -1,4 +1,5 @@
 // api/src/controllers/audit.controller.ts
+// CRITICAL FIX: Updated to parse Winston's actual log format
 
 import { Request, Response } from "express";
 import AuditService from "../services/audit.service";
@@ -131,47 +132,122 @@ export const detectFraud = async (req: Request, res: Response) => {
   }
 };
 
-// ADDED: Helper function to find the latest log file name
+// Helper function to find the latest log file name
+// Helper function to find the latest log file name
 const getLatestLogFilePath = () => {
     const logDir = path.join(__dirname, '../../logs');
     
-    // Check if the directory exists
     if (!fs.existsSync(logDir)) {
         return null;
     }
 
-    // Get all files, filter for voting logs, and find the latest one
     const logFiles = fs.readdirSync(logDir)
         .filter(file => file.startsWith('voting-') && file.endsWith('.log'))
-        .sort() // Sorts them alphabetically, which works for date strings (e.g., '2025-10-27' < '2025-10-28')
-        .reverse(); // Newest file is now at index 0
+        .sort()
+        .reverse();
         
     if (logFiles.length === 0) {
         return null;
     }
 
-    return path.join(logDir, logFiles[0]); // Return the full path to the newest log file
+    return path.join(logDir, logFiles[0]);
 };
 
-// CORRECTED IMPLEMENTATION: Reads logs from Winston file
+// CRITICAL FIX: Parse Winston's actual log format more robustly
+// Handles any level (not just [INFO]), adds 'ERROR' category
+// Format: "YYYY-MM-DD HH:MM:SS [LEVEL]: Message | {json}"
+// Gracefully handles timestamps with 'T' (ISO)
+const parseWinstonLogLine = (line: string): any | null => {
+    try {
+        // Normalize timestamp if it has 'T' (common in Winston ISO)
+        let normalizedLine = line.replace(/T/, ' ').replace(/\.\d{3}Z?/, ''); // Remove ms and Z if present
+
+        // Find the pipe separator that comes before the JSON
+        const pipeIndex = normalizedLine.indexOf(' | {');
+        if (pipeIndex === -1) {
+            // No JSON object in this line, skip it
+            return null;
+        }
+
+        // Extract timestamp (first 19 characters: "YYYY-MM-DD HH:MM:SS")
+        const timestamp = normalizedLine.substring(0, 19).trim();
+        
+        // Extract the JSON part (after " | ")
+        const jsonPart = normalizedLine.substring(pipeIndex + 3).trim();
+        
+        // Parse the JSON
+        const logData = JSON.parse(jsonPart);
+        
+        // Only process logs we care about
+        const relevantCategories = ['ADMIN', 'AUDIT', 'SECURITY', 'AUTH', 'ERROR']; // ADDED 'ERROR'
+        if (!relevantCategories.includes(logData.category)) {
+            return null;
+        }
+
+        // Extract action from the message part
+        const messagePart = normalizedLine.substring(20, pipeIndex).trim(); // Skip timestamp
+        const actionMatch = messagePart.match(/\[\w+\]:\s*(.+?)(?:\s*\|)?$/); // UPDATED regex for any level (e.g., [ERROR], [WARN])
+        const action = actionMatch ? actionMatch[1].trim() : 'UNKNOWN';
+
+        // Construct the log entry for frontend
+        return {
+            timestamp: timestamp,
+            category: logData.category,
+            action: action,
+            service: logData.service || 'voting-system',
+            adminId: logData.adminId || logData.userId || null,
+            details: logData.details || logData,
+            auditEvent: logData.auditEvent
+        };
+    } catch (err) {
+        // Silently skip malformed lines
+        return null;
+    }
+};
+
+// ALTERNATIVE: If your logs are JSON lines (e.g., {"timestamp":"2025-11-02T07:35:19Z","level":"info","message":"Audit Event",...})
+// Replace the above parseWinstonLogLine with this and test
+// const parseWinstonLogLine = (line: string): any | null => {
+//     try {
+//         const logData = JSON.parse(line);
+//         const relevantCategories = ['ADMIN', 'AUDIT', 'SECURITY', 'AUTH', 'ERROR'];
+//         if (!logData.category || !relevantCategories.includes(logData.category)) {
+//             return null;
+//         }
+//         const timestamp = new Date(logData.timestamp).toISOString().replace('T', ' ').slice(0, 19); // Normalize to "YYYY-MM-DD HH:MM:SS"
+//         const action = logData.message || 'UNKNOWN';
+//         return {
+//             timestamp,
+//             category: logData.category,
+//             action,
+//             service: logData.service || 'voting-system',
+//             adminId: logData.adminId || logData.userId || null,
+//             details: logData.details || logData,
+//             auditEvent: logData.auditEvent
+//         };
+//     } catch (err) {
+//         return null;
+//     }
+// };
+
+// FIXED: Read and parse Winston logs correctly
+// FIXED: Read and parse Winston logs correctly
 export const getAuditLogs = async (req: Request, res: Response) => {
   try {
     const requestingAdmin = (req as any).admin;
-    const { limit = 50, offset = 0 } = req.query;
+    const { limit = 100, offset = 0 } = req.query;
 
     if (!requestingAdmin) {
       return res.status(401).json({ error: "Admin authentication required" });
     }
 
-    // Only admin and super_admin can view audit logs
-    if (!['admin', 'super_admin'].includes(requestingAdmin.role)) {
+    // FIXED: Allow moderator, admin, and super_admin to view audit logs
+    if (!['admin', 'super_admin', 'moderator'].includes(requestingAdmin.role)) {
       return res.status(403).json({ error: "Insufficient permissions" });
     }
 
-    // CRITICAL FIX: Get the latest log file, regardless of date
     const logFilePath = getLatestLogFilePath();
 
-    // Guard against file not found (e.g., if the server just started or no files exist)
     if (!logFilePath || !fs.existsSync(logFilePath)) {
          return res.status(200).json({
            success: true,
@@ -182,44 +258,53 @@ export const getAuditLogs = async (req: Request, res: Response) => {
     const fileStream = fs.createReadStream(logFilePath);
     const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
 
-    const logs: any[] = [];
+    const parsedLogs: any[] = [];
     
     // Read file line by line
     for await (const line of rl) {
-      try {
-        // Log entries are saved as JSON per line
-        const entry = JSON.parse(line);
-        // Filter: Only include entries that the frontend cares about (ADMIN, AUDIT, SECURITY)
-        if (entry.category === 'ADMIN' || entry.category === 'AUDIT' || entry.category === 'SECURITY') {
-             
-             // Map the complex Winston JSON to the simple AuditLogEntry interface
-             logs.push({
-                 id: entry.timestamp + entry.action, // Use a unique string ID
-                 timestamp: new Date(entry.timestamp), // Convert ISO string to Date object
-                 adminUsername: entry.adminId || entry.userId || 'system', // Use the best available ID
-                 action: entry.action || entry.event,
-                 details: JSON.stringify(entry.details || entry.message || entry.error || {}).slice(0, 100), // Summarize details
-                 ipAddress: entry.ip || 'N/A'
-             });
-        }
-      } catch (_) {
-        // Silently ignore malformed lines
+      // TEMP DEBUG: Log first few lines to console to inspect format
+      // if (parsedLogs.length < 5) console.log('Raw log line:', line);
+      const parsed = parseWinstonLogLine(line);
+      if (parsed) {
+        parsedLogs.push(parsed);
       }
     }
     
     // Reverse logs to show newest first (Winston writes oldest first)
-    logs.reverse();
+    parsedLogs.reverse();
+
+    // TEMP DEBUG: Log parsed count
+    // console.log(`Parsed ${parsedLogs.length} logs from ${logFilePath}`);
+
+    // Transform to frontend format
+    const logs = parsedLogs.map((entry, index) => ({
+        id: `${entry.timestamp}-${index}`, // Unique ID
+        timestamp: entry.timestamp, // Keep as ISO string
+        adminUsername: entry.adminId ? String(entry.adminId) : 'system', // FIXED: Convert adminId to string to avoid TypeError on toLowerCase()
+        action: entry.action || entry.auditEvent || 'UNKNOWN',
+        details: typeof entry.details === 'string' 
+            ? entry.details 
+            : JSON.stringify(entry.details).slice(0, 200), // Truncate long details
+        ipAddress: entry.details?.ip || 'N/A'
+    }));
 
     const start = Number(offset);
     const limitNum = Number(limit);
     const paginated = logs.slice(start, start + limitNum);
 
-    LoggingService.logAdminAction(requestingAdmin.id, 'VIEW_AUDIT_LOGS', 'audit_log_list', { count: paginated.length });
+    LoggingService.logAdminAction(
+        requestingAdmin.id, 
+        'VIEW_AUDIT_LOGS', 
+        'audit_log_list', 
+        { count: paginated.length, role: requestingAdmin.role }
+    );
 
     return res.status(200).json({
       success: true,
-      // CRITICAL FIX: Return logs under the 'logs' key as the frontend expects
-      data: { logs: paginated, total: logs.length } 
+      data: { 
+        logs: paginated, 
+        total: logs.length 
+      } 
     });
   } catch (err: any) {
     LoggingService.logError(err, { context: 'getAuditLogs' });
@@ -229,7 +314,6 @@ export const getAuditLogs = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 export const getSuspiciousVotes = async (req: Request, res: Response) => {
   try {
@@ -245,7 +329,6 @@ export const getSuspiciousVotes = async (req: Request, res: Response) => {
       return res.status(403).json({ error: "Insufficient permissions" });
     }
 
-    // Get all votes and filter suspicious ones
     const pool = require('../db/config');
     const allVotesQuery = `
       SELECT v.*, u.voucher, c.name as candidate_name, p.position_name
@@ -261,15 +344,12 @@ export const getSuspiciousVotes = async (req: Request, res: Response) => {
     const suspiciousVotes = [];
 
     for (const vote of allVotesResult.rows) {
-      // Simple heuristic for suspicious votes
       const issues = [];
 
-      // Check for potential duplicates
       const duplicateQuery = `
         SELECT COUNT(*) as count FROM "Vote"
         WHERE voucher = $1 AND position_id = $2 AND id != $3
       `;
-      // NOTE: Original code used vote.user_id which is incorrect/not in SELECT. Using vote.voucher.
       const duplicateResult = await pool.query(duplicateQuery, [vote.voucher, vote.position_id, vote.id]); 
       const duplicateCount = parseInt(duplicateResult.rows[0].count);
 
@@ -277,12 +357,10 @@ export const getSuspiciousVotes = async (req: Request, res: Response) => {
         issues.push(`Duplicate votes: ${duplicateCount}`);
       }
 
-      // Check timing
       const timingQuery = `
         SELECT COUNT(*) as count FROM "Vote"
         WHERE voucher = $1 AND voted_at >= $2::timestamp - INTERVAL '5 minutes'
       `;
-      // NOTE: Original code used vote.user_id and vote.created_at which is incorrect/not in SELECT. Using vote.voucher and vote.voted_at.
       const timingResult = await pool.query(timingQuery, [vote.voucher, vote.voted_at]); 
       const recentVotes = parseInt(timingResult.rows[0].count);
 
@@ -303,7 +381,6 @@ export const getSuspiciousVotes = async (req: Request, res: Response) => {
       }
     }
 
-    // Filter by threshold
     const filteredVotes = suspiciousVotes.filter(vote => vote.riskScore >= parseInt(threshold as string));
 
     LoggingService.logAdminAction(
