@@ -9,8 +9,6 @@ import axios, { isAxiosError } from 'axios';
 import sjbuApi from '../src/api/sjbuApi'; // Import API client
 
 interface AdminLoginPageProps {
-  // REMOVED: adminUsers is no longer needed as the login is handled by the API
-  // adminUsers: AdminUser[]; 
   onLoginSuccess: (user: AdminUser) => void;
 }
 
@@ -20,7 +18,7 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Replaced mock handleLogin with live API call
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -29,8 +27,6 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onLoginSuccess }) => {
     try {
         // API Endpoint: POST /admin/login
         const response = await sjbuApi.post('/admin/login', {
-            // CRITICAL FIX: Backend expects 'email', not 'username'.
-            // The user input in the "Username" field is actually the email.
             email: username, // CHANGED from 'username' to 'email'
             password: password,
         });

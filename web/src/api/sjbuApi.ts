@@ -1,6 +1,44 @@
 // web/src/api/sjbuApi.ts
 
-import axios from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+// Assuming you have a file that defines common types, otherwise we use 'any'
+// import { SignatureResponse } from '../types'; 
+
+// --- UPDATED INTERFACES FOR CANDIDATE MANAGEMENT (STRICT SCHEMA) ---
+
+// Interface for fetching positions with candidates (matches ElectionService DTO)
+interface PositionWithCandidatesResponse {
+    id: number;
+    name: string; // The DTO uses name, while the DB uses position_name
+    candidates: CandidateResponse[];
+}
+
+// Interface for creating a candidate (matches NewCandidateData in backend)
+interface CandidateData {
+    name: string;
+    positionId: number;
+    imageUrl: string; 
+    manifesto: string; // CRITICAL FIX: Changed from 'bio' to 'manifesto'
+}
+
+// Interface for updating a candidate (matches UpdateCandidateData in backend)
+interface UpdateCandidatePayload {
+    name?: string;
+    positionId?: number;
+    imageUrl?: string;
+    manifesto?: string; // CRITICAL FIX: Changed from 'bio' to 'manifesto'
+}
+
+// Interface for a returned candidate (matches stripped-down DTO from backend service)
+interface CandidateResponse {
+    id: number;
+    name: string;
+    positionId: number;
+    imageUrl: string;
+    manifesto: string;
+    // CRITICAL FIX: Removed unmapped fields to match strict schema
+}
+// --- END NEW INTERFACES ---
 
 // Get base URL from environment variable
 // const baseURL = process.env.REACT_APP_API_URL;
@@ -8,7 +46,7 @@ const baseURL = 'http://localhost:3005/api/app';
 
 
 // Create an Axios instance
-const sjbuApi = axios.create({
+const API: AxiosInstance = axios.create({ 
   baseURL: baseURL,
   // CRITICAL FIX: Increase timeout to 30 seconds (30000ms) for stability under slow database connection
   timeout: 70000, 
@@ -19,7 +57,7 @@ const sjbuApi = axios.create({
 });
 
 // Optional: Add request interceptor for logging/security checks
-sjbuApi.interceptors.request.use(
+API.interceptors.request.use(
   (config) => {
     // Example: Log the request URL
     console.log(`[API] Request to: ${config.method?.toUpperCase()} ${config.url}`);
@@ -31,7 +69,7 @@ sjbuApi.interceptors.request.use(
 );
 
 //response interceptor for global error handling or logging
-sjbuApi.interceptors.response.use(
+API.interceptors.response.use(
   (response) => {
     // Example: Log successful response
     console.log(`[API] Success response from: ${response.config.url}`);
@@ -53,4 +91,54 @@ sjbuApi.interceptors.response.use(
   }
 );
 
-export default sjbuApi;
+/**
+ * Requests a signed upload signature from the backend for Cloudinary.
+ * This is the first step in the secure image upload process (Task A).
+ * @returns {Promise<AxiosResponse<any>>} Object containing signature, timestamp, cloudName, etc.
+ */
+const getCloudinarySignature = (): Promise<AxiosResponse<any>> => {
+  // Targets the POST /api/app/admin/sign-upload endpoint
+  return API.post('/admin/sign-upload'); 
+};
+
+// --- CANDIDATE/POSITION MANAGEMENT FUNCTIONS ---
+
+/**
+ * Creates a new candidate.
+ */
+const createCandidate = (data: CandidateData): Promise<AxiosResponse<{ candidate: CandidateResponse }>> => {
+    return API.post('/admin/candidate', data);
+};
+
+/**
+ * Updates an existing candidate.
+ */
+const updateCandidate = (candidateId: number, data: UpdateCandidatePayload): Promise<AxiosResponse<{ candidate: CandidateResponse }>> => {
+    return API.put(`/admin/candidate/${candidateId}`, data);
+};
+
+/**
+ * Gets all positions with their candidates.
+ * This function addresses the Vice-President/Position fetching issue.
+ */
+const getAllPositionsWithCandidates = (): Promise<AxiosResponse<{ positions: PositionWithCandidatesResponse[] }>> => {
+    // Targets the GET /api/app/election/positions endpoint
+    return API.get('/election/positions'); 
+};
+
+// CRITICAL FIX: Extend the type definition to include all new functions
+interface ExtendedAxiosInstance extends AxiosInstance {
+    getCloudinarySignature: () => Promise<AxiosResponse<any>>;
+    createCandidate: (data: CandidateData) => Promise<AxiosResponse<{ candidate: CandidateResponse }>>;
+    updateCandidate: (candidateId: number, data: UpdateCandidatePayload) => Promise<AxiosResponse<{ candidate: CandidateResponse }>>;
+    getAllPositionsWithCandidates: () => Promise<AxiosResponse<{ positions: PositionWithCandidatesResponse[] }>>; // NEW
+}
+
+// Now, cast the instance to the extended type and attach the functions:
+const sjbuApi = API as ExtendedAxiosInstance;
+sjbuApi.getCloudinarySignature = getCloudinarySignature;
+sjbuApi.createCandidate = createCandidate;
+sjbuApi.updateCandidate = updateCandidate;
+sjbuApi.getAllPositionsWithCandidates = getAllPositionsWithCandidates; // NEW
+
+export default sjbuApi; // Exporting the original Axios instance (now extended)

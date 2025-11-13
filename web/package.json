@@ -12,6 +12,8 @@
     "axios": "^1.13.1",
     "axios-error": "^0.8.1",
     "axios-instance": "^0.0.18",
+    "browser-image-compression": "^2.0.2",
+    "cloudinary": "^2.8.0",
     "react": "^19.2.0",
     "react-dom": "^19.1.1",
     "recharts": "^3.2.1"

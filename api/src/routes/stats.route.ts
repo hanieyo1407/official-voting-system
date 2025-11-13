@@ -1,5 +1,4 @@
 // api/src/routes/stats.route.ts
-// FIXED: Changed middleware to allow moderators read-only access to stats
 
 import { Router } from "express";
 import {
@@ -10,20 +9,18 @@ import {
   getTopPerformingCandidates,
   getElectionSummary
 } from "../controllers/stats.controller";
-import { verifyAdminToken } from "../middleware/admin.middleware";
+// CRITICAL FIX: The security middleware imports are REMOVED from here to prevent them from guarding the public routes globally.
 
 /**
  * @swagger
  * tags:
  *   - name: Statistics
- *     description: Voting statistics and analytics endpoints (admin only)
+ *     description: Voting statistics and analytics endpoints (public access for general stats)
  */
 
 const statsRoute = Router();
 
-// FIXED: All stats routes now only require admin authentication (no role restriction)
-// The controller functions handle role checking and allow moderator, admin, super_admin
-statsRoute.use(verifyAdminToken);
+// CRITICAL FIX: The statsRoute MUST NOT have global middleware that locks public access.
 
 /**
  * @swagger
@@ -32,9 +29,8 @@ statsRoute.use(verifyAdminToken);
  *     tags:
  *       - Statistics
  *     summary: Get overall voting statistics
- *     description: Retrieve comprehensive voting statistics including voter turnout, total votes, and position breakdowns (Admin, Super Admin, Moderator)
- *     security:
- *       - adminCookieAuth: []
+ *     description: Retrieve comprehensive voting statistics including voter turnout, total votes, and position breakdowns
+ *     security: []
  *     responses:
  *       200:
  *         description: Statistics retrieved successfully
@@ -55,7 +51,7 @@ statsRoute.use(verifyAdminToken);
  *       500:
  *         description: Server error
  */
-statsRoute.get("/overall", getOverallStats);
+statsRoute.get("/overall", getOverallStats); // PUBLIC ACCESS
 
 /**
  * @swagger
@@ -64,9 +60,8 @@ statsRoute.get("/overall", getOverallStats);
  *     tags:
  *       - Statistics
  *     summary: Get position-specific statistics
- *     description: Retrieve detailed statistics for a specific voting position (Admin, Super Admin, Moderator)
- *     security:
- *       - adminCookieAuth: []
+ *     description: Retrieve detailed statistics for a specific voting position
+ *     security: []
  *     parameters:
  *       - in: path
  *         name: positionId
@@ -98,7 +93,7 @@ statsRoute.get("/overall", getOverallStats);
  *       500:
  *         description: Server error
  */
-statsRoute.get("/position/:positionId", getPositionStats);
+statsRoute.get("/position/:positionId", getPositionStats); // Public access is fine here too
 
 /**
  * @swagger
@@ -107,9 +102,8 @@ statsRoute.get("/position/:positionId", getPositionStats);
  *     tags:
  *       - Statistics
  *     summary: Get voting trends
- *     description: Retrieve voting activity trends over the last 30 days (Admin, Super Admin, Moderator)
- *     security:
- *       - adminCookieAuth: []
+ *     description: Retrieve voting activity trends over the last 30 days
+ *     security: []
  *     responses:
  *       200:
  *         description: Voting trends retrieved successfully
@@ -152,7 +146,7 @@ statsRoute.get("/position/:positionId", getPositionStats);
  *       500:
  *         description: Server error
  */
-statsRoute.get("/trends", getVotingTrends);
+statsRoute.get("/trends", getVotingTrends); // PUBLIC ACCESS
 
 /**
  * @swagger
@@ -161,9 +155,8 @@ statsRoute.get("/trends", getVotingTrends);
  *     tags:
  *       - Statistics
  *     summary: Get voter demographics
- *     description: Retrieve voter registration trends and voting frequency distribution (Admin, Super Admin, Moderator)
- *     security:
- *       - adminCookieAuth: []
+ *     description: Retrieve voter registration trends and voting frequency distribution
+ *     security: []
  *     responses:
  *       200:
  *         description: Voter demographics retrieved successfully
@@ -204,7 +197,7 @@ statsRoute.get("/trends", getVotingTrends);
  *       500:
  *         description: Server error
  */
-statsRoute.get("/demographics", getVoterDemographics);
+statsRoute.get("/demographics", getVoterDemographics); 
 
 /**
  * @swagger
@@ -213,9 +206,8 @@ statsRoute.get("/demographics", getVoterDemographics);
  *     tags:
  *       - Statistics
  *     summary: Get top performing candidates
- *     description: Retrieve list of top performing candidates across all positions (Admin, Super Admin, Moderator)
- *     security:
- *       - adminCookieAuth: []
+ *     description: Retrieve list of top performing candidates across all positions
+ *     security: []
  *     parameters:
  *       - in: query
  *         name: limit
@@ -245,7 +237,7 @@ statsRoute.get("/demographics", getVoterDemographics);
  *       500:
  *         description: Server error
  */
-statsRoute.get("/top-candidates", getTopPerformingCandidates);
+statsRoute.get("/top-candidates", getTopPerformingCandidates); 
 
 /**
  * @swagger
@@ -254,9 +246,8 @@ statsRoute.get("/top-candidates", getTopPerformingCandidates);
  *     tags:
  *       - Statistics
  *     summary: Get election summary
- *     description: Retrieve comprehensive election summary with overview, highlights, and insights (Admin, Super Admin, Moderator)
- *     security:
- *       - adminCookieAuth: []
+ *     description: Retrieve comprehensive election summary with overview, highlights, and insights
+ *     security: []
  *     responses:
  *       200:
  *         description: Election summary retrieved successfully
@@ -316,6 +307,6 @@ statsRoute.get("/top-candidates", getTopPerformingCandidates);
  *       500:
  *         description: Server error
  */
-statsRoute.get("/summary", getElectionSummary);
+statsRoute.get("/summary", getElectionSummary); 
 
 export default statsRoute;

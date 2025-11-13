@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Position, Page, Candidate } from '../types';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import CountdownTimer from '../components/CountdownTimer'; // Re-using your existing timer component
+import CountdownTimer from '../components/CountdownTimer';
 
-// Define the expected structure that is passed to this component
 interface PositionWithCandidates extends Position {
     candidates: Candidate[];
     totalVotes?: number; 
@@ -17,12 +16,9 @@ interface OfficialResultsPageProps {
 }
 
 const OfficialResultsPage: React.FC<OfficialResultsPageProps> = ({ setPage }) => {
-    // STATE: Target time for the announcement (e.g., 30 seconds from now for the demo)
-    // In a real app, this might come from the backend settings.
-    const [announcementTime] = useState(() => new Date(Date.now() + 30 * 1000)); // 30 seconds
+    const [announcementTime] = useState(() => new Date(Date.now() + 3 * 1000)); // Back to mock 30 seconds
     const [isReadyToAnnounce, setIsReadyToAnnounce] = useState(false);
 
-    // EFFECT: Unlock the button when the time is reached
     useEffect(() => {
         const timeUntilAnnounce = announcementTime.getTime() - new Date().getTime();
         
@@ -49,8 +45,7 @@ const OfficialResultsPage: React.FC<OfficialResultsPageProps> = ({ setPage }) =>
                             The polls have closed. Please wait while we verify the final counts.
                         </p>
                         <div className="py-8">
-                             {/* Re-using your CountdownTimer for the dramatic reveal */}
-                            <CountdownTimer 
+                             <CountdownTimer 
                                 targetDate={announcementTime} 
                                 title="Official Announcement In" 
                                 onCompleteMessage="Results Verified!" 
@@ -73,9 +68,9 @@ const OfficialResultsPage: React.FC<OfficialResultsPageProps> = ({ setPage }) =>
 
                 <div className="mt-12">
                     <Button 
-                        size="xl" 
-                        variant={isReadyToAnnounce ? 'primary' : 'secondary'} // Change style when ready
-                        disabled={!isReadyToAnnounce}               // The requested lock
+                        size="lg" 
+                        variant={isReadyToAnnounce ? 'primary' : 'secondary'} 
+                        disabled={!isReadyToAnnounce}               
                         onClick={() => setPage(Page.Winners)}
                         className={`w-full md:w-auto px-12 py-4 text-xl font-bold transition-all duration-500 ${isReadyToAnnounce ? 'hover:scale-105 shadow-lg shadow-dmi-gold-500/50' : 'opacity-50 cursor-not-allowed'}`}
                     >

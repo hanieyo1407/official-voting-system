@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Page, Candidate, Position } from '../types'; 
+import { Page, Candidate, Position,  } from '../types'; 
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
 import Spinner from '../components/Spinner'; 
 import sjbuApi from '../src/api/sjbuApi'; 
 import { isAxiosError } from 'axios';
-
+import { useAllPositions } from '@/hooks/useAllPositions';
 // Define VoteSelection locally to use numeric keys/values
 interface VoteSelection {
   [positionId: number]: number; // Only allows number (Candidate ID) - Mandatory selection
@@ -211,10 +211,9 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
             onClick={() => handleSelect(candidate.id)} // Pass number ID
           >
             <div className="flex items-center space-x-4">
-              <img src={candidate.photoUrl} alt={candidate.name} className="w-16 h-16 rounded-full object-cover" />
+              <img src={candidate.imageUrl} alt={candidate.name} className="w-16 h-16 rounded-full object-cover" />
               <div className="flex-grow">
                 <h4 className="text-lg font-semibold text-dmi-blue-900">{candidate.name}</h4>
-                <p className="text-sm text-gray-500">{candidate.faculty}</p>
                  <Button variant="secondary" size="sm" className="mt-1" onClick={(e) => { e.stopPropagation(); openManifesto(candidate); }}>View Manifesto</Button>
               </div>
               <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selections[currentPosition.id] === candidate.id ? 'bg-dmi-blue-600 border-dmi-blue-600' : 'border-gray-300'}`}>

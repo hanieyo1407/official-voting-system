@@ -13,6 +13,7 @@ interface TrendsState {
     hourlyTrends: TrendData[];
     isLoading: boolean;
     error: string | null;
+    fetchTrends: () => Promise<void>;
 }
 
 const TRENDS_POLLING_INTERVAL = 30000; // Poll every 30 seconds
@@ -23,6 +24,7 @@ export const useVotingTrends = (): TrendsState => {
     const [error, setError] = useState<string | null>(null);
 
     const fetchTrends = useCallback(async () => {
+        setIsLoading(true); // Setting loading to true ensures UI updates correctly on refetch
         try {
             // API Endpoint: GET /stats/trends (Proceed with fetch)
             const response = await sjbuApi.get('/stats/trends');
@@ -45,7 +47,7 @@ export const useVotingTrends = (): TrendsState => {
 
                  // CRITICAL FIX: Treat 401/403 as a warning, not a definitive failure, for public-facing results
                  if (status === 401 || status === 403) {
-                     message = 'Chart data is temporarily unavailable.';
+                     message = 'Chart data is temporarily unavailable. Access Restricted.';
                  } else if (status >= 500) {
                      message = `Server Error (${status}). Data temporarily unavailable.`;
                  } else if (status === 404) {
@@ -65,5 +67,5 @@ export const useVotingTrends = (): TrendsState => {
         return () => clearInterval(interval);
     }, [fetchTrends]);
 
-    return { hourlyTrends, isLoading, error };
+    return { hourlyTrends, isLoading, error, fetchTrends };
 };

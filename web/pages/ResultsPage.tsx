@@ -6,26 +6,14 @@ import { Position, Page } from '../types';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Spinner from '../components/Spinner'; 
-import { useOverallStats } from '../hooks/useOverallStats'; // FIXED: Use the correct live stats hook
+import { useOverallStats } from '../hooks/useOverallStats';
 
 interface ResultsPageProps {
     positions: Position[]; 
     setPage: (page: Page) => void;
 }
 
-const StatusIndicator = ({ status }: { status: string }) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                status === 'Online' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-                <svg className={`-ml-0.5 mr-1.5 h-2 w-2 ${status === 'Online' ? 'text-green-400' : 'text-red-400'}`} fill="currentColor" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3" />
-                </svg>
-                {status}
-        </span>
-);
-
-const ResultsPage: React.FC<ResultsPageProps> = ({ positions, setPage }) => {
-        // FIXED: Using useOverallStats hook
+const ResultsPage: React.FC<ResultsPageProps> = ({ setPage }) => {
         const { stats, isLoading, error } = useOverallStats();
 
         if (isLoading) {
@@ -44,9 +32,8 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ positions, setPage }) => {
                 return <div className="container mx-auto px-4 py-8 text-center text-gray-500">No results data available.</div>;
         }
 
-        // FIXED: Use live data from stats object
         const totalVotes = stats.totalVotesCast;
-        const eligibleVoters = stats.totalVoters; // Total voters is in overall stats
+        const eligibleVoters = stats.totalVoters;
         const turnoutPercentage = (totalVotes / eligibleVoters) * 100;
         
         const overallTurnoutData = [
@@ -85,9 +72,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ positions, setPage }) => {
 
                         {/* Results by Position */}
                         {stats.positionsWithStats.map((positionStats) => {
-                                // Find the matching position object for candidate names if necessary, 
-                                // but positionStats contains everything needed.
-                                
                                 const candidateData = positionStats.candidates.map((candidate) => ({
                                     name: candidate.candidateName,
                                     votes: candidate.voteCount || 0,

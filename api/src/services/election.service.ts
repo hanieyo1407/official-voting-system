@@ -1,5 +1,10 @@
+// api/src/services/election.service.ts
+
 import pool from "../db/config";
 import { LoggingService } from "./logging.service";
+
+// CRITICAL FIX: Importing Candidate interface from admin service
+import { Candidate } from "./admin.service"; 
 
 export interface ElectionStatus {
   id: number;
@@ -17,8 +22,16 @@ export interface ElectionStatus {
   updatedAt: Date;
 }
 
+// NEW INTERFACE for the complex DTO returned to the frontend
+interface PositionWithCandidates {
+    id: number;
+    positionName: string;
+    candidates: Candidate[];
+}
+
 export class ElectionService {
   async getElectionStatus(): Promise<ElectionStatus> {
+// ... (getElectionStatus remains unchanged)
     try {
       const result = await pool.query(
         'SELECT id, status, started_at, paused_at, completed_at, cancelled_at, settings, created_at, updated_at FROM "ElectionStatus" ORDER BY id DESC LIMIT 1'
@@ -52,6 +65,7 @@ export class ElectionService {
   }
 
   async createDefaultElectionStatus(): Promise<ElectionStatus> {
+// ... (createDefaultElectionStatus remains unchanged)
     try {
       const result = await pool.query(
         `INSERT INTO "ElectionStatus"(status, settings, created_at, updated_at)
@@ -85,6 +99,7 @@ export class ElectionService {
   }
 
   async startElection(): Promise<ElectionStatus> {
+// ... (startElection remains unchanged)
     try {
       // Update current election status to active
       const result = await pool.query(
@@ -119,6 +134,7 @@ export class ElectionService {
   }
 
   async pauseElection(): Promise<ElectionStatus> {
+// ... (pauseElection remains unchanged)
     try {
       const result = await pool.query(
         `UPDATE "ElectionStatus"
@@ -152,6 +168,7 @@ export class ElectionService {
   }
 
   async completeElection(): Promise<ElectionStatus> {
+// ... (completeElection remains unchanged)
     try {
       const result = await pool.query(
         `UPDATE "ElectionStatus"
@@ -185,6 +202,7 @@ export class ElectionService {
   }
 
   async cancelElection(): Promise<ElectionStatus> {
+// ... (cancelElection remains unchanged)
     try {
       const result = await pool.query(
         `UPDATE "ElectionStatus"
@@ -218,6 +236,7 @@ export class ElectionService {
   }
 
   async updateElectionSettings(settings: Partial<ElectionStatus['settings']>): Promise<ElectionStatus> {
+// ... (updateElectionSettings remains unchanged)
     try {
       // Get current settings
       const currentStatus = await this.getElectionStatus();
@@ -252,6 +271,7 @@ export class ElectionService {
   }
 
   async getElectionHistory(): Promise<ElectionStatus[]> {
+// ... (getElectionHistory remains unchanged)
     try {
       const result = await pool.query(
         'SELECT id, status, started_at, paused_at, completed_at, cancelled_at, settings, created_at, updated_at FROM "ElectionStatus" ORDER BY created_at DESC'
@@ -271,6 +291,65 @@ export class ElectionService {
     } catch (error: any) {
       LoggingService.logError(error, { context: 'getElectionHistory' });
       throw new Error(`Failed to get election history: ${error.message}`);
+    }
+  }
+
+  // --- NEW POSITION/CANDIDATE FETCHING FUNCTIONS ---
+
+  /**
+   * Fetches all positions and their candidates for display on the dashboard and voting pages.
+   * This is the core function to fix the 'only President' issue.
+   */
+  async getAllPositionsWithCandidates(): Promise<PositionWithCandidates[]> {
+    try {
+        // 1. Fetch all positions
+        const positionsResult = await pool.query(
+            `SELECT id, position_name FROM "Position" ORDER BY id ASC`
+        );
+
+        if (positionsResult.rows.length === 0) {
+            return [];
+        }
+
+        // 2. Fetch all candidates efficiently
+        const candidatesResult = await pool.query(
+            // CRITICAL FIX: Use strict schema names imageurl and manifesto
+            `SELECT id, name, imageurl, manifesto, position_id 
+             FROM "Candidate" 
+             ORDER BY position_id, id`
+        );
+
+        const candidatesMap = new Map<number, Candidate[]>();
+        
+        // Group candidates by position_id
+        for (const c of candidatesResult.rows) {
+            const positionId = c.position_id;
+            const candidate: Candidate = {
+                id: c.id,
+                name: c.name,
+                positionId: positionId,
+                imageUrl: c.imageurl,  // CRITICAL FIX: Map imageurl
+                manifesto: c.manifesto, // CRITICAL FIX: Map manifesto
+                // Note: isPublished, createdAt, updatedAt are removed for schema strictness
+            };
+
+            if (!candidatesMap.has(positionId)) {
+                candidatesMap.set(positionId, []);
+            }
+            candidatesMap.get(positionId)!.push(candidate);
+        }
+
+        // 3. Combine positions with their candidates
+        const positionsWithCandidates: PositionWithCandidates[] = positionsResult.rows.map(p => ({
+            id: p.id,
+            positionName: p.position_name,
+            candidates: candidatesMap.get(p.id) || [], // Return empty array if no candidates
+        }));
+        
+        return positionsWithCandidates;
+    } catch (error: any) {
+        LoggingService.logError(error, { context: 'getAllPositionsWithCandidates' });
+        throw new Error(`Failed to fetch positions and candidates: ${error.message}`);
     }
   }
 }

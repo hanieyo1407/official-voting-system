@@ -1,9 +1,4 @@
 // web/pages/AdminDashboard.tsx
-// KEY FIXES:
-// 1. Removed MOCK_ADMIN_USERS_FOR_DEMO fallback in UserManagementView
-// 2. Fixed AuditLogView to properly display live logs
-// 3. Added moderator access to Dashboard and Audit Log views
-// 4. Fixed stats permission checks to include moderator
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
@@ -16,23 +11,27 @@ import ImageUploader from '../components/ImageUploader';
 import Spinner from '../components/Spinner'; 
 import sjbuApi from '../src/api/sjbuApi';
 import { useAdminUsers } from '../hooks/useAdminUsers'; 
-import { useOverallStats } from '../hooks/useOverallStats';
+import { useOverallStats } from '../hooks/useOverallStats'; 
 import { useAuditLogs } from '../hooks/useAuditLogs'; 
 import { isAxiosError } from 'axios';
+import { useVotingTrends } from '../hooks/useVotingTrends'; 
+// CRITICAL FIX: Import the new hook for fetching all positions/candidates
+import { useAllPositions } from '../hooks/useAllPositions'; 
+
 
 // --- Helper Icons (Unchanged) ---
-const PlusIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>;
+const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
 const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
 const TrashIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>;
 const UserIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>;
 const LogoutIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>;
-const DashboardIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>;
+const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7"/></svg>;
 const PositionsIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>;
-const CandidatesIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>;
-const UsersIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"></path></svg>;
+const CandidatesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M16 22a4 4 0 0 0-8 0"/><circle cx="12" cy="15" r="3"/></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>;
 const AuditIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>;
-const SettingsIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>;
-const RefreshIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>;
+const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg>;
+const RefreshIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 10v4h4"/><path d="m11 14 1.535-1.605a5 5 0 0 1 8 1.5"/><path d="M16 2v4"/><path d="m21 18-1.535 1.605a5 5 0 0 1-8-1.5"/><path d="M21 22v-4h-4"/><path d="M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3"/><path d="M3 10h4"/><path d="M8 2v4"/></svg>;
 
 // --- Type Definitions ---
 interface PositionWithCandidates extends Position {
@@ -40,12 +39,13 @@ interface PositionWithCandidates extends Position {
 }
 
 interface AdminDashboardProps {
-    positions: PositionWithCandidates[];
+    // CRITICAL FIX: The positions prop is no longer needed, replaced by internal hook
+    // positions: PositionWithCandidates[]; 
     currentUser: AdminUser;
     setCurrentUser: (user: AdminUser) => void;
     onLogout: () => void;
     onStartCountdown: (hours: number) => void;
-    onRefetchPositions: () => void; 
+    onRefetchPositions: () => void; // This is now a placeholder to trigger internal hook refetch
 }
 
 type AdminView = 'dashboard' | 'positions' | 'candidates' | 'users' | 'audit' | 'settings';
@@ -56,7 +56,7 @@ interface ModalState {
     data?: any;
 }
 
-// --- Role Switcher Component ---
+// --- Role Switcher Component (TASK C: Removed "Switch Role" text) ---
 const RoleSwitcher: React.FC<{ adminUsers: AdminUser[], currentUser: AdminUser, setCurrentUser: (user: AdminUser) => void, onLogout: () => void }> = ({ adminUsers, currentUser, setCurrentUser, onLogout }) => {
     return (
         <Card className="mb-6 p-4">
@@ -122,6 +122,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
 
     // LIVE DATA INTEGRATION
     const { adminUsers, isLoading: isAdminUsersLoading, error: adminUsersError, fetchAdminUsers } = useAdminUsers();
+    // CRITICAL FIX: Fetch positions internally via the new hook
+    const { 
+        positions, 
+        isLoading: isPositionsLoading, 
+        error: positionsError, 
+        fetchPositions 
+    } = useAllPositions();
 
     const handleOpenModal = (type: ModalType, data?: any) => setModal({ isOpen: true, type, data });
     const handleCloseModal = () => setModal({ isOpen: false, type: null });
@@ -142,17 +149,36 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
         }
     }, [currentUser, activeView, permissions]);
 
-    // Pass this unified function to modals for refreshing relevant data
+    // CRITICAL FIX: onRefetchPositions now triggers the fetchPositions in the hook
     const handleDataRefresh = useCallback(() => {
         fetchAdminUsers();
-        onRefetchPositions();
-    }, [fetchAdminUsers, onRefetchPositions]);
+        fetchPositions(); // Use the hook's fetch method
+    }, [fetchAdminUsers, fetchPositions]);
+    
+    // Ensure the prop function from the parent calls the new internal hook refetch logic
+    useEffect(() => {
+        // This is a workaround if the parent component expects a synchronous call
+        if (onRefetchPositions) {
+            (onRefetchPositions as any).refetch = fetchPositions; 
+        }
+    }, [fetchPositions, onRefetchPositions]);
+
 
     const renderActiveView = () => {
+        // Handle loading/error states for positions only when on relevant tabs
+        if (isPositionsLoading && (activeView === 'positions' || activeView === 'candidates')) {
+            return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Positions/Candidates...</p></Card>
+        }
+        if (positionsError && (activeView === 'positions' || activeView === 'candidates')) {
+            return <Card className="p-8 text-center text-red-600"><p>{positionsError}</p><Button onClick={fetchPositions}>Retry</Button></Card>
+        }
+        
         switch (activeView) {
             case 'dashboard': return <DashboardView permissions={permissions} />;
-            case 'positions': return <PositionsView positions={props.positions} permissions={permissions} onOpenModal={handleOpenModal} />;
-            case 'candidates': return <CandidatesView positions={props.positions} permissions={permissions} onOpenModal={handleOpenModal} />;
+            // CRITICAL FIX: Pass data from the new hook
+            case 'positions': return <PositionsView positions={positions} permissions={permissions} onOpenModal={handleOpenModal} />;
+            // CRITICAL FIX: Pass data from the new hook
+            case 'candidates': return <CandidatesView positions={positions} permissions={permissions} onOpenModal={handleOpenModal} />;
             case 'users': 
                  if (isAdminUsersLoading) return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Admin Users...</p></Card>
                  if (adminUsersError && adminUsers.length === 0) return <Card className="p-8 text-center text-red-600"><p>{adminUsersError}</p><Button onClick={fetchAdminUsers}>Retry</Button></Card>
@@ -187,7 +213,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
                 modalState={modal} 
                 onClose={handleCloseModal} 
                 permissions={permissions} 
-                positions={props.positions}
+                // CRITICAL FIX: Pass data from the new hook
+                positions={positions} 
                 onRefreshData={handleDataRefresh}
                 currentUser={currentUser}
             />
@@ -195,19 +222,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     );
 };
 
-// --- Dashboard View (LIVE STATS) - FIXED: Added permissions prop ---
+// --- Dashboard View (LIVE STATS) - TASK B INTEGRATION ---
 interface DashboardViewProps {
     permissions: Permissions;
 }
 const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
     const { stats, isLoading, error, fetchStats } = useOverallStats();
+    // TASK B: Integrate Voting Trends Data
+    const { hourlyTrends: hourlyTurnout, isLoading: isTrendsLoading, error: trendsError, fetchTrends } = useVotingTrends(); 
 
-    if (isLoading) return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Statistics...</p></Card>
-    if (error) return <Card className="p-8 text-center text-red-600"><p>{error}</p><Button onClick={fetchStats}>Retry</Button></Card>
+    if (isLoading || isTrendsLoading) return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Statistics...</p></Card>
+    // Combine errors for a single display
+    if (error || trendsError) return <Card className="p-8 text-center text-red-600"><p>{error || trendsError}</p><Button onClick={() => { fetchStats(); fetchTrends(); }}>Retry</Button></Card>
     
-    // Fallback data
-    const hourlyTurnout: any[] = []; 
-
     // Live Data
     const totalVotesCast = stats?.totalVotesCast ?? 0;
     const totalVoters = stats?.totalVoters ?? 0;
@@ -250,6 +277,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
 
             <Card className="p-6">
                 <h2 className="text-xl font-bold text-dmi-blue-900 mb-4">Turnout by Hour</h2>
+                {/* TASK B: Use trends data */}
                 {hourlyTurnout.length > 0 ? (
                     <div className="h-80">
                          <ResponsiveContainer width="100%" height="100%">
@@ -259,7 +287,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
                                 <YAxis />
                                 <Tooltip />
                                 <Legend />
-                                <Bar dataKey="votes" fill="#1b66c4" name="Votes Cast" />
+                                <Bar dataKey="votes" fill="#1b66c4" name="Votes Cast" /> 
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -384,7 +412,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ permissions, onStartCountdo
     );
 };
 
-// --- Audit Log View (FIXED: LIVE LOGS WITH REAL-TIME REFRESH & PAGINATION) ---
+// --- Audit Log View ---
 interface AuditLogViewProps {
     permissions: Permissions;
     currentUser: AdminUser;
@@ -586,7 +614,8 @@ const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser })
 };
 
 // --- Positions Management View ---
-interface PositionsViewProps extends Pick<AdminDashboardProps, 'positions'> {
+interface PositionsViewProps {
+    positions: PositionWithCandidates[];
     permissions: Permissions;
     onOpenModal: (type: ModalType, data?: any) => void;
 }
@@ -652,20 +681,19 @@ const PositionsView: React.FC<PositionsViewProps> = ({ positions, permissions, o
     </Card>
     );
 };
-
 // --- Candidates Management View ---
-interface CandidatesViewProps extends Pick<AdminDashboardProps, 'positions'> {
+interface CandidatesViewProps {
+    positions: PositionWithCandidates[];
     permissions: Permissions;
     onOpenModal: (type: ModalType, data?: any) => void;
 }
 const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions, onOpenModal }) => {
+     // CRITICAL FIX: Initialize selectedPositionId based on fetched positions
      const [selectedPositionId, setSelectedPositionId] = useState<string | number | null>(positions[0]?.id || null);
     
     useEffect(() => {
-        if (!selectedPositionId && positions.length > 0) {
-            setSelectedPositionId(positions[0].id);
-        }
-         if (positions.length > 0 && !positions.find(p => p.id === selectedPositionId)) {
+        // Only update if positions data is newly loaded and a selection hasn't been made or is invalid
+        if (positions.length > 0 && (!selectedPositionId || !positions.find(p => p.id === selectedPositionId))) {
             setSelectedPositionId(positions[0].id);
         }
         if (positions.length === 0) {
@@ -682,7 +710,8 @@ const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions,
                  <select 
                     id="position-select"
                     value={selectedPositionId || ''}
-                    onChange={(e) => setSelectedPositionId(e.target.value)}
+                    // CRITICAL FIX: Ensure value is converted to a string for the select input
+                    onChange={(e) => setSelectedPositionId(Number(e.target.value))}
                     className="mt-1 block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500"
                  >
                      {positions.length > 0 ? positions.map(p => (
@@ -709,10 +738,12 @@ const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions,
                                 {selectedPosition.candidates.map(cand => (
                                     <div key={cand.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                                         <div className="flex items-center space-x-4">
-                                            <img src={cand.photoUrl} alt={cand.name} className="w-16 h-16 rounded-full object-cover"/>
+                                            {/* CRITICAL FIX: Image display check, falls back to placeholder if imageUrl is missing */}
+                                            <img src={cand.imageUrl || '/path/to/placeholder-image.png'} alt={cand.name} className="w-16 h-16 rounded-full object-cover"/>
                                             <div>
                                                 <p className="font-semibold text-gray-800">{cand.name}</p>
-                                                <p className="text-sm text-gray-500">{cand.faculty}</p>
+                                                {/* CRITICAL FIX: Use manifesto in DTO but display bio (since form field is "Bio / Manifesto") */}
+                                                <p className="text-sm text-gray-500">{cand.manifesto ? cand.manifesto.substring(0, 30) : 'No bio provided'}...</p> 
                                             </div>
                                         </div>
                                         <div className="flex space-x-2">
@@ -748,7 +779,8 @@ const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions,
     );
 };
 
-// --- User Management View (FIXED: Removed mock data fallback) ---
+
+// --- User Management View ---
 interface UserManagementViewProps {
     adminUsers: AdminUser[];
     permissions: Permissions;
@@ -869,9 +901,11 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
     
     // Candidate Modals
     if ((type === 'ADD_CANDIDATE' || type === 'EDIT_CANDIDATE' || type === 'DELETE_CANDIDATE') && permissions.canManageCandidates) {
+        // CRITICAL FIX: Add safe check for data.name for the modal title
+        const positionName = (type === 'ADD_CANDIDATE' && data?.name) ? data.name : (data?.name || 'Position');
          return (
             <Modal isOpen={isOpen} onClose={onClose} title={
-                 type === 'ADD_CANDIDATE' ? `Add Candidate to ${data.name}` : 
+                 type === 'ADD_CANDIDATE' ? `Add Candidate to ${positionName}` : 
                  type === 'EDIT_CANDIDATE' ? 'Edit Candidate' : 
                  'Delete Candidate'
             }>
@@ -977,23 +1011,27 @@ const PositionForm = ({ type, position, onSuccess, onCancel }: { type: 'ADD_POSI
     );
 };
 
-// Candidate Form Component
+// Candidate Form Component (TASK A: CLOUDINARY INTEGRATION)
 const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { type: 'ADD_CANDIDATE' | 'EDIT_CANDIDATE', candidate?: Candidate, positionId: number | string, onSuccess: () => void, onCancel: () => void }) => {
+    // CRITICAL FIX: Changed state name from 'bio' to 'manifesto' to match API Service DTO
     const [formData, setFormData] = useState({
         name: candidate?.name || '',
-        faculty: candidate?.faculty || '',
-        photoUrl: candidate?.photoUrl || null,
-        manifesto: candidate?.manifesto || '',
+        manifesto: (candidate as any)?.manifesto || candidate?.manifesto || '', // Use manifesto if present, fallback to old bio field
+        imageUrl: candidate?.imageUrl || null, // The Cloudinary URL
     });
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const positionIdNum = Number(positionId);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        // CRITICAL FIX: Changed state name access from 'bio' to 'manifesto'
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleImageChange = (base64Image: string) => {
-        setFormData({ ...formData, photoUrl: base64Image });
+    // CRITICAL FIX: Handler for the ImageUploader's final Cloudinary URL
+    const handleImageUploadSuccess = (cloudinaryUrl: string) => {
+        setFormData({ ...formData, imageUrl: cloudinaryUrl });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -1001,22 +1039,32 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
         setError('');
         setIsLoading(true);
 
+        // Client-side validation: must have an image URL
+        if (!formData.imageUrl) {
+            setError('Please upload an image before saving the candidate.');
+            setIsLoading(false);
+            return;
+        }
+
         try {
+            // CRITICAL FIX: Send payload with 'manifesto' key
             const payload = {
-                 ...formData,
-                 positionId: positionId,
-                 photoUrl: formData.photoUrl || 'default-url',
-                 faculty: formData.faculty || 'Default Faculty'
+                 name: formData.name,
+                 positionId: positionIdNum,
+                 imageUrl: formData.imageUrl,
+                 manifesto: formData.manifesto, // CRITICAL FIX: Using 'manifesto'
             };
             
             if (type === 'ADD_CANDIDATE') {
-                await sjbuApi.post(`/positions/${positionId}/candidates`, payload); 
+                // TASK A FIX: Use the new dedicated API function
+                await sjbuApi.createCandidate(payload); 
             } else {
-                await sjbuApi.put(`/positions/${positionId}/candidates/${candidate!.id}`, payload); 
+                // TASK A FIX: Use the new dedicated API function
+                await sjbuApi.updateCandidate(candidate!.id, payload); 
             }
             onSuccess();
         } catch (err) {
-             const message = isAxiosError(err) && err.response?.data?.message || 'Failed to save candidate.';
+             const message = isAxiosError(err) && err.response?.data?.error || 'Failed to save candidate.';
              setError(message);
         } finally {
             setIsLoading(false);
@@ -1027,25 +1075,28 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {error && <div className="md:col-span-3 text-red-500 text-sm">{error}</div>}
              <div className="md:col-span-1">
-                <ImageUploader imageUrl={formData.photoUrl} onImageChange={handleImageChange} />
+                {/* TASK A FIX: Use correct prop and state name */}
+                <ImageUploader 
+                    imageUrl={formData.imageUrl} 
+                    onUploadSuccess={handleImageUploadSuccess} 
+                    disabled={isLoading}
+                />
             </div>
             <div className="md:col-span-2 space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Full Name</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500" />
                 </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Faculty</label>
-                    <input type="text" name="faculty" value={formData.faculty} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500" />
-                </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Manifesto</label>
+                    {/* CRITICAL FIX: Set input name to 'manifesto' */}
+                    <label className="block text-sm font-medium text-gray-700">Bio / Manifesto</label>
                     <textarea name="manifesto" value={formData.manifesto} onChange={handleChange} required rows={5} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500" />
                 </div>
             </div>
             <div className="md:col-span-3 flex justify-end space-x-4 pt-4 border-t mt-2">
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
-                <Button type="submit" disabled={isLoading}>{isLoading ? <Spinner /> : (type === 'ADD_CANDIDATE' ? 'Create Candidate' : 'Update Candidate')}</Button>
+                {/* Disable button if loading or no image URL exists */}
+                <Button type="submit" disabled={isLoading || !formData.imageUrl}>{isLoading ? <Spinner /> : (type === 'ADD_CANDIDATE' ? 'Create Candidate' : 'Update Candidate')}</Button>
             </div>
         </form>
     );
@@ -1078,6 +1129,7 @@ const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDI
                 delete dataToSave.password; 
             }
             if (!isEditing && !formData.email) {
+                 // TASK C: Removed MOCK/DEMO string for email placeholder
                  dataToSave.email = `${dataToSave.username}@sjbu-voting.com`;
             }
 

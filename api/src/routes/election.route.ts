@@ -1,3 +1,5 @@
+// api/src/routes/election.route.ts
+
 import { Router } from "express";
 import {
   getElectionStatus,
@@ -6,7 +8,9 @@ import {
   completeElection,
   cancelElection,
   updateElectionSettings,
-  getElectionHistory
+  getElectionHistory,
+  // NEW: Import the controller function for fetching all positions
+  getAllPositionsWithCandidates
 } from "../controllers/election.controller";
 import { verifyAdminToken, requireSuperAdmin, requireAdminOrSuperAdmin } from "../middleware/admin.middleware";
 
@@ -15,6 +19,8 @@ import { verifyAdminToken, requireSuperAdmin, requireAdminOrSuperAdmin } from ".
  * tags:
  *   - name: Election Management
  *     description: Election lifecycle management endpoints
+ *   - name: Positions & Candidates
+ *     description: Endpoints for fetching all positions and candidates
  */
 
 const electionRoute = Router();
@@ -201,6 +207,54 @@ electionRoute.get("/status", verifyAdminToken, requireAdminOrSuperAdmin, getElec
  *         description: Internal server error
  */
 electionRoute.get("/history", verifyAdminToken, requireAdminOrSuperAdmin, getElectionHistory);
+
+
+// --- NEW ROUTE FOR POSITIONS AND CANDIDATES (Accessible by all roles for dashboard/voting) ---
+
+/**
+ * @swagger
+ * /api/election/positions:
+ *   get:
+ *     summary: Get all positions with their candidates
+ *     tags: [Positions & Candidates]
+ *     description: Retrieves the list of all active positions and the candidates for each.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of positions and candidates retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 positions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       positionName:
+ *                         type: string
+ *                       candidates:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id: {type: 'integer'}
+ *                             name: {type: 'string'}
+ *                             positionId: {type: 'integer'}
+ *                             imageUrl: {type: 'string'}
+ *                             manifesto: {type: 'string'}
+ *       401:
+ *         description: Unauthorized - Admin authentication required
+ *       500:
+ *         description: Internal server error
+ */
+// NOTE: Using requireAdminOrSuperAdmin to keep this route protected as per existing patterns, though public access may be desired later.
+electionRoute.get("/positions", verifyAdminToken, requireAdminOrSuperAdmin, getAllPositionsWithCandidates); 
+
 
 /**
  * @swagger

@@ -16,8 +16,8 @@ import WinnersPage from './pages/WinnersPage';
 import IntroPage from './pages/IntroPage';
 import Card from './components/Card';
 import Button from './components/Button';
-import { useVotingData } from './hooks/useVotingData'; 
-// REMOVED: import { useOverallStats } from './hooks/useOverallStats'; 
+// FIXED: Import the working hook instead of useVotingData
+import { useAllPositions } from './hooks/useAllPositions'; 
 import sjbuApi from './src/api/sjbuApi'; 
 
 // Define the expected structure for VotingPage data
@@ -32,15 +32,13 @@ const App: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState<string>('');
   const [userVoucher, setUserVoucher] = useState<string>(''); 
 
-  // CRITICAL FIX: Only use the hook that works. The Hydration/Stats logic is now removed.
+  // FIXED: Use useAllPositions hook instead of useVotingData
   const { 
       positions: livePositions, 
       isLoading: isPositionsLoading, 
       error: positionsError, 
-      fetchData: fetchPositions 
-  } = useVotingData();
-  
-  // REMOVED: All overallStats state, hooks, and hydration logic.
+      fetchPositions 
+  } = useAllPositions();
   
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [electionStatus, setElectionStatus] = useState<ElectionStatus>('PRE_ELECTION');
@@ -48,8 +46,7 @@ const App: React.FC = () => {
   const [electionStartDate, setElectionStartDate] = useState(ELECTION_START_DATE);
   const [electionEndDate, setElectionEndDate] = useState(ELECTION_END_DATE);
 
-
-  // Effect to handle online/offline status changes globally (KEPT)
+  // Effect to handle online/offline status changes globally
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
@@ -61,15 +58,14 @@ const App: React.FC = () => {
     };
   }, []);
   
-  // --- NEW HANDLER for User Auth Success (KEPT) ---
+  // Handler for User Auth Success
   const handleUserLoginSuccess = (voucher: string) => {
     setUserVoucher(voucher);
     setCurrentPage(Page.Voting);
     fetchPositions(); 
-    // REMOVED: fetchOverallStats(); 
   }
   
-  // --- HANDLER for User Logout (KEPT) ---
+  // Handler for User Logout
   const handleUserLogout = async () => {
       try {
           await sjbuApi.post('/logout'); 
@@ -82,7 +78,7 @@ const App: React.FC = () => {
       }
   }
 
-  // --- Handler for starting election countdown (MOCK - KEPT) ---
+  // Handler for starting election countdown
   const handleStartCountdown = (hours: number) => {
     const now = new Date();
     const newStartDate = new Date(now.getTime() + hours * 60 * 60 * 1000);
@@ -91,15 +87,13 @@ const App: React.FC = () => {
     setElectionEndDate(newEndDate);
   };
 
-
-  // --- CRITICAL FIX: Restore handleAdminLogin ---
+  // Admin Login Handler
   const handleAdminLogin = (user: AdminUser) => {
     setCurrentUser(user);
     setCurrentPage(Page.Admin);
-    // REMOVED: fetchOverallStats(); 
   };
 
-  // LIVE: Admin Logout (KEPT)
+  // Admin Logout
   const handleAdminLogout = async () => {
       try {
           await sjbuApi.post('/admin/logout'); 
@@ -111,14 +105,12 @@ const App: React.FC = () => {
       }
   };
   
-  // 5. Unified Refetch for Admin Dashboard (Only fetches positions now)
+  // Unified Refetch for Admin Dashboard
   const handleAdminRefetch = useCallback(() => {
       fetchPositions();
   }, [fetchPositions]);
 
-
   const ElectionStatusSimulator = () => (
-      // ... (ElectionStatusSimulator remains unchanged)
       <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-2xl z-50 border">
           <h4 className="text-sm font-bold text-dmi-blue-900 mb-2">Election Status Simulator</h4>
           <div className="flex space-x-2">
@@ -130,7 +122,6 @@ const App: React.FC = () => {
   );
 
   const renderResultsPage = () => {
-    // MODIFIED: Only pass livePositions (raw)
     switch (electionStatus) {
         case 'LIVE':
             return <LiveResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
@@ -151,7 +142,6 @@ const App: React.FC = () => {
   }
 
   const renderPage = () => {
-    // Combine loading/error states for a unified check (Only positions hook matters now)
     const isError = positionsError;
     const isLoadingData = isPositionsLoading;
 
@@ -192,7 +182,6 @@ const App: React.FC = () => {
                   electionEndDate={electionEndDate} 
                />;
       case Page.Voting:
-        // MODIFIED: Pass raw livePositions
         return <VotingPage 
                   positions={livePositions as PositionWithCandidates[]} 
                   userVoucher={userVoucher} 
@@ -207,22 +196,20 @@ const App: React.FC = () => {
       case Page.Results:
         return renderResultsPage();
       case Page.Winners:
-        // MODIFIED: Pass raw livePositions
-        return <WinnersPage positions={livePositions as PositionWithCandidates[]} electionStatus={electionStatus} />;
+        return <WinnersPage electionStatus={electionStatus} />;
       case Page.Admin:
         if (!currentUser) {
             return <AdminLoginPage onLoginSuccess={handleAdminLogin} />;
         }
         return <AdminDashboard 
-                  positions={livePositions as PositionWithCandidates[]} // MODIFIED: Pass raw livePositions
                   currentUser={currentUser}
                   setCurrentUser={setCurrentUser}
                   onLogout={handleAdminLogout} 
                   onStartCountdown={handleStartCountdown}
-                  onRefetchPositions={handleAdminRefetch} // MODIFIED: Only fetches positions now
+                  onRefetchPositions={handleAdminRefetch}
                 />; 
       default:
-        return <HomePage setPage={setCurrentPage} electionStatus={electionStatus} electionStartDate={electionEndDate} />;
+        return <HomePage setPage={setCurrentPage} electionStatus={electionStatus} electionStartDate={electionStartDate} electionEndDate={electionEndDate} />;
     }
   };
 

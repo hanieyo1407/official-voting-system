@@ -1,9 +1,10 @@
 // api/src/controllers/admin.controller.ts
 
 import { Request, Response } from "express";
-import AdminService from "../services/admin.service";
+// CRITICAL FIX: The imports must use the updated interfaces (manifesto instead of bio)
+import AdminService, { NewCandidateData, UpdateCandidateData } from "../services/admin.service"; 
 import { LoggingService } from "../services/logging.service";
-import cloudinary from '../config/cloudinary.config'; 
+import cloudinary from '../config/cloudinary.config'; // Importing the configured cloudinary instance
 
 export const createAdmin = async (req: Request, res: Response) => {
   try {
@@ -174,7 +175,7 @@ export const getAllAdmins = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     LoggingService.logError(err, { context: 'getAllAdmins' });
-    return res.status(500).json({ error: "Failed to fetch admins" });
+    return res.status(500).json({ error: err.message || "Failed to fetch admins" });
   }
 };
 
@@ -301,15 +302,126 @@ export const getAdminStats = async (req: Request, res: Response) => {
     return res.status(200).json({ stats });
   } catch (err: any) {
     LoggingService.logError(err, { context: 'getAdminStats' });
-    return res.status(500).json({ error: "Failed to fetch admin statistics" });
+    return res.status(500).json({ error: err.message || "Failed to fetch admin statistics" });
   }
 };
+
+// --- NEW CANDIDATE MANAGEMENT CONTROLLERS ---
+
+export const createCandidate = async (req: Request, res: Response) => {
+    try {
+        const requestingAdmin = (req as any).admin;
+        // CRITICAL FIX: Destructure manifesto instead of bio
+        const { name, positionId, imageUrl, manifesto } = req.body as NewCandidateData;
+
+        if (!requestingAdmin || !['admin', 'super_admin'].includes(requestingAdmin.role)) {
+            return res.status(403).json({ error: "Insufficient permissions to create candidate" });
+        }
+
+        // CRITICAL FIX: Check manifesto instead of bio
+        if (!name || !positionId || !imageUrl || !manifesto) {
+             return res.status(400).json({
+                error: "Candidate name, position ID, image URL, and manifesto are required"
+             });
+        }
+        
+        const positionIdNum = parseInt(positionId.toString());
+        if (isNaN(positionIdNum) || positionIdNum <= 0) {
+             return res.status(400).json({ error: "Invalid position ID" });
+        }
+        
+        // CRITICAL FIX: Pass manifesto to the service
+        const newCandidate = await AdminService.createCandidate(
+            { name, positionId: positionIdNum, imageUrl, manifesto },
+            requestingAdmin.id
+        );
+
+        return res.status(201).json({ 
+            message: "Candidate created successfully", 
+            candidate: newCandidate 
+        });
+
+    } catch (err: any) {
+        LoggingService.logError(err, { context: 'createCandidate' });
+        return res.status(500).json({ error: err.message || "Failed to create candidate" });
+    }
+}
+
+
+export const updateCandidate = async (req: Request, res: Response) => {
+    try {
+        const requestingAdmin = (req as any).admin;
+        const { candidateId } = req.params;
+        const updateData: UpdateCandidateData = req.body;
+
+        if (!requestingAdmin || !['admin', 'super_admin'].includes(requestingAdmin.role)) {
+            return res.status(403).json({ error: "Insufficient permissions to update candidate" });
+        }
+
+        const idNum = parseInt(candidateId);
+        if (isNaN(idNum) || idNum <= 0) {
+             return res.status(400).json({ error: "Invalid candidate ID" });
+        }
+
+        // Validate positionId if present
+        if (updateData.positionId !== undefined) {
+             const positionIdNum = parseInt(updateData.positionId.toString());
+             if (isNaN(positionIdNum) || positionIdNum <= 0) {
+                 return res.status(400).json({ error: "Invalid position ID" });
+             }
+             updateData.positionId = positionIdNum; // Ensure it's a number for the service
+        }
+
+        // Data for the service call, ensuring only allowed fields are passed
+        const finalUpdateData: UpdateCandidateData = {};
+        if (updateData.name !== undefined) finalUpdateData.name = updateData.name;
+        if (updateData.positionId !== undefined) finalUpdateData.positionId = updateData.positionId;
+        if (updateData.imageUrl !== undefined) finalUpdateData.imageUrl = updateData.imageUrl; 
+        // CRITICAL FIX: Check and include manifesto
+        if (updateData.manifesto !== undefined) finalUpdateData.manifesto = updateData.manifesto;
+        // CRITICAL FIX: Removed isPublished from DTO check
+        // if (updateData.isPublished !== undefined) finalUpdateData.isPublished = updateData.isPublished;
+
+        if (Object.keys(finalUpdateData).length === 0) {
+            return res.status(400).json({ error: "No valid fields provided for update" });
+        }
+
+        const updatedCandidate = await AdminService.updateCandidate(
+            idNum,
+            finalUpdateData,
+            requestingAdmin.id
+        );
+
+        return res.status(200).json({ 
+            message: "Candidate updated successfully", 
+            candidate: updatedCandidate 
+        });
+
+    } catch (err: any) {
+        // FIX applied for compile error
+        LoggingService.logError(err, { context: 'updateCandidate', candidateId: req.params.candidateId }); 
+        return res.status(500).json({ error: err.message || "Failed to update candidate" });
+    }
+}
+
 
 // ADDED: Function to generate a secure signature for direct client upload (Cloudinary)
 export const signUpload = async (req: Request, res: Response) => {
     try {
+        // Retrieve values from the local environment variables loaded by index.ts/server.ts
+        const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+        const API_KEY = process.env.CLOUDINARY_API_KEY;
+        const API_SECRET = process.env.CLOUDINARY_API_SECRET;
+
+        // CRITICAL FIX 1: Server-side check for configuration presence
+        if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
+            LoggingService.logError(new Error("Cloudinary environment variables missing"), { context: 'signUpload' });
+            return res.status(500).json({ error: "Cloudinary configuration is incomplete on the server." });
+        }
+        
         const requestingAdmin = (req as any).admin;
-        const { public_id } = req.body; 
+        // CRITICAL FIX 2: Safely access public_id from req.body, defaulting to an empty object
+        const { public_id } = req.body || {}; 
         
         if (!requestingAdmin || !['admin', 'super_admin'].includes(requestingAdmin.role)) {
             return res.status(403).json({ error: "Insufficient permissions to sign upload" });
@@ -324,9 +436,10 @@ export const signUpload = async (req: Request, res: Response) => {
             ...(public_id && { public_id: public_id, overwrite: true }) 
         };
 
+        // Use the API_SECRET directly for signing
         const signature = cloudinary.utils.api_sign_request(
             params,
-            cloudinary.config().api_secret as string // Sign the request with the secret
+            API_SECRET as string // Use the directly fetched secret
         );
 
         LoggingService.logAdminAction(requestingAdmin.id, 'GENERATE_UPLOAD_SIGNATURE', 'candidate_image', { public_id: public_id || 'new' });
@@ -334,8 +447,8 @@ export const signUpload = async (req: Request, res: Response) => {
         return res.status(200).json({
             signature: signature,
             timestamp: timestamp,
-            cloud_name: cloudinary.config().cloud_name,
-            api_key: cloudinary.config().api_key,
+            cloud_name: CLOUD_NAME, // Pass the environment variable directly
+            api_key: API_KEY,      // Pass the environment variable directly
             public_id: public_id,
             folder: params.folder
         });

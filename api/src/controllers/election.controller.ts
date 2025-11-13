@@ -1,6 +1,35 @@
+// api/src/controllers/election.controller.ts
+
 import { Request, Response } from "express";
 import ElectionService from "../services/election.service";
 import { LoggingService } from "../services/logging.service";
+
+// --- NEW POSITION/CANDIDATE FETCHING CONTROLLER ---
+/**
+ * Fetches all positions with their candidates from the ElectionService.
+ * This is the public facing list for voting and admin views.
+ */
+export const getAllPositionsWithCandidates = async (req: Request, res: Response) => {
+    try {
+        // The middleware (verifyAdminToken, requireAdminOrSuperAdmin) handles auth.
+        
+        const positions = await ElectionService.getAllPositionsWithCandidates();
+
+        return res.status(200).json({
+            positions: positions.map(p => ({
+                id: p.id,
+                name: p.positionName, // Mapping positionName DTO to simpler 'name' for the route DTO
+                candidates: p.candidates,
+            }))
+        });
+
+    } catch (err: any) {
+        LoggingService.logError(err, { context: 'getAllPositionsWithCandidates' });
+        return res.status(500).json({ error: "Failed to fetch election positions and candidates." });
+    }
+}
+// --- END NEW CONTROLLER ---
+
 
 export const getElectionStatus = async (req: Request, res: Response) => {
   try {

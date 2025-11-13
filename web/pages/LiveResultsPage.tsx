@@ -24,7 +24,8 @@ const LiveIndicator = () => (
 const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage }) => {
     // Hooks to fetch live data
     const { stats, isLoading: isStatsLoading, error: statsError } = useLiveStatsPolling();
-    const { hourlyTrends, isLoading: isTrendsLoading, error: trendsError } = useVotingTrends();
+    // CRITICAL FIX: Destructure fetchTrends from the hook
+    const { hourlyTrends, isLoading: isTrendsLoading, error: trendsError, fetchTrends } = useVotingTrends(); 
 
     // Global loading/error state
     const isLoading = isStatsLoading || isTrendsLoading;

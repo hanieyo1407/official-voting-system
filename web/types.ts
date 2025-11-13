@@ -1,4 +1,4 @@
-//web/types.ts
+// web/types.ts
 
 export enum Page {
   Intro,
@@ -16,61 +16,58 @@ export enum Page {
 export type AdminRole = 'super_admin' | 'admin' | 'moderator';
 
 export interface AdminUser {
-  id: number; // FIXED: Changed from string to number (SERIAL PK)
+  id: number;
   username: string;
   role: AdminRole;
-  email: string; // ADDED: Required by live Admin API
-  isActive?: boolean; // ADDED: Required by live Admin API
-  lastLogin?: string; // ADDED: Required by live Admin API
-  createdAt?: string; // ADDED: Required by live Admin API
-  password?: string; // For mock authentication
+  email: string;
+  isActive?: boolean;
+  lastLogin?: string;
+  createdAt?: string;
+  password?: string;
 }
 
 export interface Candidate {
-  id: number; // FIXED: Changed from string to number (SERIAL PK)
+  id: number;
   name: string;
-  photoUrl: string; // Assuming photoUrl is part of the final Candidate structure
-  faculty: string; // Assuming faculty is part of the final Candidate structure
+  imageUrl: string;
   manifesto: string;
 }
 
 export interface Position {
-  id: number; // FIXED: Changed from string to number (SERIAL PK)
+  id: number;
   name: string;
   candidates: Candidate[];
-  // ADDED: Align with live stats if this object is reused for voting and results
   totalVotes?: number;
   voterTurnout?: number;
 }
 
 export interface VoteSelection {
-  [positionId: number]: number | 'abstain'; // FIXED: positionId and candidateId should be number
+  [positionId: number]: number | 'abstain';
 }
 
-// API-Aligned Types for Statistics (These look largely correct, but need minor cleanup)
 export interface CandidateStats {
-    candidateId: number; // FIXED: Added ID to align with API response structure
+    candidateId: number;
     candidateName: string;
-    manifesto?: string; // ADDED: From CandidateStats schema
+    manifesto?: string;
     voteCount: number;
     votePercentage: number;
 }
 
 export interface PositionStats {
-    positionId: number; // ADDED: To align with API response structure
+    positionId: number;
     positionName: string;
-    totalCandidates: number; // ADDED: From PositionStats schema
+    totalCandidates: number;
     totalVotes: number;
-    voterTurnout: number; // ADDED: From PositionStats schema
+    voterTurnout: number;
     candidates: CandidateStats[];
 }
 
 export interface OverallStats {
     totalPositions: number;
     totalCandidates: number;
-    averageVotesPerPosition?: number; // ADDED: From OverallStats schema
-    mostVotedPosition?: string; // ADDED: From OverallStats schema
-    leastVotedPosition?: string; // ADDED: From OverallStats schema
+    averageVotesPerPosition?: number;
+    mostVotedPosition?: string;
+    leastVotedPosition?: string;
 }
 
 export interface VotingStats {
@@ -84,10 +81,10 @@ export interface VotingStats {
 export type ElectionStatus = 'PRE_ELECTION' | 'LIVE' | 'POST_ELECTION';
 
 export interface AuditLogEntry {
-  id: number; // FIXED: Changed from string to number
+  id: number;
   timestamp: Date;
   adminUsername: string;
   action: string;
-  details: string; // This should be updated to match the AuditLog table/log format (which uses JSONB)
+  details: string;
   ipAddress: string;
 }

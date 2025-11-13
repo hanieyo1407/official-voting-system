@@ -1,3 +1,5 @@
+// api/src/services/admin.service.ts
+
 import pool from "../db/config";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -13,8 +15,151 @@ export interface AdminUser {
   createdAt: Date;
 }
 
+// --- UPDATED INTERFACES FOR CANDIDATE MANAGEMENT (STRICT SCHEMA) ---
+export interface Candidate {
+  id: number;
+  name: string;
+  positionId: number;
+  imageUrl: string;      
+  manifesto: string;     
+  // CRITICAL FIX: Removed isPublished, createdAt, updatedAt to match provided schema
+}
+
+export interface NewCandidateData {
+    name: string;
+    positionId: number;
+    imageUrl: string; 
+    manifesto: string; 
+}
+
+export interface UpdateCandidateData {
+    name?: string;
+    positionId?: number;
+    imageUrl?: string;
+    manifesto?: string;
+    // CRITICAL FIX: Removed isPublished to match provided schema
+}
+// --- END UPDATED INTERFACES ---
+
 export class AdminService {
   private static SALT_ROUNDS = 12;
+
+  // --- NEW CANDIDATE MANAGEMENT FUNCTIONS ---
+
+  /**
+   * Creates a new Candidate entry in the database.
+   */
+  async createCandidate(data: NewCandidateData, createdBy: number): Promise<Candidate> {
+      try {
+          const { name, positionId, imageUrl, manifesto } = data;
+          
+          const result = await pool.query(
+              // CRITICAL FIX: Removed is_published, created_at, updated_at from INSERT/RETURNING
+              `INSERT INTO "Candidate"(name, position_id, imageurl, manifesto)
+               VALUES($1, $2, $3, $4)
+               RETURNING id, name, position_id, imageurl, manifesto`,
+              [name, positionId, imageUrl, manifesto]
+          );
+
+          const candidate = result.rows[0];
+          LoggingService.logAdminAction(
+              createdBy.toString(), 
+              'CREATE_CANDIDATE', 
+              candidate.id.toString(), 
+              { name, positionId }
+          );
+
+          return {
+              id: candidate.id,
+              name: candidate.name,
+              positionId: candidate.position_id,
+              imageUrl: candidate.imageurl,
+              manifesto: candidate.manifesto,
+              // CRITICAL FIX: Removed unmapped fields from DTO return
+          };
+      } catch (error: any) {
+          LoggingService.logError(error, { context: 'createCandidate', data });
+          if (error.code === '23503') { 
+              throw new Error('Position not found for this candidate.');
+          }
+          throw new Error(`Failed to create candidate: ${error.message}`);
+      }
+  }
+
+  /**
+   * Updates an existing Candidate entry.
+   */
+  async updateCandidate(candidateId: number, data: UpdateCandidateData, updatedBy: number): Promise<Candidate> {
+      try {
+          // Dynamically build the SET clause and values array
+          const fields: string[] = [];
+          const values: (string | number | boolean)[] = [];
+          let paramIndex = 1;
+
+          if (data.name !== undefined) {
+              fields.push(`name = $${paramIndex++}`);
+              values.push(data.name);
+          }
+          if (data.positionId !== undefined) {
+              fields.push(`position_id = $${paramIndex++}`);
+              values.push(data.positionId);
+          }
+          if (data.imageUrl !== undefined) {
+              fields.push(`imageurl = $${paramIndex++}`);
+              values.push(data.imageUrl); 
+          }
+          if (data.manifesto !== undefined) {
+              fields.push(`manifesto = $${paramIndex++}`);
+              values.push(data.manifesto);
+          }
+          // CRITICAL FIX: Removed isPublished from update logic
+
+          if (fields.length === 0) {
+              throw new Error('No fields provided for update.');
+          }
+          
+          // CRITICAL FIX: Removed updated_at from update logic
+
+          // Add the candidateId to the values array
+          values.push(candidateId);
+          
+          const result = await pool.query(
+              // CRITICAL FIX: Removed updated_at, is_published, created_at from RETURNING
+              `UPDATE "Candidate" SET ${fields.join(', ')} WHERE id = $${paramIndex}
+               RETURNING id, name, position_id, imageurl, manifesto`,
+              values
+          );
+
+          if (result.rows.length === 0) {
+              throw new Error('Candidate not found.');
+          }
+
+          const candidate = result.rows[0];
+          LoggingService.logAdminAction(
+              updatedBy.toString(), 
+              'UPDATE_CANDIDATE', 
+              candidate.id.toString(), 
+              { fields: Object.keys(data) }
+          );
+
+          return {
+              id: candidate.id,
+              name: candidate.name,
+              positionId: candidate.position_id,
+              imageUrl: candidate.imageurl,
+              manifesto: candidate.manifesto,
+              // CRITICAL FIX: Removed unmapped fields from DTO return
+          };
+      } catch (error: any) {
+          LoggingService.logError(error, { context: 'updateCandidate', candidateId, data });
+          if (error.code === '23503') { 
+              throw new Error('Position not found for this candidate.');
+          }
+          throw new Error(`Failed to update candidate: ${error.message}`);
+      }
+  }
+
+  // --- EXISTING FUNCTIONS BELOW (No changes) ---
 
   async createAdminUser(username: string, email: string, password: string, role: AdminUser['role'] = 'admin'): Promise<AdminUser> {
     try {

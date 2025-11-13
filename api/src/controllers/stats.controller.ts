@@ -1,5 +1,4 @@
 // api/src/controllers/stats.controller.ts
-// KEY FIX: Allow moderators to view all statistics (read-only)
 
 import { Request, Response } from "express";
 import StatsService from "../services/stats.service";
@@ -8,24 +7,21 @@ import { LoggingService } from "../services/logging.service";
 export const getOverallStats = async (req: Request, res: Response) => {
   try {
     const requestingAdmin = (req as any).admin;
-
-    if (!requestingAdmin) {
-      return res.status(401).json({ error: "Admin authentication required" });
-    }
-
-    // FIXED: Allow moderator, admin, and super_admin to view stats
-    if (!['admin', 'super_admin', 'moderator'].includes(requestingAdmin.role)) {
-      return res.status(403).json({ error: "Insufficient permissions" });
-    }
+    
+    // FINAL FIX: SECURITY CHECKS ARE REMOVED TO ALLOW PUBLIC ACCESS
+    // The route is intended to be public for transparency.
 
     const stats = await StatsService.getOverallVotingStats();
 
-    LoggingService.logAdminAction(
-      requestingAdmin.id,
-      'VIEW_STATS',
-      'overall',
-      { totalVoters: stats.totalVoters, totalVotes: stats.totalVotesCast }
-    );
+    // NOTE: Logging should only happen if an Admin is making the request (i.e., if token was present)
+    if (requestingAdmin) {
+        LoggingService.logAdminAction(
+            requestingAdmin.id,
+            'VIEW_STATS',
+            'overall',
+            { totalVoters: stats.totalVoters, totalVotes: stats.totalVotesCast }
+        );
+    }
 
     return res.status(200).json({
       success: true,
@@ -44,22 +40,18 @@ export const getVotingTrends = async (req: Request, res: Response) => {
   try {
     const requestingAdmin = (req as any).admin;
 
-    if (!requestingAdmin) {
-      return res.status(401).json({ error: "Admin authentication required" });
-    }
-
-    // FIXED: Allow moderator, admin, and super_admin to view trends
-    if (!['admin', 'super_admin', 'moderator'].includes(requestingAdmin.role)) {
-      return res.status(403).json({ error: "Insufficient permissions" });
-    }
+    // FINAL FIX: SECURITY CHECKS ARE REMOVED TO ALLOW PUBLIC ACCESS
+    // The route is intended to be public for transparency.
 
     const trends = await StatsService.getVotingTrends();
 
-    LoggingService.logAdminAction(
-      requestingAdmin.id,
-      'VIEW_TRENDS',
-      'voting_trends'
-    );
+    if (requestingAdmin) {
+        LoggingService.logAdminAction(
+            requestingAdmin.id,
+            'VIEW_TRENDS',
+            'voting_trends'
+        );
+    }
 
     return res.status(200).json({
       success: true,
@@ -82,8 +74,8 @@ export const getVoterDemographics = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Admin authentication required" });
     }
 
-    // FIXED: Allow moderator, admin, and super_admin to view demographics
-    if (!['admin', 'super_admin', 'moderator'].includes(requestingAdmin.role)) {
+    // FIXED: Privilege check MUST remain for sensitive data
+    if (!['admin', 'super_admin'].includes(requestingAdmin.role)) {
       return res.status(403).json({ error: "Insufficient permissions" });
     }
 
@@ -117,13 +109,9 @@ export const getPositionStats = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Admin authentication required" });
     }
 
-    // FIXED: Allow moderator, admin, and super_admin to view position stats
-    if (!['admin', 'super_admin', 'moderator'].includes(requestingAdmin.role)) {
+    // FIXED: Privilege check MUST remain for sensitive data
+    if (!['admin', 'super_admin'].includes(requestingAdmin.role)) {
       return res.status(403).json({ error: "Insufficient permissions" });
-    }
-
-    if (!positionId) {
-      return res.status(400).json({ error: "Position ID is required" });
     }
 
     const allStats = await StatsService.getOverallVotingStats();
@@ -161,11 +149,11 @@ export const getTopPerformingCandidates = async (req: Request, res: Response) =>
     const { limit = 10 } = req.query;
 
     if (!requestingAdmin) {
-      return res.status(401).json({ error: "Admin authentication required" });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // FIXED: Allow moderator, admin, and super_admin to view top candidates
-    if (!['admin', 'super_admin', 'moderator'].includes(requestingAdmin.role)) {
+    // FIXED: Privilege check MUST remain for sensitive data
+    if (!['admin', 'super_admin'].includes(requestingAdmin.role)) {
       return res.status(403).json({ error: "Insufficient permissions" });
     }
 
@@ -202,11 +190,11 @@ export const getElectionSummary = async (req: Request, res: Response) => {
     const requestingAdmin = (req as any).admin;
 
     if (!requestingAdmin) {
-      return res.status(401).json({ error: "Admin authentication required" });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // FIXED: Allow moderator, admin, and super_admin to view election summary
-    if (!['admin', 'super_admin', 'moderator'].includes(requestingAdmin.role)) {
+    // FIXED: Privilege check MUST remain for sensitive data
+    if (!['admin', 'super_admin'].includes(requestingAdmin.role)) {
       return res.status(403).json({ error: "Insufficient permissions" });
     }
 
@@ -230,6 +218,7 @@ export const getElectionSummary = async (req: Request, res: Response) => {
         averageVotesPerPosition: overallStats.overallStats.averageVotesPerPosition
       },
       recentActivity: {
+        // dailyTrends: trends.dailyTrends.slice(0, 7), // Last 7 days
         hourlyPattern: trends.hourlyPattern
       },
       voterInsights: {

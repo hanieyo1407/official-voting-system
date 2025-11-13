@@ -11,7 +11,9 @@ import {
   deactivateAdmin,
   changePassword,
   getAdminStats,
-  signUpload // ADDED: Import the new controller function
+  signUpload,
+  createCandidate, 
+  updateCandidate  
 } from "../controllers/admin.controller";
 import { verifyAdminToken, requireSuperAdmin, requireAdminOrSuperAdmin } from "../middleware/admin.middleware";
 import { adminRateLimit } from "../middleware/rateLimit.middleware"; // Assuming this rate limit middleware exists
@@ -23,7 +25,10 @@ import { adminRateLimit } from "../middleware/rateLimit.middleware"; // Assuming
  *     description: Admin management endpoints (requires admin authentication)
  *   - name: FileUpload
  *     description: Secure endpoints for file uploads
+ *   - name: Candidate
+ *     description: Candidate management endpoints (requires admin/super_admin authentication)
  */
+
 
 const adminRoute = Router();
 
@@ -206,6 +211,80 @@ adminRoute.post("/change-password", verifyAdminToken, changePassword);
  *         description: Insufficient permissions
  */
 adminRoute.post("/sign-upload", verifyAdminToken, requireAdminOrSuperAdmin, adminRateLimit, signUpload);
+
+// --- NEW CANDIDATE MANAGEMENT ROUTES ---
+
+/**
+ * @swagger
+ * /admin/candidate:
+ *   post:
+ *     tags:
+ *       - Candidate
+ *     summary: Create a new candidate
+ *     description: Create a new candidate with a name, position, bio, and Cloudinary image URL (Admin/Super Admin only).
+ *     security:
+ *       - adminCookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - positionId
+ *               - imageUrl
+ *               - bio
+ *             properties:
+ *               name: {type: 'string', example: 'Candidate Name'}
+ *               positionId: {type: 'integer', example: 1}
+ *               imageUrl: {type: 'string', example: 'https://res.cloudinary.com/dmi/image/upload/v123456/candidate.jpg'}
+ *               bio: {type: 'string', example: 'Short biography of the candidate.'}
+ *     responses:
+ *       201: {description: 'Candidate created successfully'}
+ *       400: {description: 'Missing required fields or invalid data'}
+ *       403: {description: 'Insufficient permissions'}
+ */
+adminRoute.post("/candidate", verifyAdminToken, requireAdminOrSuperAdmin, createCandidate);
+
+/**
+ * @swagger
+ * /admin/candidate/{candidateId}:
+ *   put:
+ *     tags:
+ *       - Candidate
+ *     summary: Update an existing candidate
+ *     description: Update an existing candidate's details, including a new image URL (Admin/Super Admin only).
+ *     security:
+ *       - adminCookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: candidateId
+ *         required: true
+ *         schema: {type: 'integer'}
+ *         description: The ID of the candidate to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: {type: 'string'}
+ *               positionId: {type: 'integer'}
+ *               imageUrl: {type: 'string', description: 'New Cloudinary URL'}
+ *               bio: {type: 'string'}
+ *               isPublished: {type: 'boolean'}
+ *     responses:
+ *       200: {description: 'Candidate updated successfully'}
+ *       400: {description: 'Invalid candidate ID or no fields provided for update'}
+ *       403: {description: 'Insufficient permissions'}
+ *       404: {description: 'Candidate not found'}
+ */
+adminRoute.put("/candidate/:candidateId", verifyAdminToken, requireAdminOrSuperAdmin, updateCandidate);
+
+// --- END NEW CANDIDATE MANAGEMENT ROUTES ---
+
 
 
 // Super admin only routes

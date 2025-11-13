@@ -1,3 +1,5 @@
+// web/pages/AuthenticationPage.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Page, ElectionStatus } from '../types';
 import Button from '../components/Button';
