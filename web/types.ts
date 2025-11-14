@@ -11,6 +11,11 @@ export enum Page {
   Winners,
   AdminLogin,
   Admin,
+  CandidateGallery,     
+  HowToVote,            
+  TermsOfUse,           
+  PrivacyPolicy,        
+  ContactHelp           
 }
 
 export type AdminRole = 'super_admin' | 'admin' | 'moderator';

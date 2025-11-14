@@ -10,24 +10,29 @@ import { LoggingService } from "../services/logging.service";
  * This is the public facing list for voting and admin views.
  */
 export const getAllPositionsWithCandidates = async (req: Request, res: Response) => {
-    try {
-        // The middleware (verifyAdminToken, requireAdminOrSuperAdmin) handles auth.
-        
-        const positions = await ElectionService.getAllPositionsWithCandidates();
+  try {
+    const positions = await ElectionService.getAllPositionsWithCandidates();
 
-        return res.status(200).json({
-            positions: positions.map(p => ({
-                id: p.id,
-                name: p.positionName, // Mapping positionName DTO to simpler 'name' for the route DTO
-                candidates: p.candidates,
-            }))
-        });
+    return res.status(200).json({
+      positions: positions.map(p => ({
+        id: p.id,
+        name: p.positionName,
+        candidates: p.candidates.map(c => ({
+          id: c.id,
+          name: c.name,
+          manifesto: c.manifesto,
+          positionId: c.positionId,
+          imageUrl: c.imageUrl 
+        }))
+      }))
+    });
 
-    } catch (err: any) {
-        LoggingService.logError(err, { context: 'getAllPositionsWithCandidates' });
-        return res.status(500).json({ error: "Failed to fetch election positions and candidates." });
-    }
-}
+  } catch (err: any) {
+    LoggingService.logError(err, { context: "getAllPositionsWithCandidates" });
+    return res.status(500).json({ error: "Failed to fetch election positions and candidates." });
+  }
+};
+
 // --- END NEW CONTROLLER ---
 
 

@@ -1,6 +1,7 @@
+// web/App.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Page, Position, Candidate, AdminUser, ElectionStatus } from './types';
-import {  ELECTION_START_DATE, ELECTION_END_DATE } from './constants';
+import { ELECTION_START_DATE, ELECTION_END_DATE } from './constants';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -14,39 +15,41 @@ import OfficialResultsPage from './pages/OfficialResultsPage';
 import LiveResultsPage from './pages/LiveResultsPage';
 import WinnersPage from './pages/WinnersPage';
 import IntroPage from './pages/IntroPage';
+import CandidateGalleryPage from './pages/CandidateGalleryPage';
+import HowToVotePage from './pages/HowToVotePage';
+import TermsOfUsePage from './pages/TermsOfUsePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import ContactHelpPage from './pages/ContactHelpPage';
 import Card from './components/Card';
 import Button from './components/Button';
-// FIXED: Import the working hook instead of useVotingData
-import { useAllPositions } from './hooks/useAllPositions'; 
-import sjbuApi from './src/api/sjbuApi'; 
+import { useAllPositions } from './hooks/useAllPositions';
+import sjbuApi from './src/api/sjbuApi';
 
 // Define the expected structure for VotingPage data
-interface PositionWithCandidates extends Position { 
-    candidates: Candidate[]; 
-    totalVotes?: number;
-    voterTurnout?: number;
+interface PositionWithCandidates extends Position {
+  candidates: Candidate[];
+  totalVotes?: number;
+  voterTurnout?: number;
 }
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Intro);
   const [verificationCode, setVerificationCode] = useState<string>('');
-  const [userVoucher, setUserVoucher] = useState<string>(''); 
+  const [userVoucher, setUserVoucher] = useState<string>('');
 
-  // FIXED: Use useAllPositions hook instead of useVotingData
-  const { 
-      positions: livePositions, 
-      isLoading: isPositionsLoading, 
-      error: positionsError, 
-      fetchPositions 
+  const {
+    positions: livePositions,
+    isLoading: isPositionsLoading,
+    error: positionsError,
+    fetchPositions
   } = useAllPositions();
-  
+
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [electionStatus, setElectionStatus] = useState<ElectionStatus>('PRE_ELECTION');
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [electionStartDate, setElectionStartDate] = useState(ELECTION_START_DATE);
   const [electionEndDate, setElectionEndDate] = useState(ELECTION_END_DATE);
 
-  // Effect to handle online/offline status changes globally
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
@@ -57,28 +60,27 @@ const App: React.FC = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-  
-  // Handler for User Auth Success
+
+  // User auth handlers
   const handleUserLoginSuccess = (voucher: string) => {
     setUserVoucher(voucher);
     setCurrentPage(Page.Voting);
-    fetchPositions(); 
-  }
-  
-  // Handler for User Logout
-  const handleUserLogout = async () => {
-      try {
-          await sjbuApi.post('/logout'); 
-          setUserVoucher('');
-          setCurrentPage(Page.Home);
-      } catch (error) {
-          console.error("User logout failed:", error);
-          setUserVoucher('');
-          setCurrentPage(Page.Home);
-      }
-  }
+    fetchPositions();
+  };
 
-  // Handler for starting election countdown
+  const handleUserLogout = async () => {
+    try {
+      await sjbuApi.post('/logout');
+      setUserVoucher('');
+      setCurrentPage(Page.Home);
+    } catch (error) {
+      console.error('User logout failed:', error);
+      setUserVoucher('');
+      setCurrentPage(Page.Home);
+    }
+  };
+
+  // Admin handlers
   const handleStartCountdown = (hours: number) => {
     const now = new Date();
     const newStartDate = new Date(now.getTime() + hours * 60 * 60 * 1000);
@@ -87,85 +89,82 @@ const App: React.FC = () => {
     setElectionEndDate(newEndDate);
   };
 
-  // Admin Login Handler
   const handleAdminLogin = (user: AdminUser) => {
     setCurrentUser(user);
     setCurrentPage(Page.Admin);
   };
 
-  // Admin Logout
   const handleAdminLogout = async () => {
-      try {
-          await sjbuApi.post('/admin/logout'); 
-      } catch (error) {
-          console.error("Admin logout failed:", error);
-      } finally {
-          setCurrentUser(null);
-          setCurrentPage(Page.Home);
-      }
+    try {
+      await sjbuApi.post('/admin/logout');
+    } catch (error) {
+      console.error('Admin logout failed:', error);
+    } finally {
+      setCurrentUser(null);
+      setCurrentPage(Page.Home);
+    }
   };
-  
-  // Unified Refetch for Admin Dashboard
+
   const handleAdminRefetch = useCallback(() => {
-      fetchPositions();
+    fetchPositions();
   }, [fetchPositions]);
 
   const ElectionStatusSimulator = () => (
-      <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-2xl z-50 border">
-          <h4 className="text-sm font-bold text-dmi-blue-900 mb-2">Election Status Simulator</h4>
-          <div className="flex space-x-2">
-              <Button size="sm" variant={electionStatus === 'PRE_ELECTION' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('PRE_ELECTION')}>Pre</Button>
-              <Button size="sm" variant={electionStatus === 'LIVE' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('LIVE')}>Live</Button>
-              <Button size="sm" variant={electionStatus === 'POST_ELECTION' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('POST_ELECTION')}>Post</Button>
-          </div>
+    <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-2xl z-50 border">
+      <h4 className="text-sm font-bold text-dmi-blue-900 mb-2">Election Status Simulator</h4>
+      <div className="flex space-x-2">
+        <Button size="sm" variant={electionStatus === 'PRE_ELECTION' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('PRE_ELECTION')}>Pre</Button>
+        <Button size="sm" variant={electionStatus === 'LIVE' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('LIVE')}>Live</Button>
+        <Button size="sm" variant={electionStatus === 'POST_ELECTION' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('POST_ELECTION')}>Post</Button>
       </div>
+    </div>
   );
 
   const renderResultsPage = () => {
     switch (electionStatus) {
-        case 'LIVE':
-            return <LiveResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
-        case 'POST_ELECTION':
-            return <OfficialResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
-        case 'PRE_ELECTION':
-            return (
-                <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-                    <Card className="max-w-2xl mx-auto p-12 text-center">
-                        <h2 className="text-3xl font-bold text-dmi-blue-900">The Election Has Not Started</h2>
-                        <p className="text-gray-600 mt-4">The voting period has not yet begun. Please check back on the official start date. Results will be available here once the election is live.</p>
-                    </Card>
-                </div>
-            );
-        default:
-          return null;
+      case 'LIVE':
+        return <LiveResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
+      case 'POST_ELECTION':
+        return <OfficialResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
+      case 'PRE_ELECTION':
+        return (
+          <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+            <Card className="max-w-2xl mx-auto p-12 text-center">
+              <h2 className="text-3xl font-bold text-dmi-blue-900">The Election Has Not Started</h2>
+              <p className="text-gray-600 mt-4">The voting period has not yet begun. Please check back on the official start date. Results will be available here once the election is live.</p>
+            </Card>
+          </div>
+        );
+      default:
+        return null;
     }
-  }
+  };
 
   const renderPage = () => {
     const isError = positionsError;
     const isLoadingData = isPositionsLoading;
 
     if (isLoadingData) {
-         return (
-             <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-                <Card className="max-w-2xl mx-auto p-12 text-center">
-                    <h2 className="text-3xl font-bold text-dmi-blue-900">Loading Election Data...</h2>
-                    <p className="text-gray-600 mt-4">Please wait while we fetch the latest positions and candidates from the server.</p>
-                </Card>
-             </div>
-         );
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+          <Card className="max-w-2xl mx-auto p-12 text-center">
+            <h2 className="text-3xl font-bold text-dmi-blue-900">Loading Election Data...</h2>
+            <p className="text-gray-600 mt-4">Please wait while we fetch the latest positions and candidates from the server.</p>
+          </Card>
+        </div>
+      );
     }
-    
+
     if (isError) {
-        return (
-             <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-                <Card className="max-w-2xl mx-auto p-12 text-center bg-red-50 border-red-400">
-                    <h2 className="text-3xl font-bold text-red-700">Error Loading Election Data</h2>
-                    <p className="text-red-600 mt-4">{isError}</p>
-                    <Button onClick={fetchPositions} className="mt-6">Try Again</Button>
-                </Card>
-             </div>
-         );
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+          <Card className="max-w-2xl mx-auto p-12 text-center bg-red-50 border-red-400">
+            <h2 className="text-3xl font-bold text-red-700">Error Loading Election Data</h2>
+            <p className="text-red-600 mt-4">{isError}</p>
+            <Button onClick={fetchPositions} className="mt-6">Try Again</Button>
+          </Card>
+        </div>
+      );
     }
 
     switch (currentPage) {
@@ -174,21 +173,9 @@ const App: React.FC = () => {
       case Page.Home:
         return <HomePage setPage={setCurrentPage} electionStatus={electionStatus} electionStartDate={electionStartDate} electionEndDate={electionEndDate} />;
       case Page.Authentication:
-        return <AuthenticationPage 
-                  onLoginSuccess={handleUserLoginSuccess} 
-                  setPage={setCurrentPage} 
-                  electionStatus={electionStatus} 
-                  electionStartDate={electionStartDate} 
-                  electionEndDate={electionEndDate} 
-               />;
+        return <AuthenticationPage onLoginSuccess={handleUserLoginSuccess} setPage={setCurrentPage} electionStatus={electionStatus} electionStartDate={electionStartDate} electionEndDate={electionEndDate} />;
       case Page.Voting:
-        return <VotingPage 
-                  positions={livePositions as PositionWithCandidates[]} 
-                  userVoucher={userVoucher} 
-                  setPage={setCurrentPage} 
-                  setVerificationCode={setVerificationCode} 
-                  isOffline={isOffline} 
-                />;
+        return <VotingPage positions={livePositions as PositionWithCandidates[]} userVoucher={userVoucher} setPage={setCurrentPage} setVerificationCode={setVerificationCode} isOffline={isOffline} />;
       case Page.VoteSuccess:
         return <VoteSuccessPage verificationCode={verificationCode} setPage={setCurrentPage} />;
       case Page.Verification:
@@ -197,17 +184,21 @@ const App: React.FC = () => {
         return renderResultsPage();
       case Page.Winners:
         return <WinnersPage electionStatus={electionStatus} />;
+      case Page.CandidateGallery:
+        return <CandidateGalleryPage />;
+      case Page.HowToVote:
+        return <HowToVotePage />;
+      case Page.TermsOfUse:
+        return <TermsOfUsePage />;
+      case Page.PrivacyPolicy:
+        return <PrivacyPolicyPage />;
+      case Page.ContactHelp:
+        return <ContactHelpPage />;
       case Page.Admin:
         if (!currentUser) {
-            return <AdminLoginPage onLoginSuccess={handleAdminLogin} />;
+          return <AdminLoginPage onLoginSuccess={handleAdminLogin} />;
         }
-        return <AdminDashboard 
-                  currentUser={currentUser}
-                  setCurrentUser={setCurrentUser}
-                  onLogout={handleAdminLogout} 
-                  onStartCountdown={handleStartCountdown}
-                  onRefetchPositions={handleAdminRefetch}
-                />; 
+        return <AdminDashboard currentUser={currentUser} setCurrentUser={setCurrentUser} onLogout={handleAdminLogout} onStartCountdown={handleStartCountdown} onRefetchPositions={handleAdminRefetch} />;
       default:
         return <HomePage setPage={setCurrentPage} electionStatus={electionStatus} electionStartDate={electionStartDate} electionEndDate={electionEndDate} />;
     }
@@ -219,7 +210,7 @@ const App: React.FC = () => {
       <main className="flex-grow">
         {renderPage()}
       </main>
-      {currentPage !== Page.Intro && <Footer />}
+      {currentPage !== Page.Intro && <Footer setPage={setCurrentPage} />}
       {currentPage !== Page.Intro && <ElectionStatusSimulator />}
     </div>
   );
