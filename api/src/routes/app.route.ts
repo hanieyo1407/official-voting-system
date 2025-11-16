@@ -1,23 +1,26 @@
 import { Router } from "express";
 import {
-  getAllUsers,                //getting all users
-  createUser,                //creating a new user--creating a voucher
-  getPositions,             //getting all positons being contested for
+  getAllUsers, //getting all users
+  createUser, //creating a new user--creating a voucher
+  getPositions, //getting all positons being contested for
   getCandidatesByPosition, //getting candidates on a speciif postion
-  castVote,               //creatig a vote in db
-  createPosition,        //adding positions to db
-  createCandidate,      //adding candidates to db
-  loginUser,           //authenticating
-  logoutUser,         //loggin out
-  verifyVote         //verify the vote
+  castVote, //creatig a vote in db
+  createPosition, //adding positions to db
+  createCandidate, //adding candidates to db
+  loginUser, //authenticating
+  logoutUser, //loggin out
+  verifyVote, //verify the vote
 } from "../controllers/app.controller";
 import { verifyToken } from "../middleware/auth.middleware";
-// ADDED: Import generalRateLimit for /verify route
-import { votingRateLimit, authRateLimit, generalRateLimit } from "../middleware/rateLimit.middleware"; 
+import {
+  votingRateLimit,
+  authRateLimit,
+} from "../middleware/rateLimit.middleware";
 import adminRoute from "./admin.route";
 import statsRoute from "./stats.route";
 import auditRoute from "./audit.route";
-// REMOVED: Redundant swaggerUi and swaggerSpec imports (moved to server.ts)
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "../docs/swagger";
 
 /**
  * @swagger
@@ -288,7 +291,7 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *     tags:
  *       - Voting
  *     summary: Cast a vote
- *     description: Submit a vote for a candidate in a position (rate limited)
+ *     description: Submit a vote for both President and Vice President candidates (rate limited)
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -299,21 +302,21 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *             type: object
  *             required:
  *               - voucher
- *               - candidateId
- *               - positionId
+ *               - presidentCandidateId
+ *               - vicePresidentCandidateId
  *             properties:
  *               voucher:
  *                 type: string
  *                 description: User's voucher code
  *                 example: "VCHR123456"
- *               candidateId:
+ *               presidentCandidateId:
  *                 type: integer
- *                 description: ID of the candidate to vote for
+ *                 description: ID of the President candidate to vote for
  *                 example: 1
- *               positionId:
+ *               vicePresidentCandidateId:
  *                 type: integer
- *                 description: ID of the position
- *                 example: 1
+ *                 description: ID of the Vice President candidate to vote for
+ *                 example: 2
  *     responses:
  *       201:
  *         description: Vote cast successfully
@@ -323,18 +326,34 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *               type: object
  *               properties:
  *                 data:
- *                   $ref: '#/components/schemas/Vote'
+ *                   type: object
+ *                   properties:
+ *                     verificationCode:
+ *                       type: string
+ *                       description: Unique verification code for the vote
+ *                       example: "ABC123DEF456"
+ *                     presidentVote:
+ *                       $ref: '#/components/schemas/Vote'
+ *                     vicePresidentVote:
+ *                       $ref: '#/components/schemas/Vote'
+ *                     message:
+ *                       type: string
+ *                       description: Success message
+ *                       example: "Successfully voted for both President and Vice President"
  *       400:
  *         description: Missing required fields
  *       401:
  *         description: Unauthorized
+ *       409:
+ *         description: User has already voted
  *       429:
  *         description: Too many voting attempts
  *       500:
  *         description: Server error
  */
-appRoute.post("/vote", castVote);
+appRoute.post("/vote", verifyToken, votingRateLimit, castVote);
 
+//verify vote
 /**
  * @swagger
  * /verify:
@@ -377,9 +396,28 @@ appRoute.post("/vote", castVote);
  *       500:
  *         description: Server error
  */
-appRoute.post("/verify", generalRateLimit, verifyVote); // ADDED: generalRateLimit middleware
+appRoute.post("/verify", verifyVote);
 
-// REMOVED: API Documentation handler and comments (Moved to server.ts)
+// API Documentation
+/**
+ * @swagger
+ * /api-docs:
+ *   get:
+ *     summary: API Documentation
+ *     description: Interactive API documentation and testing interface
+ *     responses:
+ *       200:
+ *         description: API documentation interface
+ */
+appRoute.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "SJBU Voting System API Documentation",
+  }),
+);
 
 // Mount admin routes
 appRoute.use("/admin", adminRoute);
