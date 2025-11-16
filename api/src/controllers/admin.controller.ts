@@ -1,10 +1,7 @@
-// api/src/controllers/admin.controller.ts
-
 import { Request, Response } from "express";
-// CRITICAL FIX: The imports must use the updated interfaces (manifesto instead of bio)
 import AdminService, { NewCandidateData, UpdateCandidateData } from "../services/admin.service"; 
 import { LoggingService } from "../services/logging.service";
-import cloudinary from '../config/cloudinary.config'; // Importing the configured cloudinary instance
+import cloudinary from '../config/cloudinary.config'; 
 
 export const createAdmin = async (req: Request, res: Response) => {
   try {
@@ -82,10 +79,11 @@ export const loginAdmin = async (req: Request, res: Response) => {
     const { token, admin } = result;
 
     // Set HTTP-only cookie for admin token
+    // IMPORTANT: use lax in development to allow cross-origin dev (localhost:3000 -> localhost:3005)
     res.cookie("admin_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
       maxAge: 8 * 60 * 60 * 1000, // 8 hours in ms
     });
 
@@ -112,7 +110,7 @@ export const logoutAdmin = async (req: Request, res: Response) => {
     res.clearCookie("admin_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     });
 
     if (adminId) {

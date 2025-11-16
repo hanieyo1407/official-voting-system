@@ -1,5 +1,3 @@
-// api/src/routes/election.route.ts
-
 import { Router } from "express";
 import {
   getElectionStatus,
@@ -9,7 +7,6 @@ import {
   cancelElection,
   updateElectionSettings,
   getElectionHistory,
-  // NEW: Import the controller function for fetching all positions
   getAllPositionsWithCandidates
 } from "../controllers/election.controller";
 import { verifyAdminToken, requireSuperAdmin, requireAdminOrSuperAdmin } from "../middleware/admin.middleware";
@@ -209,7 +206,7 @@ electionRoute.get("/status", verifyAdminToken, requireAdminOrSuperAdmin, getElec
 electionRoute.get("/history", verifyAdminToken, requireAdminOrSuperAdmin, getElectionHistory);
 
 
-// --- NEW ROUTE FOR POSITIONS AND CANDIDATES (Accessible by all roles for dashboard/voting) ---
+// --- NEW ROUTE FOR POSITIONS AND CANDIDATES (PUBLIC) ---
 
 /**
  * @swagger
@@ -218,8 +215,6 @@ electionRoute.get("/history", verifyAdminToken, requireAdminOrSuperAdmin, getEle
  *     summary: Get all positions with their candidates
  *     tags: [Positions & Candidates]
  *     description: Retrieves the list of all active positions and the candidates for each.
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of positions and candidates retrieved successfully
@@ -247,13 +242,11 @@ electionRoute.get("/history", verifyAdminToken, requireAdminOrSuperAdmin, getEle
  *                             positionId: {type: 'integer'}
  *                             imageUrl: {type: 'string'}
  *                             manifesto: {type: 'string'}
- *       401:
- *         description: Unauthorized - Admin authentication required
  *       500:
  *         description: Internal server error
  */
-// NOTE: Using requireAdminOrSuperAdmin to keep this route protected as per existing patterns, though public access may be desired later.
-electionRoute.get("/positions", verifyAdminToken, requireAdminOrSuperAdmin, getAllPositionsWithCandidates); 
+// NOTE: This endpoint is intentionally public so voters and public pages can fetch positions/candidates.
+electionRoute.get("/positions", getAllPositionsWithCandidates);
 
 
 /**
@@ -267,60 +260,10 @@ electionRoute.get("/positions", verifyAdminToken, requireAdminOrSuperAdmin, getA
  *     responses:
  *       200:
  *         description: Election started successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Election started successfully"
- *                 electionStatus:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
- *                     status:
- *                       type: string
- *                       enum: [not_started, active, paused, completed, cancelled]
- *                       example: "active"
- *                     startedAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2025-10-20T18:00:00Z"
- *                     settings:
- *                       type: object
- *                       properties:
- *                         allowVoting:
- *                           type: boolean
- *                           example: true
- *                         showResults:
- *                           type: boolean
- *                           example: false
- *                         requireVerification:
- *                           type: boolean
- *                           example: true
  *       401:
  *         description: Unauthorized - Admin authentication required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Unauthorized"
  *       403:
  *         description: Only super admins can start elections
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Only super admins can start elections"
  *       500:
  *         description: Internal server error
  */
@@ -339,48 +282,10 @@ electionRoute.post("/start", verifyAdminToken, requireSuperAdmin, startElection)
  *     responses:
  *       200:
  *         description: Election paused successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Election paused successfully"
- *                 electionStatus:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
- *                     status:
- *                       type: string
- *                       enum: [not_started, active, paused, completed, cancelled]
- *                       example: "paused"
- *                     pausedAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2025-10-20T19:30:00Z"
  *       401:
  *         description: Unauthorized - Admin authentication required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Unauthorized"
  *       403:
  *         description: Only super admins can pause elections
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Only super admins can pause elections"
  *       500:
  *         description: Internal server error
  */
@@ -397,48 +302,10 @@ electionRoute.post("/pause", verifyAdminToken, requireSuperAdmin, pauseElection)
  *     responses:
  *       200:
  *         description: Election completed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Election completed successfully"
- *                 electionStatus:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
- *                     status:
- *                       type: string
- *                       enum: [not_started, active, paused, completed, cancelled]
- *                       example: "completed"
- *                     completedAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2025-10-20T20:00:00Z"
  *       401:
  *         description: Unauthorized - Admin authentication required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Unauthorized"
  *       403:
  *         description: Only super admins can complete elections
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Only super admins can complete elections"
  *       500:
  *         description: Internal server error
  */
@@ -455,48 +322,10 @@ electionRoute.post("/complete", verifyAdminToken, requireSuperAdmin, completeEle
  *     responses:
  *       200:
  *         description: Election cancelled successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Election cancelled successfully"
- *                 electionStatus:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
- *                     status:
- *                       type: string
- *                       enum: [not_started, active, paused, completed, cancelled]
- *                       example: "cancelled"
- *                     cancelledAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2025-10-20T19:45:00Z"
  *       401:
  *         description: Unauthorized - Admin authentication required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Unauthorized"
  *       403:
  *         description: Only super admins can cancel elections
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Only super admins can cancel elections"
  *       500:
  *         description: Internal server error
  */
@@ -519,79 +348,19 @@ electionRoute.post("/cancel", verifyAdminToken, requireSuperAdmin, cancelElectio
  *             properties:
  *               allowVoting:
  *                 type: boolean
- *                 description: Whether to allow voting during the election
- *                 example: true
  *               showResults:
  *                 type: boolean
- *                 description: Whether to show results during the election
- *                 example: false
  *               requireVerification:
  *                 type: boolean
- *                 description: Whether to require voter verification
- *                 example: true
  *     responses:
  *       200:
  *         description: Election settings updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Election settings updated successfully"
- *                 electionStatus:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
- *                     status:
- *                       type: string
- *                       enum: [not_started, active, paused, completed, cancelled]
- *                       example: "active"
- *                     settings:
- *                       type: object
- *                       properties:
- *                         allowVoting:
- *                           type: boolean
- *                           example: true
- *                         showResults:
- *                           type: boolean
- *                           example: false
- *                         requireVerification:
- *                           type: boolean
- *                           example: true
  *       400:
  *         description: No valid settings provided
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "No valid settings provided"
  *       401:
  *         description: Unauthorized - Admin authentication required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Unauthorized"
  *       403:
  *         description: Only super admins can update election settings
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Only super admins can update election settings"
  *       500:
  *         description: Internal server error
  */

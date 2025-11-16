@@ -15,7 +15,7 @@ const TermsOfUsePage: React.FC = () => {
                     </p>
 
                     <h2 className="text-xl font-bold text-dmi-blue-800">1. Eligibility</h2>
-                    <p>Only individuals issued a unique, verifiable voter voucher by the SJBU Election Committee are eligible to cast a vote.</p>
+                    <p>Only individuals issued a unique, verifiable voter voucher by the DMI-SJBU Election Committee are eligible to cast a vote.</p>
 
                     <h2 className="text-xl font-bold text-dmi-blue-800">2. Single Vote Rule</h2>
                     <p>Each eligible voter is permitted to cast their ballot **once**. Attempting to vote multiple times using fraudulent or unauthorized vouchers is a violation of these terms and may result in disciplinary action.</p>
