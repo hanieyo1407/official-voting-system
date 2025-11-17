@@ -6,10 +6,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     // Prefer cookie for browser-based auth; allow Authorization header as fallback
     const tokenFromCookie = (req as any).cookies?.token;
     const authHeader = req.headers.authorization;
-    const tokenFromHeader =
-      authHeader && authHeader.startsWith("Bearer ")
-        ? authHeader.slice(7)
-        : undefined;
+    const tokenFromHeader = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
 
     const token = tokenFromCookie || tokenFromHeader;
     if (!token) {
