@@ -101,13 +101,13 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const { token, user } = await AppService.loginUser(voucher);
 
-    //HttpOnly cookie
+    // HttpOnly cookie for user auth
+    const isProd = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      //secure: process.env.NODE_ENV === "production", //apply in prodcution
-      secure: false, //for testin
-      sameSite: "lax",
-      maxAge: 5 * 60 * 1000, // 5 mins in ms
+      secure: isProd,                   // must be true on HTTPS in production
+      sameSite: isProd ? "none" : "lax",// cross-site cookies require SameSite=None
+      maxAge: 5 * 60 * 1000,            // 5 minutes
     });
 
     return res.status(200).json({ message: "Login successful", user });
@@ -119,12 +119,11 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const logoutUser = async (req: Request, res: Response) => {
   try {
-    // clear the cookie set at login (use same name and compatible options)
+    const isProd = process.env.NODE_ENV === "production";
     res.clearCookie("token", {
       httpOnly: true,
-      //secure: process.env.NODE_ENV === "production",
-      secure: false, // keep false for local testing
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
     });
     return res.status(200).json({ message: "Logout successful" });
   } catch (err) {
@@ -135,32 +134,30 @@ export const logoutUser = async (req: Request, res: Response) => {
 
 export const castVote = async (req: Request, res: Response) => {
   try {
-    // CRITICAL FIX: The backend must explicitly check for the sequential payload
-    const { voucher, candidateId, positionId } = req.body ?? {};
-    
+    // Prefer authenticated user voucher from middleware; allow body voucher as fallback
+    const authUser = (req as any).user;
+    const { voucher: voucherFromBody, candidateId, positionId } = req.body ?? {};
+
+    const voucher = authUser?.voucher || voucherFromBody;
     if (!voucher || !candidateId || !positionId) {
-      // NOTE: This is the error message the frontend relies on to show the correct failure type
-      return res.status(400).json({ error: "missing vote fields: voucher, candidateId, positionId are required" });
+      return res
+        .status(400)
+        .json({ error: "missing vote fields: voucher, candidateId, positionId are required" });
     }
-    
-    // Ensure data types are correct before sending to service
+
     const positionIdNumber = Number(positionId);
     const candidateIdNumber = Number(candidateId);
-    
+
     if (isNaN(positionIdNumber) || isNaN(candidateIdNumber)) {
-       return res.status(400).json({ error: "Candidate ID or Position ID is not a valid number" });
+      return res.status(400).json({ error: "Candidate ID or Position ID is not a valid number" });
     }
-    
-    // Call the service with the validated data
+
     const vote = await AppService.castVote(String(voucher), candidateIdNumber, positionIdNumber);
-    
-    // The successful response should reflect a single vote submission
     return res.status(201).json({ data: vote });
   } catch (err: any) {
     console.error(err);
-    // The service layer throws a specific error, which we catch
-    if (err.message.includes("Voucher already used")) {
-         return res.status(400).json({ error: "Voucher already used for this position." });
+    if (err.message?.includes("Voucher already used")) {
+      return res.status(400).json({ error: "Voucher already used for this position." });
     }
     return res.status(500).json({ error: "Failed to cast vote" });
   }

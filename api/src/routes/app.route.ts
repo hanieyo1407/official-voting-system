@@ -15,6 +15,7 @@ import { verifyToken } from "../middleware/auth.middleware";
 import {
   votingRateLimit,
   authRateLimit,
+  generalRateLimit,
 } from "../middleware/rateLimit.middleware";
 import adminRoute from "./admin.route";
 import statsRoute from "./stats.route";
@@ -291,7 +292,7 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *     tags:
  *       - Voting
  *     summary: Cast a vote
- *     description: Submit a vote for both President and Vice President candidates (rate limited)
+ *     description: Submit a vote for a candidate in a position (rate limited)
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -302,21 +303,21 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *             type: object
  *             required:
  *               - voucher
- *               - presidentCandidateId
- *               - vicePresidentCandidateId
+ *               - candidateId
+ *               - positionId
  *             properties:
  *               voucher:
  *                 type: string
  *                 description: User's voucher code
  *                 example: "VCHR123456"
- *               presidentCandidateId:
+ *               candidateId:
  *                 type: integer
- *                 description: ID of the President candidate to vote for
+ *                 description: ID of the candidate to vote for
  *                 example: 1
- *               vicePresidentCandidateId:
+ *               positionId:
  *                 type: integer
- *                 description: ID of the Vice President candidate to vote for
- *                 example: 2
+ *                 description: ID of the position
+ *                 example: 1
  *     responses:
  *       201:
  *         description: Vote cast successfully
@@ -326,26 +327,11 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *               type: object
  *               properties:
  *                 data:
- *                   type: object
- *                   properties:
- *                     verificationCode:
- *                       type: string
- *                       description: Unique verification code for the vote
- *                       example: "ABC123DEF456"
- *                     presidentVote:
- *                       $ref: '#/components/schemas/Vote'
- *                     vicePresidentVote:
- *                       $ref: '#/components/schemas/Vote'
- *                     message:
- *                       type: string
- *                       description: Success message
- *                       example: "Successfully voted for both President and Vice President"
+ *                   $ref: '#/components/schemas/Vote'
  *       400:
  *         description: Missing required fields
  *       401:
  *         description: Unauthorized
- *       409:
- *         description: User has already voted
  *       429:
  *         description: Too many voting attempts
  *       500:
@@ -396,7 +382,7 @@ appRoute.post("/vote", verifyToken, votingRateLimit, castVote);
  *       500:
  *         description: Server error
  */
-appRoute.post("/verify", verifyVote);
+appRoute.post("/verify", generalRateLimit, verifyVote);
 
 // API Documentation
 /**
