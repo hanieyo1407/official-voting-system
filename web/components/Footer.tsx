@@ -143,6 +143,8 @@ const Footer: React.FC<FooterProps> = ({ setPage }) => {
             </div>
 
             <div className="flex items-center gap-4 text-xs">
+              <button onClick={() => setPage(Page.HowToVote)} className="hover:text-dmi-gold-500 transition-colors">How To Use</button>
+              <span className="text-dmi-blue-600">•</span>
               <button onClick={() => setPage(Page.PrivacyPolicy)} className="hover:text-dmi-gold-500 transition-colors">Privacy Policy</button>
               <span className="text-dmi-blue-600">•</span>
               <button onClick={() => setPage(Page.TermsOfUse)} className="hover:text-dmi-gold-500 transition-colors">Terms of Service</button>

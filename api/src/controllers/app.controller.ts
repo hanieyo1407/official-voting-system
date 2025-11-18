@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import AppService from "../services/app.service";
 
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -101,16 +102,26 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const { token, user } = await AppService.loginUser(voucher);
 
-    // HttpOnly cookie for user auth
+    // HttpOnly cookie for user auth (primary mechanism)
     const isProd = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProd,                   // must be true on HTTPS in production
-      sameSite: isProd ? "none" : "lax",// cross-site cookies require SameSite=None
-      maxAge: 5 * 60 * 1000,            // 5 minutes
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      maxAge: 5 * 60 * 1000, // 5 minutes
     });
 
-    return res.status(200).json({ message: "Login successful", user });
+    // Short-lived client token for browsers that block cross-site cookies.
+    // Keep lifetime short and sign with same JWT secret.
+    const jwtSecret = process.env.JWT_SECRET as string;
+    const clientToken = jwt.sign(
+      { id: user?.id ?? null, voucher: user?.voucher ?? null },
+      jwtSecret,
+      { expiresIn: "5m" }
+    );
+
+    // Return user and tokenForClient (no secrets)
+    return res.status(200).json({ message: "Login successful", user, tokenForClient: clientToken });
   } catch (err: any) {
     console.error(err);
     return res.status(401).json({ error: err.message || "Login failed" });
