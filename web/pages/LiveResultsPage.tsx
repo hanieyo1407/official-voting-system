@@ -27,35 +27,30 @@ const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage })
 
   if (isLoading && !stats) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center min-h-[60vh] flex items-center justify-center">
-         <Spinner /> <p className="ml-4 text-dmi-blue-800 font-medium">Loading live results...</p>
+      <div className="container px-4 py-8 text-center min-h-[60vh] flex items-center justify-center">
+         <Spinner /> <p className="ml-4 text-dmi-blue-800 font-medium text-base-mobile">Loading live results...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-       <div className="container mx-auto px-4 py-8 text-center min-h-[60vh] flex items-center justify-center">
-          <Card className="max-w-2xl mx-auto p-12 text-center bg-red-50 border-red-400">
-              <h2 className="text-3xl font-bold text-red-700">Live Results Error</h2>
-              <p className="text-red-600 mt-4">{error}</p>
+       <div className="container px-4 py-8 text-center min-h-[60vh] flex items-center justify-center">
+          <Card className="max-w-2xl mx-auto p-6 text-center bg-red-50 border-red-400">
+              <h2 className="text-2xl font-bold text-red-700">Live Results Error</h2>
+              <p className="text-red-600 mt-3 text-sm">{error}</p>
           </Card>
        </div>
     );
   }
 
-  // RAW values from backend
-  const totalVotesCastRaw = Number(stats?.totalVotesCast ?? 0); // aggregated across positions (raw)
-  const totalVotersRaw = Number(stats?.totalVoters ?? 0); // raw vouchers
+  const totalVotesCastRaw = Number(stats?.totalVotesCast ?? 0);
+  const totalVotersRaw = Number(stats?.totalVoters ?? 0);
 
-  // === SINGLE CHANGE: adjust only the aggregate "Live Votes Cast" display ===
-  // displayedVotes is the one and only value divided by 2 for user-facing aggregate
+  // UI-facing aggregate adjusted
   const displayedVotes = Math.round(totalVotesCastRaw / 2);
-
-  // Registered voters remain raw (do not divide)
   const displayedVoters = totalVotersRaw;
 
-  // Turnout computed from adjusted aggregate / raw registered voters
   const turnoutPercent = (() => {
     if (displayedVoters <= 0) return '0.00';
     const pct = (displayedVotes / displayedVoters) * 100;
@@ -65,43 +60,42 @@ const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage })
 
   const positionsWithStats = stats?.positionsWithStats || [];
 
-  // No other adjustments: candidate counts and charts use raw voteCount values from the API
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-10">
-          <div className="flex justify-center items-center">
-              <h1 className="text-4xl font-extrabold text-dmi-blue-900">Live Election Tracker</h1>
-              {isLoading ? <span className="ml-4 text-sm text-gray-500">(Polling...)</span> : <LiveIndicator />}
+    <div className="container px-4 py-6">
+      <div className="text-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-dmi-blue-900">Live Election Tracker</h1>
+              {isLoading ? <span className="text-sm text-gray-500">(Polling...)</span> : <LiveIndicator />}
           </div>
-          <p className="text-lg text-gray-600 mt-2">The election is currently in progress. Watch the numbers update in real-time!</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">The election is currently in progress. Watch the numbers update in real-time!</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <Card className="p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-500">Live Votes Cast</h3>
-              <p className="text-5xl font-bold text-dmi-blue-800 transition-all duration-300">{displayedVotes}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <Card className="p-4 text-center">
+              <h3 className="text-sm font-semibold text-gray-500">Live Votes Cast</h3>
+              <p className="text-3xl sm:text-4xl font-bold text-dmi-blue-800 transition-all duration-300">{displayedVotes}</p>
           </Card>
 
-          <Card className="p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-500">Registered Voters</h3>
-              <p className="text-5xl font-bold text-dmi-blue-800">{displayedVoters}</p>
+          <Card className="p-4 text-center">
+              <h3 className="text-sm font-semibold text-gray-500">Registered Voters</h3>
+              <p className="text-3xl sm:text-4xl font-bold text-dmi-blue-800">{displayedVoters}</p>
           </Card>
 
-          <Card className="p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-500">Live Voter Turnout</h3>
-              <p className="text-5xl font-bold text-dmi-blue-800 transition-all duration-300">{turnoutPercent}%</p>
+          <Card className="p-4 text-center">
+              <h3 className="text-sm font-semibold text-gray-500">Live Voter Turnout</h3>
+              <p className="text-3xl sm:text-4xl font-bold text-dmi-blue-800 transition-all duration-300">{turnoutPercent}%</p>
           </Card>
       </div>
 
-      <div className="mb-10">
-        <h2 className="text-3xl font-bold text-dmi-blue-900 text-center mb-6">Voting Trends</h2>
+      <div className="mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900 text-center mb-4">Voting Trends</h2>
 
-        <Card className="p-6 mb-8">
-          <h3 className="text-xl font-bold text-dmi-blue-900 mb-4">Turnout by Hour</h3>
+        <Card className="p-4 mb-6">
+          <h3 className="text-lg font-semibold text-dmi-blue-900 mb-3">Turnout by Hour</h3>
           {hourlyTrends && hourlyTrends.length > 0 ? (
-            <div className="h-80">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hourlyTrends} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                <BarChart data={hourlyTrends} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="hour" />
                   <YAxis />
@@ -112,35 +106,31 @@ const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage })
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-6 text-gray-500">
               {isTrendsLoading ? <Spinner /> : 'No hourly trend data available from the server.'}
             </div>
           )}
         </Card>
 
-        <h2 className="text-3xl font-bold text-dmi-blue-900 text-center mb-6">Candidate Race Summaries</h2>
-        <div className="space-y-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900 text-center mb-4">Candidate Race Summaries</h2>
+        <div className="space-y-6">
           {positionsWithStats.map((position: any) => {
             const rawTotalVotes = Number(position.totalVotes ?? 0);
-
-            // Candidate list uses raw voteCount for chart proportions and tooltips
-            const candidates = (position.candidates || []).map((c: any) => ({
-              ...c,
-            }));
+            const candidates = (position.candidates || []).map((c: any) => ({ ...c }));
 
             return (
-              <Card key={position.positionId} className="p-6">
-                <h3 className="text-xl font-bold text-dmi-blue-900 mb-4">
+              <Card key={position.positionId} className="p-4">
+                <h3 className="text-lg font-bold text-dmi-blue-900 mb-3">
                   {position.positionName} - {rawTotalVotes} Votes Cast
                 </h3>
 
-                <div className="h-64">
+                <div className="h-48 sm:h-56">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={candidates} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart data={candidates} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" />
-                      <YAxis type="category" dataKey="candidateName" width={120} tick={{fontSize: 12}} />
-                      <Tooltip formatter={(value: number, name: string, props: any) => {
+                      <YAxis type="category" dataKey="candidateName" width={110} tick={{fontSize: 12}} />
+                      <Tooltip formatter={(value: number, _name: string, props: any) => {
                         const raw = Number(props.payload.voteCount ?? value);
                         const pct = raw && rawTotalVotes ? ((raw / rawTotalVotes) * 100).toFixed(2) : '0.00';
                         return [`${raw} raw — ${pct}%`, position.positionName];

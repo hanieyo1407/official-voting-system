@@ -66,31 +66,30 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center py-12 px-4 bg-gray-50">
-      <div className="max-w-md w-full">
-        <h2 className="text-center text-3xl font-extrabold text-dmi-blue-900 mb-6">
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 bg-gray-50">
+      <div className="w-full max-w-md">
+        <h2 className="text-center text-2xl lg:text-3xl font-extrabold text-dmi-blue-900 mb-6">
           Admin Portal Login
         </h2>
         <Card>
           <form onSubmit={handleLogin}>
-            <div className="p-8 space-y-6">
+            <div className="p-6 space-y-4">
               <div>
                 <label
-                  // NOTE: Changed htmlFor to 'email' for better semantics, but kept input name as 'username' to match state
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Email
                 </label>
                 <input
-                  id="email" // Changed ID to 'email'
-                  name="username" // Keeps state binding simple
+                  id="email"
+                  name="username"
                   type="text"
-                  autoComplete="email" // Changed autocomplete
+                  autoComplete="email"
                   required
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-dmi-blue-500 focus:border-dmi-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-3 text-base-mobile bg-gray-100 border border-gray-300 rounded-card placeholder-gray-400 focus:outline-none focus:shadow-focus-ring focus:border-dmi-blue-500"
                 />
               </div>
 
@@ -109,14 +108,18 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onLoginSuccess }) => {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-dmi-blue-500 focus:border-dmi-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-3 text-base-mobile bg-gray-100 border border-gray-300 rounded-card placeholder-gray-400 focus:outline-none focus:shadow-focus-ring focus:border-dmi-blue-500"
                 />
               </div>
 
               {error && <p className="text-sm text-red-600">{error}</p>}
             </div>
-            <div className="bg-gray-50 px-8 py-4">
-              <Button type="submit" className="w-full" disabled={isLoading}>
+            <div className="bg-gray-50 px-4 py-4">
+              <Button
+                type="submit"
+                className="w-full min-h-touch rounded-btn bg-dmi-blue-500 text-white text-base-mobile font-semibold"
+                disabled={isLoading}
+              >
                 {isLoading ? <Spinner /> : 'Sign In'}
               </Button>
             </div>

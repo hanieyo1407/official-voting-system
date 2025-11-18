@@ -15,37 +15,33 @@ import { useOverallStats } from '../hooks/useOverallStats';
 import { useAuditLogs } from '../hooks/useAuditLogs'; 
 import { isAxiosError } from 'axios';
 import { useVotingTrends } from '../hooks/useVotingTrends'; 
-// CRITICAL FIX: Import the new hook for fetching all positions/candidates
 import { useAllPositions } from '../hooks/useAllPositions'; 
 
 
-// --- Helper Icons (Unchanged) ---
-const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
+const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
 const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
 const TrashIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>;
 const UserIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>;
 const LogoutIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>;
-const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7"/></svg>;
+const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7"/></svg>;
 const PositionsIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>;
-const CandidatesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M16 22a4 4 0 0 0-8 0"/><circle cx="12" cy="15" r="3"/></svg>;
-const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>;
+const CandidatesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M16 22a4 4 0 0 0-8 0"/><circle cx="12" cy="15" r="3"/></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>;
 const AuditIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>;
-const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg>;
-const RefreshIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 10v4h4"/><path d="m11 14 1.535-1.605a5 5 0 0 1 8 1.5"/><path d="M16 2v4"/><path d="m21 18-1.535 1.605a5 5 0 0 1-8-1.5"/><path d="M21 22v-4h-4"/><path d="M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3"/><path d="M3 10h4"/><path d="M8 2v4"/></svg>;
+const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg>;
+const RefreshIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 10v4h4"/><path d="m11 14 1.535-1.605a5 5 0 0 1 8 1.5"/><path d="M16 2v4"/><path d="m21 18-1.535 1.605a5 5 0 0 1-8-1.5"/><path d="M21 22v-4h-4"/><path d="M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3"/><path d="M3 10h4"/><path d="M8 2v4"/></svg>;
 
-// --- Type Definitions ---
+// --- Types ---
 interface PositionWithCandidates extends Position {
     candidates: Candidate[];
 }
 
 interface AdminDashboardProps {
-    // CRITICAL FIX: The positions prop is no longer needed, replaced by internal hook
-    // positions: PositionWithCandidates[]; 
     currentUser: AdminUser;
     setCurrentUser: (user: AdminUser) => void;
     onLogout: () => void;
     onStartCountdown: (hours: number) => void;
-    onRefetchPositions: () => void; // This is now a placeholder to trigger internal hook refetch
+    onRefetchPositions: () => void;
 }
 
 type AdminView = 'dashboard' | 'positions' | 'candidates' | 'users' | 'audit' | 'settings';
@@ -56,26 +52,26 @@ interface ModalState {
     data?: any;
 }
 
-// --- Role Switcher Component (TASK C: Removed "Switch Role" text) ---
 const RoleSwitcher: React.FC<{ adminUsers: AdminUser[], currentUser: AdminUser, setCurrentUser: (user: AdminUser) => void, onLogout: () => void }> = ({ adminUsers, currentUser, setCurrentUser, onLogout }) => {
     return (
-        <Card className="mb-6 p-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between">
-                <div className="flex items-center mb-4 sm:mb-0">
+        <Card className="mb-4 p-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center flex-wrap gap-2">
                     <UserIcon />
                     <span className="font-semibold text-dmi-blue-900">Current User:</span>
-                     <span className="ml-2 mr-2 px-3 py-1 text-sm font-semibold text-dmi-blue-800 bg-dmi-blue-100 rounded-full">{currentUser.username}</span>
-                    <span className="px-3 py-1 text-sm font-bold text-white bg-dmi-blue-700 rounded-full">{currentUser.role.replace('_', ' ').toUpperCase()}</span>
+                    <span className="ml-2 px-2 py-1 text-sm font-semibold text-dmi-blue-800 bg-dmi-blue-100 rounded-full">{currentUser.username}</span>
+                    <span className="px-2 py-1 text-sm font-bold text-white bg-dmi-blue-700 rounded-full">{currentUser.role.replace('_', ' ').toUpperCase()}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <Button size="sm" variant="secondary" onClick={onLogout}><LogoutIcon/> Logout</Button>
+                    <Button size="sm" variant="secondary" onClick={onLogout} className="min-h-touch">
+                        <LogoutIcon/> Logout
+                    </Button>
                 </div>
             </div>
         </Card>
     );
 };
 
-// --- Sidebar Navigation ---
 interface SidebarProps {
     activeView: AdminView;
     setActiveView: (view: AdminView) => void;
@@ -91,9 +87,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, permission
         { id: 'settings', label: 'Settings', icon: <SettingsIcon />, permitted: permissions.canEditSettings },
     ];
 
+    // Mobile-first: horizontal compact nav on small screens; vertical on lg+
     return (
-        <aside className="bg-white p-4 rounded-xl shadow-md">
-            <nav className="space-y-2">
+        <aside className="w-full lg:w-auto">
+            <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible bg-white p-2 rounded-lg shadow-sm">
                 {navItems.map(item => {
                     if (!item.permitted) return null;
                     const isActive = activeView === item.id;
@@ -101,10 +98,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, permission
                         <button
                             key={item.id}
                             onClick={() => setActiveView(item.id as AdminView)}
-                            className={`w-full flex items-center p-3 text-left rounded-lg transition-colors ${isActive ? 'bg-dmi-blue-600 text-white font-bold shadow' : 'text-gray-700 hover:bg-dmi-blue-50 hover:text-dmi-blue-800'}`}
+                            className={`flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-md transition-colors text-sm ${isActive ? 'bg-dmi-blue-600 text-white font-semibold shadow' : 'text-gray-700 hover:bg-dmi-blue-50 hover:text-dmi-blue-800'}`}
                         >
                             {item.icon}
-                            <span>{item.label}</span>
+                            <span className="hidden sm:inline">{item.label}</span>
                         </button>
                     )
                 })}
@@ -113,27 +110,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, permission
     );
 };
 
-// --- Admin Dashboard Component ---
 const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     const { currentUser, onLogout, onRefetchPositions } = props;
     const [activeView, setActiveView] = useState<AdminView>('dashboard');
     const [modal, setModal] = useState<ModalState>({ isOpen: false, type: null });
     const permissions = usePermissions(currentUser);
 
-    // LIVE DATA INTEGRATION
     const { adminUsers, isLoading: isAdminUsersLoading, error: adminUsersError, fetchAdminUsers } = useAdminUsers();
-    // CRITICAL FIX: Fetch positions internally via the new hook
-    const { 
-        positions, 
-        isLoading: isPositionsLoading, 
-        error: positionsError, 
-        fetchPositions 
-    } = useAllPositions();
+    const { positions, isLoading: isPositionsLoading, error: positionsError, fetchPositions } = useAllPositions();
 
     const handleOpenModal = (type: ModalType, data?: any) => setModal({ isOpen: true, type, data });
     const handleCloseModal = () => setModal({ isOpen: false, type: null });
     
-    // Effect to handle view changes when role changes
     useEffect(() => {
         const viewPermissions: { [key in AdminView]: keyof Permissions } = {
             dashboard: 'canViewDashboard',
@@ -149,39 +137,32 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
         }
     }, [currentUser, activeView, permissions]);
 
-    // CRITICAL FIX: onRefetchPositions now triggers the fetchPositions in the hook
     const handleDataRefresh = useCallback(() => {
         fetchAdminUsers();
-        fetchPositions(); // Use the hook's fetch method
+        fetchPositions();
     }, [fetchAdminUsers, fetchPositions]);
     
-    // Ensure the prop function from the parent calls the new internal hook refetch logic
     useEffect(() => {
-        // This is a workaround if the parent component expects a synchronous call
         if (onRefetchPositions) {
             (onRefetchPositions as any).refetch = fetchPositions; 
         }
     }, [fetchPositions, onRefetchPositions]);
 
-
     const renderActiveView = () => {
-        // Handle loading/error states for positions only when on relevant tabs
         if (isPositionsLoading && (activeView === 'positions' || activeView === 'candidates')) {
-            return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Positions/Candidates...</p></Card>
+            return <Card className="p-6 text-center"><Spinner /><p className="mt-2 text-sm">Loading Positions/Candidates...</p></Card>
         }
         if (positionsError && (activeView === 'positions' || activeView === 'candidates')) {
-            return <Card className="p-8 text-center text-red-600"><p>{positionsError}</p><Button onClick={fetchPositions}>Retry</Button></Card>
+            return <Card className="p-6 text-center text-red-600"><p>{positionsError}</p><Button onClick={fetchPositions} className="mt-3">Retry</Button></Card>
         }
         
         switch (activeView) {
             case 'dashboard': return <DashboardView permissions={permissions} />;
-            // CRITICAL FIX: Pass data from the new hook
             case 'positions': return <PositionsView positions={positions} permissions={permissions} onOpenModal={handleOpenModal} />;
-            // CRITICAL FIX: Pass data from the new hook
             case 'candidates': return <CandidatesView positions={positions} permissions={permissions} onOpenModal={handleOpenModal} />;
             case 'users': 
-                 if (isAdminUsersLoading) return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Admin Users...</p></Card>
-                 if (adminUsersError && adminUsers.length === 0) return <Card className="p-8 text-center text-red-600"><p>{adminUsersError}</p><Button onClick={fetchAdminUsers}>Retry</Button></Card>
+                 if (isAdminUsersLoading) return <Card className="p-6 text-center"><Spinner /><p className="mt-2 text-sm">Loading Admin Users...</p></Card>
+                 if (adminUsersError && adminUsers.length === 0) return <Card className="p-6 text-center text-red-600"><p>{adminUsersError}</p><Button onClick={fetchAdminUsers}>Retry</Button></Card>
                  return <UserManagementView adminUsers={adminUsers} permissions={permissions} onOpenModal={handleOpenModal} onRefresh={handleDataRefresh} />;
             case 'audit': return <AuditLogView permissions={permissions} currentUser={currentUser} />;
             case 'settings': return <SettingsView permissions={permissions} onStartCountdown={props.onStartCountdown} />;
@@ -190,8 +171,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold text-dmi-blue-900 mb-6">Administrator Dashboard</h1>
+        <div className="container mx-auto px-4 py-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-dmi-blue-900 mb-4">Administrator Dashboard</h1>
             
             <RoleSwitcher 
                 adminUsers={adminUsers} 
@@ -200,11 +181,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
                 onLogout={onLogout}
             /> 
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <div className="lg:col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-3">
                    <Sidebar activeView={activeView} setActiveView={setActiveView} permissions={permissions} />
                 </div>
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-9">
                    {renderActiveView()}
                 </div>
             </div>
@@ -213,7 +194,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
                 modalState={modal} 
                 onClose={handleCloseModal} 
                 permissions={permissions} 
-                // CRITICAL FIX: Pass data from the new hook
                 positions={positions} 
                 onRefreshData={handleDataRefresh}
                 currentUser={currentUser}
@@ -222,41 +202,34 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     );
 };
 
-// --- Dashboard View (LIVE STATS) - TASK B INTEGRATION ---
+// DashboardView
 interface DashboardViewProps {
     permissions: Permissions;
 }
 const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
     const { stats, isLoading, error, fetchStats } = useOverallStats();
-    // TASK B: Integrate Voting Trends Data
     const { hourlyTrends: hourlyTurnout, isLoading: isTrendsLoading, error: trendsError, fetchTrends } = useVotingTrends(); 
 
-    if (isLoading || isTrendsLoading) return <Card className="p-8 text-center"><Spinner /><p className="mt-2">Loading Statistics...</p></Card>
-    // Combine errors for a single display
-    if (error || trendsError) return <Card className="p-8 text-center text-red-600"><p>{error || trendsError}</p><Button onClick={() => { fetchStats(); fetchTrends(); }}>Retry</Button></Card>
+    if (isLoading || isTrendsLoading) return <Card className="p-6 text-center"><Spinner /><p className="mt-2 text-sm">Loading Statistics...</p></Card>
+    if (error || trendsError) return <Card className="p-6 text-center text-red-600"><p>{error || trendsError}</p><Button onClick={() => { fetchStats(); fetchTrends(); }} className="mt-3">Retry</Button></Card>
     
-    // Live Data
     const totalVotesCast = stats?.totalVotesCast ?? 0;
     const totalVoters = stats?.totalVoters ?? 0;
     
-    // Calculate Turnout
     const uniqueVotersProxy = totalVotesCast / 2;
     const liveVoterTurnout = (totalVoters > 0 && uniqueVotersProxy > 0)
         ? ((uniqueVotersProxy / totalVoters) * 100).toFixed(2)
         : '0.00';
 
-    // Extract Position Stats for Charts/Tables
     const positionsWithStats = stats?.positionsWithStats || [];
-
-    // ADDED: Read-only indicator for moderators
     const isReadOnly = !permissions.canManagePositions && !permissions.canManageCandidates;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             {isReadOnly && (
-                <Card className="p-4 bg-blue-50 border-blue-200">
-                    <p className="text-blue-800 text-sm flex items-center">
-                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <Card className="p-3 bg-blue-50 border-blue-200">
+                    <p className="text-blue-800 text-sm flex items-center gap-2">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
                         </svg>
                         <strong>Read-Only Access:</strong> You are viewing this dashboard in read-only mode as a Moderator.
@@ -264,24 +237,23 @@ const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
                 </Card>
             )}
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="p-6">
-                    <h3 className="text-gray-500 font-semibold">Total Votes Cast (Live)</h3>
-                    <p className="text-4xl font-bold text-dmi-blue-800 mt-2">{totalVotesCast}</p>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="p-4">
+                    <h3 className="text-sm font-semibold text-gray-500">Total Votes Cast (Live)</h3>
+                    <p className="text-2xl sm:text-3xl font-bold text-dmi-blue-800 mt-2">{totalVotesCast}</p>
                 </Card>
-                 <Card className="p-6">
-                    <h3 className="text-gray-500 font-semibold">Voter Turnout (Live)</h3>
-                    <p className="text-4xl font-bold text-dmi-blue-800 mt-2">{liveVoterTurnout}%</p>
+                 <Card className="p-4">
+                    <h3 className="text-sm font-semibold text-gray-500">Voter Turnout (Live)</h3>
+                    <p className="text-2xl sm:text-3xl font-bold text-dmi-blue-800 mt-2">{liveVoterTurnout}%</p>
                 </Card>
             </div>
 
-            <Card className="p-6">
-                <h2 className="text-xl font-bold text-dmi-blue-900 mb-4">Turnout by Hour</h2>
-                {/* TASK B: Use trends data */}
+            <Card className="p-4">
+                <h2 className="text-lg font-bold text-dmi-blue-900 mb-3">Turnout by Hour</h2>
                 {hourlyTurnout.length > 0 ? (
-                    <div className="h-80">
+                    <div className="h-56 sm:h-80">
                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={hourlyTurnout} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <BarChart data={hourlyTurnout} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="hour" />
                                 <YAxis />
@@ -292,20 +264,20 @@ const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
                         </ResponsiveContainer>
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-6 text-gray-500">
                         No hourly trend data available from the server.
                     </div>
                 )}
             </Card>
 
-            <h2 className="text-3xl font-bold text-dmi-blue-900 text-center mb-6">Candidate Race Summaries</h2>
-            <div className="space-y-8">
+            <h2 className="text-xl font-bold text-dmi-blue-900 text-center mb-2">Candidate Race Summaries</h2>
+            <div className="space-y-4">
                 {positionsWithStats.map((position: any) => (
-                    <Card key={position.positionId} className="p-6">
-                        <h3 className="text-xl font-bold text-dmi-blue-900 mb-4">{position.positionName} - {position.totalVotes} Votes Cast</h3>
-                        <div className="h-64">
+                    <Card key={position.positionId} className="p-4">
+                        <h3 className="text-lg font-bold text-dmi-blue-900 mb-3">{position.positionName} - {position.totalVotes} Votes Cast</h3>
+                        <div className="h-48 sm:h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={position.candidates} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <BarChart data={position.candidates} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis type="number" />
                                     <YAxis type="category" dataKey="candidateName" width={100} tick={{fontSize: 12}} />
@@ -325,7 +297,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
     );
 };
 
-// --- Settings View ---
+// SettingsView
 interface SettingsViewProps {
     permissions: Permissions;
     onStartCountdown: (hours: number) => void;
@@ -346,17 +318,17 @@ const SettingsView: React.FC<SettingsViewProps> = ({ permissions, onStartCountdo
     
     return (
         <Card>
-            <div className="p-6 border-b">
-                <h2 className="text-xl font-bold text-dmi-blue-900">Election Settings</h2>
+            <div className="p-4 border-b">
+                <h2 className="text-lg font-bold text-dmi-blue-900">Election Settings</h2>
                 <p className="text-sm text-gray-500">Configure core parameters for the election.</p>
             </div>
-            <form className="p-6 space-y-6">
+            <form className="p-4 space-y-4">
                 {!permissions.canEditSettings && (
-                    <div className="bg-dmi-blue-50 text-dmi-blue-800 p-3 rounded-lg text-sm">
+                    <div className="bg-dmi-blue-50 text-dmi-blue-800 p-2 rounded-lg text-sm">
                         Settings can only be modified by a Super Admin.
                     </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">Election Start Date</label>
                         <input type="datetime-local" id="start-date" name="start-date" disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" />
@@ -370,17 +342,17 @@ const SettingsView: React.FC<SettingsViewProps> = ({ permissions, onStartCountdo
                     <label htmlFor="voucher-rules" className="block text-sm font-medium text-gray-700">Voucher Generation Rules</label>
                      <textarea id="voucher-rules" name="voucher-rules" rows={4} disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" placeholder="e.g., Alphanumeric, 12 characters, expires in 24 hours..."></textarea>
                 </div>
-                 <div className="pt-4 flex justify-end">
+                 <div className="pt-2 flex justify-end">
                     <Button type="submit" disabled={!permissions.canEditSettings} disabledTooltip="Requires Super Admin role.">Save Settings</Button>
                 </div>
             </form>
 
-            <div className="p-6 border-t space-y-4">
-                <h3 className="text-lg font-bold text-dmi-blue-800">Start Election Countdown</h3>
+            <div className="p-4 border-t space-y-3">
+                <h3 className="text-sm font-bold text-dmi-blue-800">Start Election Countdown</h3>
                 <p className="text-sm text-gray-600">
                     This will immediately set the election start time based on the hours provided from now. This action is irreversible for this session.
                 </p>
-                <form onSubmit={handleStartCountdown} className="flex flex-col sm:flex-row sm:items-end sm:space-x-4">
+                <form onSubmit={handleStartCountdown} className="flex flex-col sm:flex-row sm:items-end sm:space-x-3 gap-2">
                     <div className="flex-grow">
                         <label htmlFor="countdown-hours" className="block text-sm font-medium text-gray-700">Countdown Duration (1-48 Hours)</label>
                         <input
@@ -396,12 +368,13 @@ const SettingsView: React.FC<SettingsViewProps> = ({ permissions, onStartCountdo
                             required
                         />
                     </div>
-                    <div className="mt-4 sm:mt-0">
+                    <div className="mt-2 sm:mt-0">
                         <Button
                             type="submit"
                             disabled={!permissions.canEditSettings}
                             disabledTooltip="Requires Super Admin role."
                             variant="danger"
+                            className="min-h-touch"
                         >
                             Start Countdown
                         </Button>
@@ -412,7 +385,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ permissions, onStartCountdo
     );
 };
 
-// --- Audit Log View ---
+// AuditLogView
 interface AuditLogViewProps {
     permissions: Permissions;
     currentUser: AdminUser;
@@ -420,10 +393,8 @@ interface AuditLogViewProps {
 const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser }) => {
     const { logs, isLoading, error, fetchLogs } = useAuditLogs(); 
     const [searchTerm, setSearchTerm] = useState('');
-    
-    // ADDED: Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [logsPerPage] = useState(20); // Show 20 logs per page
+    const [logsPerPage] = useState(20);
 
     const filteredLogs = logs.filter(log =>
         log.adminUsername.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -431,13 +402,11 @@ const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser })
         log.details.toLowerCase().includes(searchTerm.toLowerCase())
     ).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
-    // ADDED: Calculate pagination
     const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
     const indexOfLastLog = currentPage * logsPerPage;
     const indexOfFirstLog = indexOfLastLog - logsPerPage;
     const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
 
-    // Reset to page 1 when search term changes
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
@@ -453,9 +422,9 @@ const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser })
 
     return (
         <Card>
-            <div className="p-4 flex justify-between items-center border-b">
+            <div className="p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center border-b gap-3">
                 <div>
-                    <h2 className="text-xl font-bold text-dmi-blue-900">Admin Audit Log</h2>
+                    <h2 className="text-lg font-bold text-dmi-blue-900">Admin Audit Log</h2>
                     {isReadOnly && (
                         <p className="text-sm text-blue-600 mt-1">
                             <strong>Read-Only Access:</strong> Viewing logs as Moderator
@@ -465,27 +434,31 @@ const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser })
                         Showing {filteredLogs.length > 0 ? indexOfFirstLog + 1 : 0} - {Math.min(indexOfLastLog, filteredLogs.length)} of {filteredLogs.length} logs
                     </p>
                 </div>
-                <Button 
-                    size="sm" 
-                    variant="secondary" 
-                    onClick={() => fetchLogs()} 
-                    disabled={isLoading}
-                >
-                    {isLoading ? <Spinner /> : <RefreshIcon />}
-                    {!isLoading && ' Refresh'}
-                </Button>
+                <div className="flex items-center gap-2">
+                    <input
+                        type="text"
+                        placeholder="Search logs..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="p-2 border border-gray-300 rounded-md focus:ring-dmi-blue-500 focus:border-dmi-blue-500 text-sm"
+                        aria-label="Search audit logs"
+                    />
+                    <Button size="sm" variant="secondary" onClick={() => fetchLogs()} disabled={isLoading} className="min-h-touch">
+                        {isLoading ? <Spinner /> : <RefreshIcon />} <span className="hidden sm:inline ml-1">Refresh</span>
+                    </Button>
+                </div>
             </div>
             
             {isLoading && (
-                <div className="p-8 text-center">
+                <div className="p-4 text-center">
                     <Spinner />
-                    <p className="mt-2 text-gray-600">Loading audit logs...</p>
+                    <p className="mt-2 text-sm text-gray-600">Loading audit logs...</p>
                 </div>
             )}
             
             {error && !isLoading && (
-                <div className="p-8 text-center">
-                    <div className="text-red-600 mb-4">
+                <div className="p-4 text-center">
+                    <div className="text-red-600 mb-3">
                         <p className="font-semibold">Error Loading Logs</p>
                         <p className="text-sm">{error}</p>
                     </div>
@@ -495,116 +468,72 @@ const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser })
 
             {!isLoading && !error && (
                 <>
-                    <div className="p-4">
-                        <input
-                            type="text"
-                            placeholder="Search logs by user, action, or details..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-dmi-blue-500 focus:border-dmi-blue-500"
-                            aria-label="Search audit logs"
-                        />
-                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-gray-50 text-xs text-gray-700 uppercase">
                                 <tr>
-                                    <th scope="col" className="px-4 py-3">Timestamp</th>
-                                    <th scope="col" className="px-4 py-3">Admin User</th>
-                                    <th scope="col" className="px-4 py-3">Action</th>
-                                    <th scope="col" className="px-4 py-3">Details</th>
-                                    <th scope="col" className="px-4 py-3">IP Address</th>
+                                    <th scope="col" className="px-3 py-2">Timestamp</th>
+                                    <th scope="col" className="px-3 py-2">Admin User</th>
+                                    <th scope="col" className="px-3 py-2">Action</th>
+                                    <th scope="col" className="px-3 py-2">Details</th>
+                                    <th scope="col" className="px-3 py-2">IP Address</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {currentLogs.map(log => (
                                     <tr key={log.id} className="border-b hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                            {log.timestamp instanceof Date ? log.timestamp.toLocaleString() : log.timestamp}
-                                        </td>
-                                        <td className="px-4 py-3 font-medium text-dmi-blue-800">{log.adminUsername}</td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{log.timestamp instanceof Date ? log.timestamp.toLocaleString() : log.timestamp}</td>
+                                        <td className="px-3 py-2 font-medium text-dmi-blue-800">{log.adminUsername}</td>
+                                        <td className="px-3 py-2">
                                             <span className={`px-2 py-1 font-semibold rounded-full text-xs ${getActionChipColor(log.action)}`}>
                                                 {log.action.replace('_', ' ')}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-gray-700">{log.details}</td>
-                                        <td className="px-4 py-3 font-mono text-gray-500">{log.ipAddress}</td>
+                                        <td className="px-3 py-2 text-gray-700">{log.details}</td>
+                                        <td className="px-3 py-2 font-mono text-gray-500">{log.ipAddress}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                         {filteredLogs.length === 0 && (
-                            <div className="text-center p-8 text-gray-500">
+                            <div className="text-center p-6 text-gray-500">
                                 <p>No audit logs found matching your search criteria.</p>
-                                {logs.length === 0 && (
-                                    <p className="text-sm mt-2">The system has not generated any audit logs yet.</p>
-                                )}
                             </div>
                         )}
                     </div>
 
-                    {/* ADDED: Pagination Controls */}
                     {totalPages > 1 && (
-                        <div className="p-4 flex items-center justify-between border-t">
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                            >
-                                ← Previous
-                            </Button>
-                            
-                            <div className="flex items-center space-x-2">
-                                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                                    // Show first page, last page, current page, and pages around current
-                                    let pageNum;
-                                    if (totalPages <= 5) {
-                                        pageNum = i + 1;
-                                    } else if (currentPage <= 3) {
-                                        pageNum = i + 1;
-                                    } else if (currentPage >= totalPages - 2) {
-                                        pageNum = totalPages - 4 + i;
-                                    } else {
-                                        pageNum = currentPage - 2 + i;
-                                    }
-                                    
-                                    return (
-                                        <button
-                                            key={i}
-                                            onClick={() => setCurrentPage(pageNum)}
-                                            className={`px-3 py-1 text-sm rounded ${
-                                                currentPage === pageNum
-                                                    ? 'bg-dmi-blue-600 text-white font-bold'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                            }`}
-                                        >
-                                            {pageNum}
-                                        </button>
-                                    );
-                                })}
-                                {totalPages > 5 && currentPage < totalPages - 2 && (
-                                    <>
-                                        <span className="text-gray-500">...</span>
-                                        <button
-                                            onClick={() => setCurrentPage(totalPages)}
-                                            className="px-3 py-1 text-sm rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                        >
-                                            {totalPages}
-                                        </button>
-                                    </>
-                                )}
+                        <div className="p-3 flex flex-col sm:flex-row items-center justify-between border-t gap-2">
+                            <div className="flex items-center gap-2">
+                                <Button size="sm" variant="secondary" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>← Prev</Button>
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                                        let pageNum;
+                                        if (totalPages <= 5) {
+                                            pageNum = i + 1;
+                                        } else if (currentPage <= 3) {
+                                            pageNum = i + 1;
+                                        } else if (currentPage >= totalPages - 2) {
+                                            pageNum = totalPages - 4 + i;
+                                        } else {
+                                            pageNum = currentPage - 2 + i;
+                                        }
+                                        return (
+                                            <button
+                                                key={i}
+                                                onClick={() => setCurrentPage(pageNum)}
+                                                className={`px-2 py-1 text-xs rounded ${currentPage === pageNum ? 'bg-dmi-blue-600 text-white font-bold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                            >
-                                Next →
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button size="sm" variant="secondary" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Next →</Button>
+                            </div>
                         </div>
                     )}
                 </>
@@ -613,7 +542,7 @@ const AuditLogView: React.FC<AuditLogViewProps> = ({ permissions, currentUser })
     );
 };
 
-// --- Positions Management View ---
+// PositionsView
 interface PositionsViewProps {
     positions: PositionWithCandidates[];
     permissions: Permissions;
@@ -622,31 +551,32 @@ interface PositionsViewProps {
 const PositionsView: React.FC<PositionsViewProps> = ({ positions, permissions, onOpenModal }) => {
     return (
     <Card>
-        <div className="p-4 flex justify-between items-center border-b">
-             <h2 className="text-xl font-bold text-dmi-blue-900">Manage Positions</h2>
+        <div className="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b gap-3">
+             <h2 className="text-lg font-bold text-dmi-blue-900">Manage Positions</h2>
             <Button 
                 onClick={() => onOpenModal('ADD_POSITION')}
                 disabled={!permissions.canManagePositions}
                 disabledTooltip="Requires Admin or Super Admin role."
+                className="min-h-touch"
             >
-                <PlusIcon/> Add Position
+                <PlusIcon/> <span className="hidden sm:inline">Add Position</span>
             </Button>
         </div>
         <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left text-sm">
                 <thead className="bg-gray-50">
                     <tr>
-                        <th scope="col" className="px-4 py-3 text-left">Position Name</th>
-                        <th scope="col" className="px-4 py-3 text-center">Candidates</th>
-                        <th scope="col" className="px-4 py-3 text-center">Actions</th>
+                        <th scope="col" className="px-3 py-2 text-left">Position Name</th>
+                        <th scope="col" className="px-3 py-2 text-center">Candidates</th>
+                        <th scope="col" className="px-3 py-2 text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {positions.length > 0 ? positions.map(pos => (
                         <tr key={pos.id} className="border-b hover:bg-gray-50"> 
-                            <td className="px-4 py-4 font-semibold text-dmi-blue-800">{pos.name}</td>
-                            <td className="px-4 py-4 text-center">{pos.candidates.length}</td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 py-3 font-semibold text-dmi-blue-800">{pos.name}</td>
+                            <td className="px-3 py-3 text-center">{pos.candidates.length}</td>
+                            <td className="px-3 py-3">
                                 <div className="flex justify-center space-x-2">
                                     <Button 
                                         size="sm" 
@@ -654,20 +584,22 @@ const PositionsView: React.FC<PositionsViewProps> = ({ positions, permissions, o
                                         onClick={() => onOpenModal('EDIT_POSITION', pos)}
                                         disabled={!permissions.canManagePositions}
                                         disabledTooltip="Requires Admin or Super Admin role."
-                                    ><EditIcon/> Edit</Button>
+                                        className="min-h-touch"
+                                    ><EditIcon/> <span className="hidden sm:inline">Edit</span></Button>
                                     <Button 
                                         size="sm" 
                                         variant="danger" 
                                         onClick={() => onOpenModal('DELETE_POSITION', pos)}
                                         disabled={!permissions.canManagePositions}
                                         disabledTooltip="Requires Admin or Super Admin role."
-                                    ><TrashIcon/> Delete</Button>
+                                        className="min-h-touch"
+                                    ><TrashIcon/> <span className="hidden sm:inline">Delete</span></Button>
                                 </div>
                             </td>
                         </tr>
                     )) : (
                         <tr>
-                            <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                            <td colSpan={3} className="px-3 py-8 text-center text-gray-500">
                                 <p>No positions found.</p>
                                 {permissions.canManagePositions && (
                                     <p className="text-sm mt-2">Click "Add Position" to create your first position.</p>
@@ -681,18 +613,17 @@ const PositionsView: React.FC<PositionsViewProps> = ({ positions, permissions, o
     </Card>
     );
 };
-// --- Candidates Management View ---
+
+// CandidatesView
 interface CandidatesViewProps {
     positions: PositionWithCandidates[];
     permissions: Permissions;
     onOpenModal: (type: ModalType, data?: any) => void;
 }
 const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions, onOpenModal }) => {
-     // CRITICAL FIX: Initialize selectedPositionId based on fetched positions
      const [selectedPositionId, setSelectedPositionId] = useState<string | number | null>(positions[0]?.id || null);
     
     useEffect(() => {
-        // Only update if positions data is newly loaded and a selection hasn't been made or is invalid
         if (positions.length > 0 && (!selectedPositionId || !positions.find(p => p.id === selectedPositionId))) {
             setSelectedPositionId(positions[0].id);
         }
@@ -704,13 +635,12 @@ const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions,
     const selectedPosition = positions.find(p => p.id === selectedPositionId);
     
     return (
-        <div className="space-y-6">
-            <Card className="p-4">
+        <div className="space-y-4">
+            <Card className="p-3">
                  <label htmlFor="position-select" className="block text-sm font-medium text-gray-700 mb-2">Select Position to Manage</label>
                  <select 
                     id="position-select"
-                    value={selectedPositionId || ''}
-                    // CRITICAL FIX: Ensure value is converted to a string for the select input
+                    value={selectedPositionId ?? ''}
                     onChange={(e) => setSelectedPositionId(Number(e.target.value))}
                     className="mt-1 block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500"
                  >
@@ -722,56 +652,57 @@ const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions,
 
             {selectedPosition ? (
                 <Card>
-                    <div className="p-4 flex justify-between items-center border-b">
-                        <h2 className="text-xl font-bold text-dmi-blue-900">Candidates for: <span className="font-normal">{selectedPosition.name}</span></h2>
+                    <div className="p-3 flex justify-between items-center border-b">
+                        <h2 className="text-lg font-bold text-dmi-blue-900">Candidates for: <span className="font-normal">{selectedPosition.name}</span></h2>
                         <Button 
                             onClick={() => onOpenModal('ADD_CANDIDATE', selectedPosition)}
                             disabled={!permissions.canManageCandidates}
                             disabledTooltip="Requires Admin or Super Admin role."
+                            className="min-h-touch"
                         >
-                            <PlusIcon/> Add Candidate
+                            <PlusIcon/> <span className="hidden sm:inline">Add Candidate</span>
                         </Button>
                     </div>
-                    <div className="p-4">
+                    <div className="p-3">
                         {selectedPosition.candidates.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 {selectedPosition.candidates.map(cand => (
-                                    <div key={cand.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
-                                        <div className="flex items-center space-x-4">
-                                            {/* CRITICAL FIX: Image display check, falls back to placeholder if imageUrl is missing */}
-                                            <img src={cand.imageUrl || '/path/to/placeholder-image.png'} alt={cand.name} className="w-16 h-16 rounded-full object-cover"/>
+                                    <div key={cand.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border">
+                                        <div className="flex items-center space-x-3">
+                                            <img src={cand.imageUrl || '/path/to/placeholder-image.png'} alt={cand.name} className="w-12 h-12 rounded-full object-cover"/>
                                             <div>
                                                 <p className="font-semibold text-gray-800">{cand.name}</p>
-                                                {/* CRITICAL FIX: Use manifesto in DTO but display bio (since form field is "Bio / Manifesto") */}
-                                                <p className="text-sm text-gray-500">{cand.manifesto ? cand.manifesto.substring(0, 30) : 'No bio provided'}...</p> 
+                                                <p className="text-xs text-gray-500">{cand.manifesto ? (cand.manifesto.substring(0, 60) + (cand.manifesto.length > 60 ? '…' : '')) : 'No bio provided'}</p> 
                                             </div>
                                         </div>
                                         <div className="flex space-x-2">
                                             <Button size="sm" variant="secondary" onClick={() => onOpenModal('EDIT_CANDIDATE', { ...cand, positionId: selectedPosition.id })}
                                                 disabled={!permissions.canManageCandidates}
                                                 disabledTooltip="Requires Admin or Super Admin role."
-                                            ><EditIcon /></Button>
+                                                className="min-h-touch"
+                                            ><EditIcon /> <span className="hidden sm:inline">Edit</span></Button>
                                             <Button size="sm" variant="danger" onClick={() => onOpenModal('DELETE_CANDIDATE', { ...cand, positionId: selectedPosition.id })}
                                                  disabled={!permissions.canManageCandidates}
                                                  disabledTooltip="Requires Admin or Super Admin role."
-                                            ><TrashIcon /></Button>
+                                                 className="min-h-touch"
+                                            ><TrashIcon /> <span className="hidden sm:inline">Delete</span></Button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-8">
+                            <div className="text-center py-6">
                                 <h3 className="text-lg font-semibold text-gray-700">No Candidates Yet</h3>
-                                <p className="text-gray-500 mt-1">{permissions.canManageCandidates ? 'Click "Add Candidate" to get started.' : 'Contact an admin to add candidates.'}</p>
+                                <p className="text-sm text-gray-500 mt-1">{permissions.canManageCandidates ? 'Click "Add Candidate" to get started.' : 'Contact an admin to add candidates.'}</p>
                             </div>
                         )}
                     </div>
                 </Card>
             ) : (
-                <Card className="flex items-center justify-center h-full p-8">
+                <Card className="flex items-center justify-center h-full p-6">
                      <div className="text-center">
                         <h3 className="text-lg font-semibold text-gray-700">Select a Position</h3>
-                        <p className="text-gray-500 mt-1">Choose a position from the dropdown to manage its candidates.</p>
+                        <p className="text-sm text-gray-500 mt-1">Choose a position from the dropdown to manage its candidates.</p>
                     </div>
                 </Card>
             )}
@@ -779,8 +710,7 @@ const CandidatesView: React.FC<CandidatesViewProps> = ({ positions, permissions,
     );
 };
 
-
-// --- User Management View ---
+// UserManagementView
 interface UserManagementViewProps {
     adminUsers: AdminUser[];
     permissions: Permissions;
@@ -790,62 +720,67 @@ interface UserManagementViewProps {
 const UserManagementView: React.FC<UserManagementViewProps> = ({ adminUsers, permissions, onOpenModal, onRefresh }) => {
     return (
         <Card>
-            <div className="p-4 flex justify-between items-center border-b">
-                <h2 className="text-xl font-bold text-dmi-blue-900">Manage Admin Users</h2>
+            <div className="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b gap-3">
+                <h2 className="text-lg font-bold text-dmi-blue-900">Manage Admin Users</h2>
                 <Button 
                     disabled={!permissions.canManageUsers}
                     disabledTooltip="Requires Super Admin role."
                     onClick={() => onOpenModal('ADD_USER')}
+                    className="min-h-touch"
                 >
-                    <PlusIcon/> Create New Admin
+                    <PlusIcon/> <span className="hidden sm:inline">Create New Admin</span>
                 </Button>
             </div>
              
-            <table className="w-full text-left">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th scope="col" className="px-4 py-3">Username</th>
-                        <th scope="col" className="px-4 py-3">Role</th>
-                        <th scope="col" className="px-4 py-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {adminUsers.map(user => (
-                        <tr key={user.id} className="border-b">
-                            <td className="p-4 font-semibold text-dmi-blue-800">{user.username}</td>
-                            <td className="p-4">
-                                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ 
-                                     user.role === 'super_admin' ? 'bg-dmi-gold-500 text-white' : 
-                                     user.role === 'admin' ? 'bg-dmi-blue-100 text-dmi-blue-800' :
-                                     'bg-gray-200 text-gray-800'
-                                 }`}>
-                                     {user.role.replace('_', ' ').toUpperCase()}
-                                </span>
-                            </td>
-                            <td className="p-4">
-                                <div className="flex space-x-2">
-                                    <Button 
-                                        size="sm" variant="secondary" 
-                                        disabled={!permissions.canManageUsers} 
-                                        disabledTooltip="Requires Super Admin role."
-                                        onClick={() => onOpenModal('EDIT_USER', user)}
-                                    ><EditIcon/> Edit</Button>
-                                    <Button 
-                                        size="sm" 
-                                        variant="danger" 
-                                        disabled={!permissions.canManageUsers} 
-                                        disabledTooltip="Requires Super Admin role."
-                                        onClick={() => onOpenModal('DELETE_USER', user)}
-                                    ><TrashIcon/> Delete</Button>
-                                </div>
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-3 py-2">Username</th>
+                            <th className="px-3 py-2">Role</th>
+                            <th className="px-3 py-2">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {adminUsers.map(user => (
+                            <tr key={user.id} className="border-b">
+                                <td className="p-3 font-semibold text-dmi-blue-800">{user.username}</td>
+                                <td className="p-3">
+                                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ 
+                                         user.role === 'super_admin' ? 'bg-dmi-gold-500 text-white' : 
+                                         user.role === 'admin' ? 'bg-dmi-blue-100 text-dmi-blue-800' :
+                                         'bg-gray-200 text-gray-800'
+                                     }`}>
+                                         {user.role.replace('_', ' ').toUpperCase()}
+                                    </span>
+                                </td>
+                                <td className="p-3">
+                                    <div className="flex space-x-2">
+                                        <Button 
+                                            size="sm" variant="secondary" 
+                                            disabled={!permissions.canManageUsers} 
+                                            disabledTooltip="Requires Super Admin role."
+                                            onClick={() => onOpenModal('EDIT_USER', user)}
+                                            className="min-h-touch"
+                                        ><EditIcon/> <span className="hidden sm:inline">Edit</span></Button>
+                                        <Button 
+                                            size="sm" 
+                                            variant="danger" 
+                                            disabled={!permissions.canManageUsers} 
+                                            disabledTooltip="Requires Super Admin role."
+                                            onClick={() => onOpenModal('DELETE_USER', user)}
+                                            className="min-h-touch"
+                                        ><TrashIcon/> <span className="hidden sm:inline">Delete</span></Button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
             
             {adminUsers.length === 0 && (
-                <div className="text-center p-8 text-gray-500">
+                <div className="text-center p-6 text-gray-500">
                     <p>No admin users found.</p>
                 </div>
             )}
@@ -853,7 +788,7 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({ adminUsers, per
     );
 };
 
-// --- Modals and Forms (LIVE CRUD IMPLEMENTATION) ---
+// ManagementModals
 interface ManagementModalsProps {
     modalState: ModalState;
     onClose: () => void;
@@ -868,7 +803,6 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
 
     if (!isOpen) return null;
     
-    // Position Modals
     if ((type === 'ADD_POSITION' || type === 'EDIT_POSITION' || type === 'DELETE_POSITION') && permissions.canManagePositions) {
         return (
             <Modal isOpen={isOpen} onClose={onClose} title={
@@ -899,9 +833,7 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
         );
     }
     
-    // Candidate Modals
     if ((type === 'ADD_CANDIDATE' || type === 'EDIT_CANDIDATE' || type === 'DELETE_CANDIDATE') && permissions.canManageCandidates) {
-        // CRITICAL FIX: Add safe check for data.name for the modal title
         const positionName = (type === 'ADD_CANDIDATE' && data?.name) ? data.name : (data?.name || 'Position');
          return (
             <Modal isOpen={isOpen} onClose={onClose} title={
@@ -933,7 +865,6 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
         );
     }
 
-     // User Modals (Super Admin only)
     if ((type === 'ADD_USER' || type === 'EDIT_USER' || type === 'DELETE_USER') && permissions.canManageUsers) {
         return (
             <Modal isOpen={isOpen} onClose={onClose} title={
@@ -971,7 +902,7 @@ const ManagementModals: React.FC<ManagementModalsProps> = ({ modalState, onClose
     return null;
 };
 
-// Position Form Component
+// PositionForm
 const PositionForm = ({ type, position, onSuccess, onCancel }: { type: 'ADD_POSITION' | 'EDIT_POSITION', position?: PositionWithCandidates, onSuccess: () => void, onCancel: () => void }) => {
     const [name, setName] = useState(position?.name || '');
     const [isLoading, setIsLoading] = useState(false);
@@ -997,13 +928,13 @@ const PositionForm = ({ type, position, onSuccess, onCancel }: { type: 'ADD_POSI
         }
     };
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <div>
                 <label htmlFor="pos-name" className="block text-sm font-medium text-gray-700">Position Name</label>
                 <input type="text" id="pos-name" value={name} onChange={e => setName(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 sm:text-sm" />
             </div>
-            <div className="flex justify-end space-x-4 pt-4">
+            <div className="flex justify-end space-x-3 pt-3">
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
                 <Button type="submit" disabled={isLoading}>{isLoading ? <Spinner /> : (type === 'ADD_POSITION' ? 'Create Position' : 'Update Position')}</Button>
             </div>
@@ -1011,13 +942,12 @@ const PositionForm = ({ type, position, onSuccess, onCancel }: { type: 'ADD_POSI
     );
 };
 
-// Candidate Form Component (TASK A: CLOUDINARY INTEGRATION)
+// CandidateForm
 const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { type: 'ADD_CANDIDATE' | 'EDIT_CANDIDATE', candidate?: Candidate, positionId: number | string, onSuccess: () => void, onCancel: () => void }) => {
-    // CRITICAL FIX: Changed state name from 'bio' to 'manifesto' to match API Service DTO
     const [formData, setFormData] = useState({
         name: candidate?.name || '',
-        manifesto: (candidate as any)?.manifesto || candidate?.manifesto || '', // Use manifesto if present, fallback to old bio field
-        imageUrl: candidate?.imageUrl || null, // The Cloudinary URL
+        manifesto: (candidate as any)?.manifesto || candidate?.manifesto || '',
+        imageUrl: candidate?.imageUrl || null,
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -1025,11 +955,9 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
     const positionIdNum = Number(positionId);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        // CRITICAL FIX: Changed state name access from 'bio' to 'manifesto'
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // CRITICAL FIX: Handler for the ImageUploader's final Cloudinary URL
     const handleImageUploadSuccess = (cloudinaryUrl: string) => {
         setFormData({ ...formData, imageUrl: cloudinaryUrl });
     };
@@ -1039,7 +967,6 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
         setError('');
         setIsLoading(true);
 
-        // Client-side validation: must have an image URL
         if (!formData.imageUrl) {
             setError('Please upload an image before saving the candidate.');
             setIsLoading(false);
@@ -1047,19 +974,16 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
         }
 
         try {
-            // CRITICAL FIX: Send payload with 'manifesto' key
             const payload = {
                  name: formData.name,
                  positionId: positionIdNum,
                  imageUrl: formData.imageUrl,
-                 manifesto: formData.manifesto, // CRITICAL FIX: Using 'manifesto'
+                 manifesto: formData.manifesto,
             };
             
             if (type === 'ADD_CANDIDATE') {
-                // TASK A FIX: Use the new dedicated API function
                 await sjbuApi.createCandidate(payload); 
             } else {
-                // TASK A FIX: Use the new dedicated API function
                 await sjbuApi.updateCandidate(candidate!.id, payload); 
             }
             onSuccess();
@@ -1072,37 +996,34 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
     };
 
     return (
-         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {error && <div className="md:col-span-3 text-red-500 text-sm">{error}</div>}
              <div className="md:col-span-1">
-                {/* TASK A FIX: Use correct prop and state name */}
                 <ImageUploader 
                     imageUrl={formData.imageUrl} 
                     onUploadSuccess={handleImageUploadSuccess} 
                     disabled={isLoading}
                 />
             </div>
-            <div className="md:col-span-2 space-y-4">
+            <div className="md:col-span-2 space-y-3">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Full Name</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500" />
                 </div>
                 <div>
-                    {/* CRITICAL FIX: Set input name to 'manifesto' */}
                     <label className="block text-sm font-medium text-gray-700">Bio / Manifesto</label>
                     <textarea name="manifesto" value={formData.manifesto} onChange={handleChange} required rows={5} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500" />
                 </div>
             </div>
-            <div className="md:col-span-3 flex justify-end space-x-4 pt-4 border-t mt-2">
+            <div className="md:col-span-3 flex justify-end space-x-3 pt-3 border-t mt-2">
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
-                {/* Disable button if loading or no image URL exists */}
                 <Button type="submit" disabled={isLoading || !formData.imageUrl}>{isLoading ? <Spinner /> : (type === 'ADD_CANDIDATE' ? 'Create Candidate' : 'Update Candidate')}</Button>
             </div>
         </form>
     );
 };
 
-// User Form Component
+// UserForm
 const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDIT_USER', user?: AdminUser, onSuccess: () => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState({
         username: user?.username || '',
@@ -1129,7 +1050,6 @@ const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDI
                 delete dataToSave.password; 
             }
             if (!isEditing && !formData.email) {
-                 // TASK C: Removed MOCK/DEMO string for email placeholder
                  dataToSave.email = `${dataToSave.username}@sjbu-voting.com`;
             }
 
@@ -1148,7 +1068,7 @@ const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDI
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <div>
                 <label className="block text-sm font-medium text-gray-700">Username</label>
@@ -1170,7 +1090,7 @@ const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDI
                     <option value="super_admin">Super Admin</option>
                 </select>
             </div>
-            <div className="flex justify-end space-x-4 pt-4">
+            <div className="flex justify-end space-x-3 pt-3">
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
                 <Button type="submit" disabled={isLoading}>{isLoading ? <Spinner /> : (isEditing ? 'Update User' : 'Create User')}</Button>
             </div>
@@ -1178,11 +1098,11 @@ const UserForm = ({ type, user, onSuccess, onCancel }: { type: 'ADD_USER' | 'EDI
     );
 };
 
-// Generic Delete Confirmation Component
+// DeleteConfirmation
 const DeleteConfirmation: React.FC<{ entityType: string, entityName: string, onConfirm: () => void, onCancel: () => void }> = ({ entityType, entityName, onConfirm, onCancel }) => (
     <>
         <p className="text-gray-700">Are you sure you want to delete <strong>{entityName}</strong>? This action cannot be undone.</p>
-        <div className="flex justify-end space-x-4 mt-6">
+        <div className="flex justify-end space-x-3 mt-4">
             <Button variant="secondary" onClick={onCancel}>Cancel</Button>
             <Button variant="danger" onClick={onConfirm}>Delete {entityType}</Button>
         </div>

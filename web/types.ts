@@ -15,7 +15,8 @@ export enum Page {
   HowToVote,            
   TermsOfUse,           
   PrivacyPolicy,        
-  ContactHelp           
+  ContactHelp,  
+  MeetTheTeam         
 }
 
 export type AdminRole = 'super_admin' | 'admin' | 'moderator';

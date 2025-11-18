@@ -66,6 +66,11 @@ const Footer: React.FC<FooterProps> = ({ setPage }) => {
                   Candidate Gallery
                 </button>
               </li>
+              <li>
+                <button onClick={() => setPage(Page.MeetTheTeam)} className="group flex items-center gap-2 text-sm text-dmi-blue-300 hover:text-dmi-gold-500 transition-all duration-200">
+                  Meet The Team
+                </button>
+              </li>
             </ul>
           </div>
 

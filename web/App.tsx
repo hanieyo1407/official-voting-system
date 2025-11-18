@@ -20,6 +20,7 @@ import HowToVotePage from './pages/HowToVotePage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import ContactHelpPage from './pages/ContactHelpPage';
+import MeetTheTeamPage from './pages/MeetTheTeamPage';
 import Card from './components/Card';
 import Button from './components/Button';
 import { useAllPositions } from './hooks/useAllPositions';
@@ -190,6 +191,8 @@ const App: React.FC = () => {
         return <HowToVotePage />;
       case Page.TermsOfUse:
         return <TermsOfUsePage />;
+      case Page.MeetTheTeam:
+        return <MeetTheTeamPage />;
       case Page.PrivacyPolicy:
         return <PrivacyPolicyPage />;
       case Page.ContactHelp:

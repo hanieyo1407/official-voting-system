@@ -73,8 +73,8 @@ const CandidateGalleryPage: React.FC = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8 text-center min-h-[60vh] flex items-center justify-center">
-        <Card className="max-w-2xl mx-auto p-12 text-center bg-red-50 border-red-400">
-          <h2 className="text-3xl font-bold text-red-700">Data Error</h2>
+        <Card className="max-w-2xl mx-auto p-6 text-center bg-red-50 border-red-400">
+          <h2 className="text-2xl font-bold text-red-700">Data Error</h2>
           <p className="text-red-600 mt-4">{error}</p>
           <Button onClick={fetchPositions} className="mt-4">Retry Load</Button>
         </Card>
@@ -85,32 +85,32 @@ const CandidateGalleryPage: React.FC = () => {
   if (positions.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 text-center min-h-[60vh] flex items-center justify-center">
-        <Card className="max-w-2xl mx-auto p-12 text-center">
-          <h2 className="text-3xl font-bold text-dmi-blue-900">No Candidates Found</h2>
-          <p className="text-lg text-gray-600 mt-4">The election setup is incomplete. Please check back later.</p>
+        <Card className="max-w-2xl mx-auto p-6 text-center">
+          <h2 className="text-2xl font-bold text-dmi-blue-900">No Candidates Found</h2>
+          <p className="text-base-mobile text-gray-600 mt-4">The election setup is incomplete. Please check back later.</p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold text-dmi-blue-900">Candidate Gallery</h1>
-        <p className="text-lg text-gray-600 mt-2">View the manifestos and official photos for all candidates.</p>
+    <div className="container mx-auto px-4 py-6">
+      <div className="text-center mb-8">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-dmi-blue-900">Candidate Gallery</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-2">View the manifestos and official photos for all candidates.</p>
       </div>
 
-      <div className="space-y-12">
+      <div className="space-y-8">
         {positions.map((position) => (
-          <Card key={position.id} className="p-6">
-            <h2 className="text-3xl font-bold text-dmi-blue-900 mb-6 border-b pb-3">{position.name}</h2>
+          <Card key={position.id} className="p-4">
+            <h2 className="text-xl md:text-2xl font-bold text-dmi-blue-900 mb-4 border-b pb-2">{position.name}</h2>
 
             {position.candidates.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {position.candidates.map((candidate) => {
                   const src = candidate.imageUrl?.trim() || defaultPlaceholder;
                   return (
-                    <div key={candidate.id} className="text-center border rounded-lg overflow-hidden shadow-md transition-shadow hover:shadow-lg">
+                    <div key={candidate.id} className="text-center border rounded-card overflow-hidden shadow-sm transition-shadow hover:shadow-md">
                       <div className="bg-gray-100 p-4 flex justify-center">
                         {/* Clickable image opens the full image viewer */}
                         <button
@@ -122,7 +122,7 @@ const CandidateGalleryPage: React.FC = () => {
                           <img
                             src={src}
                             alt={candidate.name}
-                            className="w-48 h-48 object-cover rounded-full border-4 border-white shadow-md transform hover:scale-105 transition-transform duration-200"
+                            className="w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 object-cover rounded-full border-4 border-white shadow-md transform hover:scale-105 transition-transform duration-200"
                             onError={(e) => {
                               const t = e.currentTarget;
                               if (t.src !== defaultPlaceholder) t.src = defaultPlaceholder;
@@ -132,8 +132,8 @@ const CandidateGalleryPage: React.FC = () => {
                       </div>
 
                       <div className="p-4">
-                        <h3 className="text-xl font-semibold text-dmi-blue-800">{candidate.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1 mb-3">Position: {position.name}</p>
+                        <h3 className="text-lg font-semibold text-dmi-blue-800">{candidate.name}</h3>
+                        <p className="text-xs text-gray-500 mt-1 mb-3">Position: {position.name}</p>
 
                         <div className="flex justify-center gap-3">
                           <Button
@@ -170,8 +170,8 @@ const CandidateGalleryPage: React.FC = () => {
         onClose={closeManifestoModal}
         title={`Manifesto: ${modalState.candidate?.name || ''} (${modalState.positionName})`}
       >
-        <div className="max-h-96 overflow-y-auto p-2">
-          <p className="text-gray-700 whitespace-pre-wrap">
+        <div className="max-h-80 overflow-y-auto p-2">
+          <p className="text-gray-700 whitespace-pre-wrap text-sm">
             {modalState.candidate?.manifesto || 'Manifesto not available.'}
           </p>
         </div>
@@ -187,11 +187,11 @@ const CandidateGalleryPage: React.FC = () => {
         title={imageViewer.alt || 'Candidate Photo'}
       >
         <div className="flex flex-col items-center">
-          <div className="max-w-full max-h-[70vh] overflow-hidden">
+          <div className="max-w-full max-h-[65vh] overflow-hidden">
             <img
               src={imageViewer.src}
               alt={imageViewer.alt}
-              className="max-w-full max-h-[70vh] object-contain rounded-md"
+              className="max-w-full max-h-[65vh] object-contain rounded-md"
               onError={(e) => {
                 const t = e.currentTarget;
                 if (t.src !== defaultPlaceholder) t.src = defaultPlaceholder;
@@ -204,7 +204,7 @@ const CandidateGalleryPage: React.FC = () => {
               href={imageViewer.src}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-dmi-blue-700 text-white rounded hover:bg-dmi-blue-800"
+              className="inline-flex items-center px-4 py-2 bg-dmi-blue-700 text-white rounded-btn text-sm"
             >
               Open in new tab
             </a>

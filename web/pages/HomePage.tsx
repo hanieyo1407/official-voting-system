@@ -40,8 +40,8 @@ const HomePage: React.FC<HomePageProps> = ({ setPage, electionStatus, electionSt
         return <CountdownTimer targetDate={electionEndDate} title="Voting Closes In" onCompleteMessage="Voting has officially ended." />;
       case 'POST_ELECTION':
         return (
-          <div className="text-center p-6 bg-white/20 backdrop-blur-sm rounded-lg shadow-lg">
-              <h3 className="text-2xl sm:text-3xl font-bold text-white">The 2025 Student Elections have concluded.</h3>
+          <div className="text-center p-4 bg-white/20 backdrop-blur-sm rounded-lg shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold text-white">The 2025 Student Elections have concluded.</h3>
           </div>
         );
       default:
@@ -51,35 +51,35 @@ const HomePage: React.FC<HomePageProps> = ({ setPage, electionStatus, electionSt
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center bg-white rounded-xl shadow-lg p-12 mb-12">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-dmi-blue-900">Shape Your University's Future</h2>
-        <h1 className="text-2xl md:text-3xl font-bold text-dmi-blue-700 mt-2">Secure & Simple Electronic Voting for the 2025 Student Elections</h1>
-        <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+    <div className="container mx-auto px-4 py-6">
+      <div className="text-center bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 className="text-2xl md:text-4xl font-extrabold text-dmi-blue-900">Shape Your University's Future</h2>
+        <h1 className="text-lg md:text-2xl font-bold text-dmi-blue-700 mt-2">Secure & Simple Electronic Voting for the 2025 Student Elections</h1>
+        <p className="mt-3 text-sm md:text-base text-gray-600 max-w-3xl mx-auto">
           Your Voice. Your Vote. Your DEMWAYE. Participate in building a better campus community.
         </p>
 
-        <div className="my-10 p-6 bg-dmi-blue-700 rounded-xl">
+        <div className="my-6 p-4 bg-dmi-blue-700 rounded-xl">
           {renderTimerSection()}
         </div>
 
-        <div className="flex justify-center items-center space-x-4">
-          <Button size="lg" onClick={() => setPage(Page.Authentication)} disabled={electionStatus !== 'LIVE'}>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+          <Button size="lg" onClick={() => setPage(Page.Authentication)} disabled={electionStatus !== 'LIVE'} className="w-full sm:w-auto">
             Cast Your Vote Now
-            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+            <svg className="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
           </Button>
-          <Button size="lg" variant="secondary" onClick={() => setPage(Page.Results)}>
+          <Button size="lg" variant="secondary" onClick={() => setPage(Page.Results)} className="w-full sm:w-auto">
             View Results
           </Button>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {phases.map((phase) => (
-          <Card key={phase.title} className="text-center p-8 hover:shadow-xl transition-shadow">
-            <div className="flex justify-center mb-4">{phase.icon}</div>
-            <h3 className="text-xl font-bold text-dmi-blue-800 mb-2">{phase.title}</h3>
-            <p className="text-gray-600">{phase.description}</p>
+          <Card key={phase.title} className="text-center p-4 hover:shadow-xl transition-shadow">
+            <div className="flex justify-center mb-3">{phase.icon}</div>
+            <h3 className="text-base md:text-lg font-bold text-dmi-blue-800 mb-2">{phase.title}</h3>
+            <p className="text-sm text-gray-600">{phase.description}</p>
           </Card>
         ))}
       </div>

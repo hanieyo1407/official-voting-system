@@ -169,10 +169,10 @@ const AuthenticationPage: React.FC<AuthenticationPageProps> = ({ onLoginSuccess,
 // Removed: const correctVoucher = 'SJBU-VOTE-2025';
 
   const renderSuccessView = () => (
-    <div className="p-8 text-center flex flex-col items-center justify-center h-full">
-        <svg className="w-24 h-24 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <h3 className="text-2xl font-semibold text-dmi-blue-900">Authentication Successful!</h3>
-        <p className="text-gray-600 mt-2">You are verified. Loading your ballot now...</p>
+    <div className="p-6 text-center flex flex-col items-center justify-center h-full">
+        <svg className="w-20 h-20 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <h3 className="text-xl lg:text-2xl font-semibold text-dmi-blue-900">Authentication Successful!</h3>
+        <p className="text-gray-600 mt-2 text-base-mobile">You are verified. Loading your ballot now...</p>
     </div>
   );
 
@@ -183,11 +183,11 @@ const AuthenticationPage: React.FC<AuthenticationPageProps> = ({ onLoginSuccess,
     const seconds = lockoutTime % 60;
 
     return (
-      <div className="p-8 text-center flex flex-col items-center justify-center">
-        <svg className="w-24 h-24 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <h3 className="text-2xl font-semibold text-dmi-blue-900">Too Many Failed Attempts</h3>
-        <p className="text-gray-600 mt-2">For security, access is temporarily locked. Please try again in:</p>
-        <div className="text-4xl font-mono font-bold text-red-600 my-4">
+      <div className="p-6 text-center flex flex-col items-center justify-center">
+        <svg className="w-20 h-20 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <h3 className="text-xl lg:text-2xl font-semibold text-dmi-blue-900">Too Many Failed Attempts</h3>
+        <p className="text-gray-600 mt-2 text-sm">For security, access is temporarily locked. Please try again in:</p>
+        <div className="text-3xl md:text-4xl font-mono font-bold text-red-600 my-4">
           {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
         </div>
       </div>
@@ -196,15 +196,15 @@ const AuthenticationPage: React.FC<AuthenticationPageProps> = ({ onLoginSuccess,
 
   const renderVoucherView = () => (
     <form onSubmit={handleVerifyVoucher}>
-      <div className="p-8 text-center">
-        <h3 className="text-xl font-semibold text-dmi-blue-900">Voter Authentication</h3>
-        <p className="text-gray-600 mt-2">Please enter your unique voting voucher code below to proceed.</p>
-        <div className="my-6">
+      <div className="p-6 text-center">
+        <h3 className="text-lg lg:text-xl font-semibold text-dmi-blue-900">Voter Authentication</h3>
+        <p className="text-gray-600 mt-2 text-sm">Please enter your unique voting voucher code below to proceed.</p>
+        <div className="my-4">
           <input
             type="text"
             value={voucher}
             onChange={(e) => setVoucher(e.target.value)}
-            className="w-full text-center text-2xl tracking-widest font-mono bg-gray-100 border-2 border-gray-300 rounded-lg p-3 focus:border-dmi-blue-500 focus:ring-dmi-blue-500 text-dmi-blue-900 font-semibold placeholder-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed"
+            className="w-full text-center text-xl-mobile md:text-2xl font-mono bg-gray-100 border-2 border-gray-300 rounded-card p-3 focus:outline-none focus:shadow-focus-ring focus:border-dmi-blue-500 text-dmi-blue-900 font-semibold placeholder-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed"
             placeholder="ENTER VOUCHER"
             required
             autoFocus
@@ -214,9 +214,9 @@ const AuthenticationPage: React.FC<AuthenticationPageProps> = ({ onLoginSuccess,
         </div>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
       </div>
-      <div className="bg-gray-50 px-8 py-4">
-        <Button type="submit" className="w-full" disabled={isLoading || isRateLimited}>
-           {isLoading ? <Spinner/> : <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>}
+      <div className="bg-gray-50 px-4 py-4">
+        <Button type="submit" className="w-full min-h-touch rounded-btn bg-dmi-blue-500 text-white text-base-mobile font-semibold" disabled={isLoading || isRateLimited}>
+           {isLoading ? <Spinner/> : <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>}
           {isLoading ? 'Verifying...' : 'Verify & Proceed'}
         </Button>
       </div>
@@ -227,24 +227,24 @@ const AuthenticationPage: React.FC<AuthenticationPageProps> = ({ onLoginSuccess,
     switch (electionStatus) {
       case 'PRE_ELECTION':
         return (
-          <Card className="max-w-2xl mx-auto p-12 text-center bg-dmi-blue-800 text-white">
-            <h2 className="text-3xl font-bold">The Election Has Not Started Yet</h2>
-            <p className="mt-4 mb-8">Please check back when the countdown finishes. You will be able to cast your vote then.</p>
+          <Card className="max-w-2xl mx-auto p-8 text-center bg-dmi-blue-800 text-white">
+            <h2 className="text-2xl lg:text-3xl font-bold">The Election Has Not Started Yet</h2>
+            <p className="mt-4 mb-8 text-sm">Please check back when the countdown finishes. You will be able to cast your vote then.</p>
             <CountdownTimer targetDate={electionStartDate} title="Voting Begins In" onCompleteMessage="The Election is Now Live!" />
           </Card>
         );
       case 'POST_ELECTION':
         return (
-          <Card className="max-w-md w-full p-12 text-center">
-            <h2 className="text-3xl font-bold text-dmi-blue-900">Voting Has Ended</h2>
-            <p className="text-gray-600 mt-4">The voting period for the 2025 Student Elections is now closed. Thank you for your participation.</p>
-            <Button className="mt-6" onClick={() => setPage(Page.Results)}>View Official Results</Button>
+          <Card className="max-w-md w-full p-8 text-center">
+            <h2 className="text-2xl font-bold text-dmi-blue-900">Voting Has Ended</h2>
+            <p className="text-gray-600 mt-4 text-sm">The voting period for the 2025 Student Elections is now closed. Thank you for your participation.</p>
+            <Button className="mt-4" onClick={() => setPage(Page.Results)}>View Official Results</Button>
           </Card>
         );
       case 'LIVE':
         return (
-          <div className="max-w-md w-full space-y-8">
-              <div className="p-4 bg-dmi-blue-700 rounded-xl">
+          <div className="w-full max-w-md space-y-6">
+              <div className="p-3 bg-dmi-blue-700 rounded-xl">
                   <CountdownTimer targetDate={electionEndDate} title="Voting Closes In" onCompleteMessage="Voting has ended." />
               </div>
               <Card>
@@ -258,7 +258,7 @@ const AuthenticationPage: React.FC<AuthenticationPageProps> = ({ onLoginSuccess,
   }
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+    <div className="min-h-[60vh] flex items-center justify-center py-8 px-4">
         {renderPageContent()}
     </div>
   );
