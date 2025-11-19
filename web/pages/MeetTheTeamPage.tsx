@@ -35,7 +35,7 @@ const sampleTeam: TeamMember[] = [
     role: 'Operations & Events',
     imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.08.44_AM_fzppim',
     bio: 'The strongest people are not those who show strength to us, but those who win battles we know nothing about.',
-    contact: 'peter@dmi-sjbu.edu',
+    contact: 'blessingsphiri196@gmail.com',
   },
   {
     id: 3,

@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 type HowToModal = 'HOW_TO_VOTE' | 'HOW_TO_VERIFY' | 'SECURITY' | null;
 
 const cloudinaryPlaceholder = (publicId: string) =>
-  `https://res.cloudinary.com/YOUR_CLOUD_NAME/video/upload/q_auto,f_auto/${publicId}.mp4`;
+  `https://res.cloudinary.com/unihousingmw/video/upload/q_auto,f_auto/${publicId}.mp4`;
 
 const HowToVotePage: React.FC = () => {
   const [open, setOpen] = useState<HowToModal>(null);
@@ -99,7 +99,7 @@ const HowToVotePage: React.FC = () => {
       >
         <div className="aspect-video">
           <video controls className="w-full h-full rounded">
-            <source src={cloudinaryPlaceholder('how_to_verify_public_id')} type="video/mp4" />
+            <source src={cloudinaryPlaceholder('v1763539331/Screen_Recording_20251119-013547_Chrome_p90y1q')} type="video/mp4" />
           </video>
         </div>
         <div className="mt-4 text-sm text-gray-600">
