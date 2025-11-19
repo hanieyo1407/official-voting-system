@@ -33,8 +33,8 @@ const sampleTeam: TeamMember[] = [
     name: 'Blessings Phiri',
     position: 'Vice Chairperson',
     role: 'Operations & Events',
-    imagePublicId: 'dmi/team/peter_banda',
-    bio: 'Peter coordinates events, manages logistics, and ensures smooth delivery on election days.',
+    imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.08.44_AM_fzppim',
+    bio: 'The strongest people are not those who show strength to us, but those who win battles we know nothing about.',
     contact: 'peter@dmi-sjbu.edu',
   },
   {
@@ -60,9 +60,9 @@ const sampleTeam: TeamMember[] = [
     name: 'Jane Alex',
     position: 'Project Coordinator',
     role: 'Project Coordinator',
-    imagePublicId: 'v1763505109/LILZPICS047_3_xho0xi',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
+    imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.48.06_AM_zwwmkk',
+    bio: 'Finding success in hardship.',
+    contact: 'Welonasi@gmail.com',
   },
       {
     id: 6,
