@@ -83,7 +83,7 @@ const HowToVotePage: React.FC = () => {
         {/* Cloudinary placeholder — replace publicId with your Cloudinary public ID */}
         <div className="aspect-video">
           <video controls className="w-full h-full rounded">
-            <source src={cloudinaryPlaceholder('how_to_vote_public_id')} type="video/mp4" />
+            <source src={cloudinaryPlaceholder('v1763539960/Screen_Recording_20251119-013347_Chrome_yt11hh')} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
