@@ -17,6 +17,9 @@ import { isAxiosError } from 'axios';
 import { useVotingTrends } from '../hooks/useVotingTrends'; 
 import { useAllPositions } from '../hooks/useAllPositions'; 
 
+// New imports for schedule editor
+import useElectionSchedule from '../hooks/useElectionSchedule';
+import { updateSchedule } from '../src/api/sjbuApi';
 
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
 const EditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>;
@@ -31,7 +34,8 @@ const AuditIcon = () => <svg className="w-6 h-6 mr-3" fill="none" stroke="curren
 const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg>;
 const RefreshIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 10v4h4"/><path d="m11 14 1.535-1.605a5 5 0 0 1 8 1.5"/><path d="M16 2v4"/><path d="m21 18-1.535 1.605a5 5 0 0 1-8-1.5"/><path d="M21 22v-4h-4"/><path d="M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3"/><path d="M3 10h4"/><path d="M8 2v4"/></svg>;
 
-// --- Types ---
+// --- Types and component code unchanged except where schedule integration added ---
+
 interface PositionWithCandidates extends Position {
     candidates: Candidate[];
 }
@@ -72,12 +76,7 @@ const RoleSwitcher: React.FC<{ adminUsers: AdminUser[], currentUser: AdminUser, 
     );
 };
 
-interface SidebarProps {
-    activeView: AdminView;
-    setActiveView: (view: AdminView) => void;
-    permissions: Permissions;
-}
-const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, permissions }) => {
+const Sidebar: React.FC<{ activeView: AdminView; setActiveView: (view: AdminView) => void; permissions: Permissions; }> = ({ activeView, setActiveView, permissions }) => {
      const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon />, permitted: permissions.canViewDashboard },
         { id: 'positions', label: 'Positions', icon: <PositionsIcon />, permitted: permissions.canViewPositions },
@@ -87,7 +86,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, permission
         { id: 'settings', label: 'Settings', icon: <SettingsIcon />, permitted: permissions.canEditSettings },
     ];
 
-    // Mobile-first: horizontal compact nav on small screens; vertical on lg+
     return (
         <aside className="w-full lg:w-auto">
             <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible bg-white p-2 rounded-lg shadow-sm">
@@ -119,6 +117,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     const { adminUsers, isLoading: isAdminUsersLoading, error: adminUsersError, fetchAdminUsers } = useAdminUsers();
     const { positions, isLoading: isPositionsLoading, error: positionsError, fetchPositions } = useAllPositions();
 
+    const { schedule, phase: schedulePhase, loading: scheduleLoading, refresh: refreshSchedule } = useElectionSchedule(15000);
+
     const handleOpenModal = (type: ModalType, data?: any) => setModal({ isOpen: true, type, data });
     const handleCloseModal = () => setModal({ isOpen: false, type: null });
     
@@ -140,7 +140,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     const handleDataRefresh = useCallback(() => {
         fetchAdminUsers();
         fetchPositions();
-    }, [fetchAdminUsers, fetchPositions]);
+        refreshSchedule();
+    }, [fetchAdminUsers, fetchPositions, refreshSchedule]);
     
     useEffect(() => {
         if (onRefetchPositions) {
@@ -202,7 +203,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     );
 };
 
-// DashboardView
+// DashboardView - UPDATED WITH CARD LAYOUT
 interface DashboardViewProps {
     permissions: Permissions;
 }
@@ -271,115 +272,184 @@ const DashboardView: React.FC<DashboardViewProps> = ({ permissions }) => {
             </Card>
 
             <h2 className="text-xl font-bold text-dmi-blue-900 text-center mb-2">Candidate Race Summaries</h2>
-            <div className="space-y-4">
-                {positionsWithStats.map((position: any) => (
-                    <Card key={position.positionId} className="p-4">
-                        <h3 className="text-lg font-bold text-dmi-blue-900 mb-3">{position.positionName} - {position.totalVotes} Votes Cast</h3>
-                        <div className="h-48 sm:h-64">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={position.candidates} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis type="number" />
-                                    <YAxis type="category" dataKey="candidateName" width={100} tick={{fontSize: 12}} />
-                                    <Tooltip formatter={(value: number, name: string) => [
-                                        `${value} votes (${(value / position.totalVotes * 100).toFixed(2)}%)`, 
-                                        position.positionName
-                                    ]} />
-                                    <Legend />
-                                    <Bar dataKey="voteCount" name="Votes" fill="#1b66c4" />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </Card>
-                ))}
+            <div className="space-y-6">
+                {positionsWithStats.map((position: any) => {
+                    const rawTotalVotes = Number(position.totalVotes ?? 0);
+                    const candidates = (position.candidates || []).map((c: any) => ({ ...c }));
+                    
+                    // Sort candidates by vote count (descending)
+                    const sortedCandidates = [...candidates].sort((a, b) => 
+                      (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0)
+                    );
+
+                    return (
+                        <Card key={position.positionId} className="p-4">
+                            <h3 className="text-lg font-bold text-dmi-blue-900 mb-3">{position.positionName} - {rawTotalVotes} Votes Cast</h3>
+                            
+                            <div className="h-48 sm:h-56 mb-4">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={candidates} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis type="number" />
+                                        <YAxis type="category" dataKey="candidateName" width={110} tick={{fontSize: 12}} />
+                                        <Tooltip formatter={(value: number, _name: string, props: any) => {
+                                            const raw = Number(props.payload.voteCount ?? value);
+                                            const pct = raw && rawTotalVotes ? ((raw / rawTotalVotes) * 100).toFixed(2) : '0.00';
+                                            return [`${raw} raw — ${pct}%`, position.positionName];
+                                        }} />
+                                        <Legend />
+                                        <Bar dataKey="voteCount" name="Votes" fill="#1b66c4" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Summary Cards */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {sortedCandidates.map((candidate: any, index: number) => {
+                                const voteCount = Number(candidate.voteCount || 0);
+                                const percentage = rawTotalVotes > 0 
+                                  ? ((voteCount / rawTotalVotes) * 100).toFixed(2) 
+                                  : '0.00';
+                                const isLeading = index === 0 && voteCount > 0;
+                                const isSecond = index === 1 && voteCount > 0;
+
+                                // Determine card styling based on rank
+                                let borderColor = 'border-gray-300';
+                                let bgColor = 'bg-white';
+                                let badgeColor = 'bg-gray-200 text-gray-700';
+                                let rankBadge = `#${index + 1}`;
+
+                                if (isLeading) {
+                                  borderColor = 'border-green-400';
+                                  bgColor = 'bg-green-50';
+                                  badgeColor = 'bg-green-500 text-white';
+                                  rankBadge = '🥇 Leading';
+                                } else if (isSecond) {
+                                  borderColor = 'border-blue-400';
+                                  bgColor = 'bg-blue-50';
+                                  badgeColor = 'bg-blue-500 text-white';
+                                  rankBadge = '🥈 2nd';
+                                }
+
+                                return (
+                                  <div 
+                                    key={candidate.candidateId}
+                                    className={`${bgColor} border-2 ${borderColor} rounded-lg p-3 transition-all duration-300 hover:shadow-md`}
+                                  >
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h4 className={`font-bold text-sm ${isLeading ? 'text-green-900' : isSecond ? 'text-blue-900' : 'text-gray-800'}`}>
+                                        {candidate.candidateName}
+                                      </h4>
+                                      <span className={`${badgeColor} text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ml-2`}>
+                                        {rankBadge}
+                                      </span>
+                                    </div>
+                                    
+                                    <div className="space-y-1">
+                                      <div className="flex justify-between items-baseline">
+                                        <span className="text-xs text-gray-600">Votes:</span>
+                                        <span className={`text-xl font-bold tabular-nums ${isLeading ? 'text-green-700' : isSecond ? 'text-blue-700' : 'text-gray-800'}`}>
+                                          {voteCount.toLocaleString()}
+                                        </span>
+                                      </div>
+                                      
+                                      <div className="flex justify-between items-baseline">
+                                        <span className="text-xs text-gray-600">Share:</span>
+                                        <span className={`text-lg font-semibold tabular-nums ${isLeading ? 'text-green-700' : isSecond ? 'text-blue-700' : 'text-gray-700'}`}>
+                                          {percentage}%
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                        </Card>
+                    );
+                })}
             </div>
         </div>
     );
 };
 
-// SettingsView
+// SettingsView (modified to include server-driven schedule editor)
 interface SettingsViewProps {
     permissions: Permissions;
     onStartCountdown: (hours: number) => void;
 }
 const SettingsView: React.FC<SettingsViewProps> = ({ permissions, onStartCountdown }) => {
-    const [countdownHours, setCountdownHours] = useState('48');
+    const { schedule, phase, loading: scheduleLoading, refresh } = useElectionSchedule(30000);
+    const [startInput, setStartInput] = useState('');
+    const [endInput, setEndInput] = useState('');
+    const [resultsInput, setResultsInput] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [msg, setMsg] = useState<string | null>(null);
 
-    const handleStartCountdown = (e: React.FormEvent) => {
+    useEffect(() => {
+        if (schedule) {
+            setStartInput(schedule.startDate ?? '');
+            setEndInput(schedule.endDate ?? '');
+            setResultsInput(schedule.resultsAnnouncement ?? '');
+        }
+    }, [schedule]);
+
+    const handleSaveSchedule = async (e: React.FormEvent) => {
         e.preventDefault();
-        const hours = parseInt(countdownHours, 10);
-        if (hours > 0 && hours <= 48) {
-            onStartCountdown(hours);
-            alert(`Countdown successfully started for ${hours} hours! The home page timer will now reflect this change.`);
-        } else {
-            alert('Please enter a valid number of hours between 1 and 48.');
+        if (!permissions.canEditSettings) return;
+        setSaving(true);
+        setMsg(null);
+        try {
+            await updateSchedule({
+                startDate: new Date(startInput).toISOString(),
+                endDate: new Date(endInput).toISOString(),
+                resultsAnnouncement: resultsInput ? new Date(resultsInput).toISOString() : null
+            });
+            setMsg('Schedule saved');
+            await refresh();
+        } catch (err: any) {
+            console.error(err);
+            setMsg(err?.response?.data?.error || 'Save failed');
+        } finally {
+            setSaving(false);
         }
     };
-    
+
     return (
         <Card>
             <div className="p-4 border-b">
                 <h2 className="text-lg font-bold text-dmi-blue-900">Election Settings</h2>
                 <p className="text-sm text-gray-500">Configure core parameters for the election.</p>
             </div>
-            <form className="p-4 space-y-4">
+
+            <form onSubmit={handleSaveSchedule} className="p-4 space-y-4">
                 {!permissions.canEditSettings && (
-                    <div className="bg-dmi-blue-50 text-dmi-blue-800 p-2 rounded-lg text-sm">
-                        Settings can only be modified by a Super Admin.
-                    </div>
+                    <div className="bg-dmi-blue-50 text-dmi-blue-800 p-2 rounded-lg text-sm">Settings can only be modified by a Super Admin.</div>
                 )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                        <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">Election Start Date</label>
-                        <input type="datetime-local" id="start-date" name="start-date" disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" />
+                        <label className="block text-sm font-medium text-gray-700">Election Start Date (UTC)</label>
+                        <input type="datetime-local" value={startInput ? startInput.replace('Z','') : ''} onChange={e => setStartInput(new Date(e.target.value).toISOString())} disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" />
                     </div>
                      <div>
-                        <label htmlFor="end-date" className="block text-sm font-medium text-gray-700">Election End Date</label>
-                        <input type="datetime-local" id="end-date" name="end-date" disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" />
+                        <label className="block text-sm font-medium text-gray-700">Election End Date (UTC)</label>
+                        <input type="datetime-local" value={endInput ? endInput.replace('Z','') : ''} onChange={e => setEndInput(new Date(e.target.value).toISOString())} disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" />
                     </div>
                 </div>
+
                  <div>
-                    <label htmlFor="voucher-rules" className="block text-sm font-medium text-gray-700">Voucher Generation Rules</label>
-                     <textarea id="voucher-rules" name="voucher-rules" rows={4} disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" placeholder="e.g., Alphanumeric, 12 characters, expires in 24 hours..."></textarea>
+                    <label className="block text-sm font-medium text-gray-700">Results Announcement (UTC, optional)</label>
+                    <input type="datetime-local" value={resultsInput ? resultsInput.replace('Z','') : ''} onChange={e => setResultsInput(new Date(e.target.value).toISOString())} disabled={!permissions.canEditSettings} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100" />
                 </div>
+
                  <div className="pt-2 flex justify-end">
-                    <Button type="submit" disabled={!permissions.canEditSettings} disabledTooltip="Requires Super Admin role.">Save Settings</Button>
+                    <Button type="submit" disabled={!permissions.canEditSettings || saving} className="min-h-touch">{saving ? 'Saving...' : 'Save Schedule'}</Button>
                 </div>
             </form>
 
-            <div className="p-4 border-t space-y-3">
-                <h3 className="text-sm font-bold text-dmi-blue-800">Start Election Countdown</h3>
-                <p className="text-sm text-gray-600">
-                    This will immediately set the election start time based on the hours provided from now. This action is irreversible for this session.
-                </p>
-                <form onSubmit={handleStartCountdown} className="flex flex-col sm:flex-row sm:items-end sm:space-x-3 gap-2">
-                    <div className="flex-grow">
-                        <label htmlFor="countdown-hours" className="block text-sm font-medium text-gray-700">Countdown Duration (1-48 Hours)</label>
-                        <input
-                            type="number"
-                            id="countdown-hours"
-                            name="countdown-hours"
-                            value={countdownHours}
-                            onChange={e => setCountdownHours(e.target.value)}
-                            min="1"
-                            max="48"
-                            disabled={!permissions.canEditSettings}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-dmi-blue-500 focus:ring-dmi-blue-500 disabled:bg-gray-100"
-                            required
-                        />
-                    </div>
-                    <div className="mt-2 sm:mt-0">
-                        <Button
-                            type="submit"
-                            disabled={!permissions.canEditSettings}
-                            disabledTooltip="Requires Super Admin role."
-                            variant="danger"
-                            className="min-h-touch"
-                        >
-                            Start Countdown
-                        </Button>
-                    </div>
-                </form>
+            <div className="p-4 border-t space-y-3 text-sm text-gray-600">
+                <p>Server schedule: {schedule ? `${schedule.startDate ?? '—'} → ${schedule.endDate ?? '—'}` : (scheduleLoading ? 'Loading...' : 'Not configured')}</p>
+                {msg && <p className="text-sm text-gray-700">{msg}</p>}
             </div>
         </Card>
     );
@@ -731,7 +801,7 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({ adminUsers, per
                     <PlusIcon/> <span className="hidden sm:inline">Create New Admin</span>
                 </Button>
             </div>
-             
+            
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-gray-50">
@@ -982,9 +1052,9 @@ const CandidateForm = ({ type, candidate, positionId, onSuccess, onCancel }: { t
             };
             
             if (type === 'ADD_CANDIDATE') {
-                await sjbuApi.createCandidate(payload); 
+                await (sjbuApi as any).createCandidate(payload); 
             } else {
-                await sjbuApi.updateCandidate(candidate!.id, payload); 
+                await (sjbuApi as any).updateCandidate(candidate!.id, payload); 
             }
             onSuccess();
         } catch (err) {

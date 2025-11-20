@@ -7,7 +7,9 @@ import {
   cancelElection,
   updateElectionSettings,
   getElectionHistory,
-  getAllPositionsWithCandidates
+  getAllPositionsWithCandidates,
+  getSchedule,
+  upsertSchedule
 } from "../controllers/election.controller";
 import { verifyAdminToken, requireSuperAdmin, requireAdminOrSuperAdmin } from "../middleware/admin.middleware";
 
@@ -365,5 +367,11 @@ electionRoute.post("/cancel", verifyAdminToken, requireSuperAdmin, cancelElectio
  *         description: Internal server error
  */
 electionRoute.put("/settings", verifyAdminToken, requireSuperAdmin, updateElectionSettings);
+// --- Election schedule routes (add in src/routes/election.route.ts) ---
+// Public schedule read
+electionRoute.get("/schedule", getSchedule);
+
+// Admin-only schedule update
+electionRoute.post("/schedule", verifyAdminToken, requireAdminOrSuperAdmin, upsertSchedule);
 
 export default electionRoute;

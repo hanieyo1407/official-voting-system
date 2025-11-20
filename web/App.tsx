@@ -24,6 +24,7 @@ import MeetTheTeamPage from './pages/MeetTheTeamPage';
 import Card from './components/Card';
 import Button from './components/Button';
 import { useAllPositions } from './hooks/useAllPositions';
+import useElectionSchedule from './hooks/useElectionSchedule';
 import sjbuApi from './src/api/sjbuApi';
 
 // Define the expected structure for VotingPage data
@@ -48,8 +49,48 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [electionStatus, setElectionStatus] = useState<ElectionStatus>('PRE_ELECTION');
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [electionStartDate, setElectionStartDate] = useState(ELECTION_START_DATE);
-  const [electionEndDate, setElectionEndDate] = useState(ELECTION_END_DATE);
+  const [electionStartDate, setElectionStartDate] = useState<Date>(ELECTION_START_DATE);
+  const [electionEndDate, setElectionEndDate] = useState<Date>(ELECTION_END_DATE);
+
+  // Server-driven schedule hook (polls server for authoritative schedule)
+  const { schedule: appSchedule, phase: appPhase, loading: scheduleLoading, refresh: refreshSchedule } = useElectionSchedule(15000);
+
+  // Map server phase string into the app's ElectionStatus enum
+  const mapPhaseToElectionStatus = (phase: string | undefined): ElectionStatus => {
+    switch (phase) {
+      case 'PRE':
+      case 'PRE_ELECTION':
+        return 'PRE_ELECTION';
+      case 'LIVE':
+      case 'ACTIVE':
+        return 'LIVE';
+      case 'POST_WAIT':
+      case 'POST':
+      case 'POST_ELECTION':
+      case 'COMPLETED':
+        return 'POST_ELECTION';
+      default:
+        return 'PRE_ELECTION';
+    }
+  };
+
+  // Mirror server phase into local electionStatus and update start/end dates when provided
+  useEffect(() => {
+    if (!scheduleLoading) {
+      setElectionStatus(mapPhaseToElectionStatus(appPhase));
+      if (appSchedule) {
+        try {
+          if (appSchedule.startDate) setElectionStartDate(new Date(appSchedule.startDate));
+          if (appSchedule.endDate) setElectionEndDate(new Date(appSchedule.endDate));
+        } catch (err) {
+          // ignore parse errors; keep existing dates
+          // keep console log for debugging
+          // eslint-disable-next-line no-console
+          console.warn('Failed to parse server schedule dates', err);
+        }
+      }
+    }
+  }, [appPhase, appSchedule, scheduleLoading]);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -108,18 +149,8 @@ const App: React.FC = () => {
 
   const handleAdminRefetch = useCallback(() => {
     fetchPositions();
-  }, [fetchPositions]);
-
-  const ElectionStatusSimulator = () => (
-    <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-2xl z-50 border">
-      <h4 className="text-sm font-bold text-dmi-blue-900 mb-2">Election Status Simulator</h4>
-      <div className="flex space-x-2">
-        <Button size="sm" variant={electionStatus === 'PRE_ELECTION' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('PRE_ELECTION')}>Pre</Button>
-        <Button size="sm" variant={electionStatus === 'LIVE' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('LIVE')}>Live</Button>
-        <Button size="sm" variant={electionStatus === 'POST_ELECTION' ? 'primary' : 'secondary'} onClick={() => setElectionStatus('POST_ELECTION')}>Post</Button>
-      </div>
-    </div>
-  );
+    refreshSchedule();
+  }, [fetchPositions, refreshSchedule]);
 
   const renderResultsPage = () => {
     switch (electionStatus) {
@@ -214,7 +245,6 @@ const App: React.FC = () => {
         {renderPage()}
       </main>
       {currentPage !== Page.Intro && <Footer setPage={setCurrentPage} />}
-      {currentPage !== Page.Intro && <ElectionStatusSimulator />}
     </div>
   );
 };

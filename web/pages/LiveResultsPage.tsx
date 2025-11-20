@@ -117,6 +117,11 @@ const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage })
           {positionsWithStats.map((position: any) => {
             const rawTotalVotes = Number(position.totalVotes ?? 0);
             const candidates = (position.candidates || []).map((c: any) => ({ ...c }));
+            
+            // Sort candidates by vote count (descending)
+            const sortedCandidates = [...candidates].sort((a, b) => 
+              (Number(b.voteCount) || 0) - (Number(a.voteCount) || 0)
+            );
 
             return (
               <Card key={position.positionId} className="p-4">
@@ -124,7 +129,7 @@ const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage })
                   {position.positionName} - {rawTotalVotes} Votes Cast
                 </h3>
 
-                <div className="h-48 sm:h-56">
+                <div className="h-48 sm:h-56 mb-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={candidates} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -139,6 +144,68 @@ const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage })
                       <Bar dataKey="voteCount" name="Votes" fill="#1b66c4" />
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {sortedCandidates.map((candidate: any, index: number) => {
+                    const voteCount = Number(candidate.voteCount || 0);
+                    const percentage = rawTotalVotes > 0 
+                      ? ((voteCount / rawTotalVotes) * 100).toFixed(2) 
+                      : '0.00';
+                    const isLeading = index === 0 && voteCount > 0;
+                    const isSecond = index === 1 && voteCount > 0;
+
+                    // Determine card styling based on rank
+                    let borderColor = 'border-gray-300';
+                    let bgColor = 'bg-white';
+                    let badgeColor = 'bg-gray-200 text-gray-700';
+                    let rankBadge = `#${index + 1}`;
+
+                    if (isLeading) {
+                      borderColor = 'border-green-400';
+                      bgColor = 'bg-green-50';
+                      badgeColor = 'bg-green-500 text-white';
+                      rankBadge = '🥇 Leading';
+                    } else if (isSecond) {
+                      borderColor = 'border-blue-400';
+                      bgColor = 'bg-blue-50';
+                      badgeColor = 'bg-blue-500 text-white';
+                      rankBadge = '🥈 2nd';
+                    }
+
+                    return (
+                      <div 
+                        key={candidate.candidateId}
+                        className={`${bgColor} border-2 ${borderColor} rounded-lg p-3 transition-all duration-300 hover:shadow-md`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className={`font-bold text-sm ${isLeading ? 'text-green-900' : isSecond ? 'text-blue-900' : 'text-gray-800'}`}>
+                            {candidate.candidateName}
+                          </h4>
+                          <span className={`${badgeColor} text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ml-2`}>
+                            {rankBadge}
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-xs text-gray-600">Votes:</span>
+                            <span className={`text-xl font-bold tabular-nums ${isLeading ? 'text-green-700' : isSecond ? 'text-blue-700' : 'text-gray-800'}`}>
+                              {voteCount.toLocaleString()}
+                            </span>
+                          </div>
+                          
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-xs text-gray-600">Share:</span>
+                            <span className={`text-lg font-semibold tabular-nums ${isLeading ? 'text-green-700' : isSecond ? 'text-blue-700' : 'text-gray-700'}`}>
+                              {percentage}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </Card>
             );

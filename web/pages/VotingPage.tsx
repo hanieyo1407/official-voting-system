@@ -1,5 +1,4 @@
 // web/pages/VotingPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Page, Candidate, Position } from '../types'; 
 import Button from '../components/Button';
@@ -9,6 +8,8 @@ import Spinner from '../components/Spinner';
 import sjbuApi from '../src/api/sjbuApi'; 
 import { isAxiosError } from 'axios';
 import { useAllPositions } from '@/hooks/useAllPositions';
+import useElectionSchedule from '../hooks/useElectionSchedule';
+import CountdownTimer from '../components/CountdownTimer';
 
 interface VoteSelection {
   [positionId: number]: number;
@@ -36,6 +37,8 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalCandidate, setModalCandidate] = useState<Candidate | null>(null);
 
+  const { schedule, phase, loading: scheduleLoading } = useElectionSchedule(10000);
+
   useEffect(() => {
     try {
       const savedSelections = localStorage.getItem('dmi-vote-selections');
@@ -55,12 +58,10 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
   }, []);
 
   useEffect(() => {
-    if (Object.keys(selections).length > 0) {
-      try {
-        localStorage.setItem('dmi-vote-selections', JSON.stringify(selections));
-      } catch (error) {
-        console.error("Could not save selections to local storage", error);
-      }
+    try {
+      localStorage.setItem('dmi-vote-selections', JSON.stringify(selections));
+    } catch (error) {
+      console.error("Could not save selections to local storage", error);
     }
   }, [selections]);
 
@@ -92,6 +93,15 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
   };
 
   const handleSubmit = async () => {
+    if (scheduleLoading) {
+      alert('Please wait — schedule loading.');
+      return;
+    }
+    if (phase !== 'LIVE') {
+      alert('Voting is not currently live. Please try when voting is open.');
+      return;
+    }
+
     if (isOffline) {
       alert("You are offline. Please reconnect to the internet to submit your vote.");
       return;
@@ -171,6 +181,41 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
     setModalCandidate(candidate);
     setIsManifestoModalOpen(true);
   };
+
+  if (scheduleLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <Card className="max-w-4xl mx-auto p-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900">Loading schedule…</h2>
+        </Card>
+      </div>
+    );
+  }
+
+  if (phase !== 'LIVE') {
+    const startDate = schedule?.startDate ? new Date(schedule.startDate) : null;
+    const endDate = schedule?.endDate ? new Date(schedule.endDate) : null;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-4xl mx-auto p-6 text-center">
+          {phase === 'PRE' && startDate && (
+            <>
+              <h2 className="text-xl font-bold">Voting opens soon</h2>
+              <p className="mt-2 text-gray-600">Voting begins at {startDate.toLocaleString()}</p>
+              <CountdownTimer targetDate={startDate} title="Opens in" onCompleteMessage="Voting is now live" />
+            </>
+          )}
+          {phase === 'POST_WAIT' && (
+            <>
+              <h2 className="text-xl font-bold">Voting has closed</h2>
+              {schedule?.resultsAnnouncement ? <CountdownTimer targetDate={new Date(schedule.resultsAnnouncement)} title="Results in" onCompleteMessage="Results announced" /> : <p className="mt-2">Results announcement pending.</p>}
+            </>
+          )}
+          {phase === 'POST' && <p>Results are published. Visit the Results page.</p>}
+        </Card>
+      </div>
+    );
+  }
 
   if (!currentPosition) {
     return (

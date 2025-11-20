@@ -49,7 +49,7 @@ const HowToVotePage: React.FC = () => {
             <p className="font-semibold text-dmi-blue-800">Quick Actions</p>
             <div className="mt-3 flex flex-col sm:flex-row gap-3">
               <Button onClick={() => setOpen('HOW_TO_VOTE')}>Watch: How to Vote</Button>
-              <Button variant="secondary" onClick={() => setOpen('HOW_TO_VERIFY')}>Watch: How to Verify</Button>
+              <Button variant="secondary" onClick={() => setOpen('HOW_TO_VERIFY')}>Watch: How to vote & verify</Button>
               <Button variant="secondary" onClick={() => setOpen('SECURITY')}>Watch: Security & Privacy</Button>
             </div>
           </div>
@@ -83,7 +83,7 @@ const HowToVotePage: React.FC = () => {
         {/* Cloudinary placeholder — replace publicId with your Cloudinary public ID */}
         <div className="aspect-video">
           <video controls className="w-full h-full rounded">
-            <source src={cloudinaryPlaceholder('v1763539960/Screen_Recording_20251119-013347_Chrome_yt11hh')} type="video/mp4" />
+            <source src={cloudinaryPlaceholder('v1763589550/WhatsApp_Video_2025-11-19_at_5.51.18_PM_k7695c')} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
@@ -99,7 +99,7 @@ const HowToVotePage: React.FC = () => {
       >
         <div className="aspect-video">
           <video controls className="w-full h-full rounded">
-            <source src={cloudinaryPlaceholder('v1763539331/Screen_Recording_20251119-013547_Chrome_p90y1q')} type="video/mp4" />
+            <source src={cloudinaryPlaceholder('v1763589526/WhatsApp_Video_2025-11-19_at_10.16.27_PM_fzpn10')} type="video/mp4" />
           </video>
         </div>
         <div className="mt-4 text-sm text-gray-600">

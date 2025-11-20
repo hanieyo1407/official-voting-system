@@ -94,7 +94,13 @@ DMI VOTING SYSTEM
 │  │  ├─ voting-2025-11-10.log
 │  │  ├─ voting-2025-11-11.log
 │  │  ├─ voting-2025-11-12.log
-│  │  └─ voting-2025-11-13.log
+│  │  ├─ voting-2025-11-13.log
+│  │  ├─ voting-2025-11-14.log
+│  │  ├─ voting-2025-11-15.log
+│  │  ├─ voting-2025-11-16.log
+│  │  ├─ voting-2025-11-17.log
+│  │  ├─ voting-2025-11-18.log
+│  │  └─ voting-2025-11-19.log
 │  ├─ logs\.477b1ee574ca8bf1a46c7e75ad6a78d6cc973473-audit.json
 │  ├─ nodemon
 │  ├─ nodemon.json
@@ -199,8 +205,10 @@ DMI VOTING SYSTEM
    ├─ constants.tsx
    ├─ dist
    │  ├─ assets
-   │  │  └─ index-Djoc84in.js
+   │  │  ├─ favicon-DhXWufE_.png
+   │  │  └─ index-dr746xk7.js
    │  └─ index.html
+   ├─ favicon.png
    ├─ hooks
    │  ├─ useAdminUsers.ts
    │  ├─ useAllPositions.ts
@@ -220,11 +228,17 @@ DMI VOTING SYSTEM
    │  ├─ AdminDashboard.tsx
    │  ├─ AdminLoginPage.tsx
    │  ├─ AuthenticationPage.tsx
+   │  ├─ CandidateGalleryPage.tsx
+   │  ├─ ContactHelpPage.tsx
    │  ├─ HomePage.tsx
+   │  ├─ HowToVotePage.tsx
    │  ├─ IntroPage.tsx
    │  ├─ LiveResultsPage.tsx
+   │  ├─ MeetTheTeamPage.tsx
    │  ├─ OfficialResultsPage.tsx
+   │  ├─ PrivacyPolicyPage.tsx
    │  ├─ ResultsPage.tsx
+   │  ├─ TermsOfUsePage.tsx
    │  ├─ VerificationPage.tsx
    │  ├─ VoteSuccessPage.tsx
    │  ├─ VotingPage.tsx

@@ -4,8 +4,30 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 // Assuming you have a file that defines common types, otherwise we use 'any'
 // import { SignatureResponse } from '../types'; 
 
-// --- UPDATED INTERFACES FOR CANDIDATE MANAGEMENT (STRICT SCHEMA) ---
+export type ScheduleDto = {
+  electionKey: string;
+  startDate: string | null;
+  endDate: string | null;
+  resultsAnnouncement: string | null;
+  updatedAt: string | null;
+  updatedBy: number | null;
+};
 
+export const fetchSchedule = async (): Promise<ScheduleDto> => {
+  const res = await sjbuApi.get('/election/schedule'); // mounted at /api/app/election
+  return res.data;
+};
+
+export const updateSchedule = async (payload: {
+  startDate: string;
+  endDate: string;
+  resultsAnnouncement?: string | null;
+}) => {
+  const res = await sjbuApi.post('/election/schedule', payload);
+  return res.data;
+};
+
+// --- UPDATED INTERFACES FOR CANDIDATE MANAGEMENT (STRICT SCHEMA) ---
 // Interface for fetching positions with candidates (matches ElectionService DTO)
 interface PositionWithCandidatesResponse {
     id: number;

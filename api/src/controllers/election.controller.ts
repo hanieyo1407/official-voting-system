@@ -4,6 +4,98 @@ import { Request, Response } from "express";
 import ElectionService from "../services/election.service";
 import { LoggingService } from "../services/logging.service";
 
+// --- Election schedule controller (add to src/controllers/election.controller.ts) ---
+import pool from "../db/config"; // add this near other imports if not already present
+const ELECTION_KEY = 'students_2025';
+
+export const getSchedule = async (req: Request, res: Response) => {
+  try {
+    const q = `
+      SELECT election_key, start_date, end_date, results_announcement, updated_at, updated_by
+      FROM election_schedule
+      WHERE election_key = $1
+      LIMIT 1
+    `;
+    const { rows } = await pool.query(q, [ELECTION_KEY]);
+    const row = rows[0];
+    if (!row) return res.status(404).json({ error: 'not_configured' });
+
+    return res.status(200).json({
+      electionKey: row.election_key,
+      startDate: row.start_date ? row.start_date.toISOString() : null,
+      endDate: row.end_date ? row.end_date.toISOString() : null,
+      resultsAnnouncement: row.results_announcement ? row.results_announcement.toISOString() : null,
+      updatedAt: row.updated_at ? row.updated_at.toISOString() : null,
+      updatedBy: row.updated_by || null
+    });
+  } catch (err: any) {
+    LoggingService.logError(err, { context: 'getSchedule' });
+    return res.status(500).json({ error: 'server_error' });
+  }
+};
+
+export const upsertSchedule = async (req: Request, res: Response) => {
+  try {
+    const requestingAdmin = (req as any).admin;
+    if (!requestingAdmin) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Only admin and super_admin can update schedule
+    if (!['super_admin', 'admin'].includes(requestingAdmin.role)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { startDate, endDate, resultsAnnouncement } = req.body || {};
+    if (!startDate || !endDate) return res.status(400).json({ error: 'startDate_and_endDate_required' });
+
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    const r = resultsAnnouncement ? new Date(resultsAnnouncement) : null;
+
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return res.status(400).json({ error: 'invalid_date_format' });
+    if (e <= s) return res.status(400).json({ error: 'end_must_be_after_start' });
+    if (r && isNaN(r.getTime())) return res.status(400).json({ error: 'invalid_resultsAnnouncement' });
+
+    const upsertSql = `
+      INSERT INTO election_schedule (election_key, start_date, end_date, results_announcement, updated_at, updated_by)
+      VALUES ($1, $2, $3, $4, now(), $5)
+      ON CONFLICT (election_key) DO UPDATE SET
+        start_date = EXCLUDED.start_date,
+        end_date = EXCLUDED.end_date,
+        results_announcement = EXCLUDED.results_announcement,
+        updated_at = now(),
+        updated_by = EXCLUDED.updated_by
+      RETURNING election_key, start_date, end_date, results_announcement, updated_at, updated_by;
+    `;
+
+    const vals = [
+      ELECTION_KEY,
+      s.toISOString(),
+      e.toISOString(),
+      r ? r.toISOString() : null,
+      requestingAdmin.id
+    ];
+
+    const { rows } = await pool.query(upsertSql, vals);
+    const saved = rows[0];
+
+    // Optional audit log (uncomment if you want to persist)
+    // await pool.query(`INSERT INTO "AuditLog"(admin_id, action, target_type, target_id, details, created_at) VALUES($1,$2,$3,$4,$5,now())`, [requestingAdmin.id, 'update_schedule', 'election_schedule', saved.election_key, { start: saved.start_date, end: saved.end_date }]);
+
+    return res.status(200).json({
+      electionKey: saved.election_key,
+      startDate: saved.start_date ? saved.start_date.toISOString() : null,
+      endDate: saved.end_date ? saved.end_date.toISOString() : null,
+      resultsAnnouncement: saved.results_announcement ? saved.results_announcement.toISOString() : null,
+      updatedAt: saved.updated_at ? saved.updated_at.toISOString() : null,
+      updatedBy: saved.updated_by || null
+    });
+  } catch (err: any) {
+    LoggingService.logError(err, { context: 'upsertSchedule' });
+    return res.status(500).json({ error: 'server_error' });
+  }
+};
+
+
 // --- NEW POSITION/CANDIDATE FETCHING CONTROLLER ---
 /**
  * Fetches all positions with their candidates from the ElectionService.
