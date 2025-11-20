@@ -12,8 +12,9 @@ import {
   changePassword,
   getAdminStats,
   signUpload,
-  createCandidate, 
-  updateCandidate  
+  createCandidate,
+  updateCandidate,
+  deletePosition
 } from "../controllers/admin.controller";
 import { verifyAdminToken, requireSuperAdmin, requireAdminOrSuperAdmin } from "../middleware/admin.middleware";
 import { adminRateLimit } from "../middleware/rateLimit.middleware"; // Assuming this rate limit middleware exists
@@ -486,5 +487,37 @@ adminRoute.put("/:adminId/role", verifyAdminToken, requireSuperAdmin, updateAdmi
  *         description: Server error
  */
 adminRoute.delete("/:adminId/deactivate", verifyAdminToken, requireSuperAdmin, deactivateAdmin);
+
+/**
+ * @swagger
+ * /admin/position/{positionId}:
+ *   delete:
+ *     summary: Delete a position
+ *     description: Delete a position by ID (super admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - adminCookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: positionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Position ID
+ *     responses:
+ *       200:
+ *         description: Position deleted successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Position not found
+ *       500:
+ *         description: Internal server error
+ */
+adminRoute.delete("/position/:positionId", verifyAdminToken, requireSuperAdmin, deletePosition);
 
 export default adminRoute;

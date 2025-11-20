@@ -19,16 +19,16 @@ CREATE INDEX IF NOT EXISTS idx_election_schedule_key ON election_schedule (elect
 
 -- Upsert the authoritative Students' Org 2025 row
 -- UTC times derived from the electoral calendar you provided:
---   Voting start  : 2025-11-22T06:00:00.000Z  (08:00 CAT)
---   Voting end    : 2025-11-22T13:30:00.000Z  (15:30 CAT)
---   Results announce: 2025-11-22T14:00:00.000Z (16:00 CAT)
+--   Voting start  : 2025-11-21T08:00:00.000Z  (08:00 CAT)
+--   Voting end    : 2025-11-21T15:30:00.000Z  (15:30 CAT)
+--   Results announce: 2025-11-21T16:00:00.000Z (16:00 CAT)
 
 INSERT INTO election_schedule (election_key, start_date, end_date, results_announcement, created_at, updated_at)
 VALUES (
   'students_2025',
-  '2025-11-22T06:00:00.000Z',
-  '2025-11-22T13:30:00.000Z',
-  '2025-11-22T14:00:00.000Z',
+  '2025-11-21T08:00:00.000Z',
+  '2025-11-21T15:30:00.000Z',
+  '2025-11-21T16:00:00.000Z',
   now(),
   now()
 )
@@ -37,4 +37,3 @@ ON CONFLICT (election_key) DO UPDATE
       end_date = EXCLUDED.end_date,
       results_announcement = EXCLUDED.results_announcement,
       updated_at = now();
-

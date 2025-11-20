@@ -6,29 +6,9 @@
     "auditLog": "logs\\.477b1ee574ca8bf1a46c7e75ad6a78d6cc973473-audit.json",
     "files": [
         {
-            "date": 1760645637723,
-            "name": "logs\\voting-2025-10-16.log",
-            "hash": "444e7b52d6454961806545d70075e52e0eb9f4034e7e240bfdba5d88f2de8028"
-        },
-        {
-            "date": 1760712073830,
-            "name": "logs\\voting-2025-10-17.log",
-            "hash": "3d41eb2e620c74c57a1ce5b45ae8c17aa01844204a62d2fe98d3bd3dff7d5717"
-        },
-        {
-            "date": 1760782856298,
-            "name": "logs\\voting-2025-10-18.log",
-            "hash": "6ca4145e71d7d23a86e37cd19c82a86a9fe809dd4cce35be1a00e4adff1c711f"
-        },
-        {
-            "date": 1760870653446,
-            "name": "logs\\voting-2025-10-19.log",
-            "hash": "1ceaec4783654ea011454aa8e4d5f928766838906327b048e9f9baaa62467643"
-        },
-        {
-            "date": 1760991617523,
-            "name": "logs\\voting-2025-10-20.log",
-            "hash": "85c34453a3c81a92682080ea07263e9d2c6a31b097491e57d5a24ee23db35bd8"
+            "date": 1763649687769,
+            "name": "logs\\voting-2025-11-20.log",
+            "hash": "1682f9e10e54fb56b3720a61cb7f5f3287f664468b99d2aab442dbc1bf85c887"
         }
     ],
     "hashType": "sha256"

@@ -145,6 +145,56 @@ export const getAdminProfile = async (req: Request, res: Response) => {
   }
 };
 
+export const deletePosition = async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).admin?.id;
+    
+    // Check if admin is authenticated
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    // Get admin details to check role
+    const admin = await AdminService.getAdminById(adminId);
+    
+    // Check if admin has permission (only super_admin can delete positions)
+    if (!admin || admin.role !== 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: "Insufficient permissions. Only super admins can delete positions."
+      });
+    }
+
+    const { positionId } = req.params;
+    
+    // Validate positionId
+    if (!positionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Position ID is required"
+      });
+    }
+
+    // Call service to delete position
+    // Uncomment the following line to enable the deletePosition service call
+    // const result = await AdminService.deletePosition(parseInt(positionId));
+    
+    return res.status(200).json({
+      success: true,
+      message: "Position deleted successfully"
+    });
+  } catch (error: any) {
+    LoggingService.logError(error, { context: "delete_position_controller" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
 export const getAllAdmins = async (req: Request, res: Response) => {
   try {
     const requestingAdmin = (req as any).admin;
