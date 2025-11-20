@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import AdminService, { NewCandidateData, UpdateCandidateData } from "../services/admin.service"; 
 import { LoggingService } from "../services/logging.service";
 import cloudinary from '../config/cloudinary.config'; 
+import { InputSanitizer } from "../utils/sanitizer";
 
+// REPLACE your existing createAdmin function:
 export const createAdmin = async (req: Request, res: Response) => {
   try {
     const { username, email, password, role } = req.body;
@@ -13,13 +15,28 @@ export const createAdmin = async (req: Request, res: Response) => {
       });
     }
 
-    if (password.length < 8) {
-      return res.status(400).json({
-        error: "Password must be at least 8 characters long"
-      });
+    // SECURITY FIX: Sanitize inputs
+    let sanitizedUsername: string;
+    let sanitizedEmail: string;
+    try {
+      sanitizedUsername = InputSanitizer.sanitizeUsername(username);
+      sanitizedEmail = InputSanitizer.sanitizeEmail(email);
+      InputSanitizer.validatePassword(password);
+    } catch (error: any) {
+      return res.status(400).json({ error: error.message });
     }
 
-    const admin = await AdminService.createAdminUser(username, email, password, role);
+    // Validate role
+    if (role && !['super_admin', 'admin', 'moderator'].includes(role)) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    const admin = await AdminService.createAdminUser(
+      sanitizedUsername,
+      sanitizedEmail,
+      password,
+      role
+    );
 
     return res.status(201).json({
       message: "Admin user created successfully",
@@ -33,58 +50,54 @@ export const createAdmin = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     LoggingService.logError(err, { context: 'createAdmin' });
-    return res.status(500).json({ error: err.message || "Failed to create admin user" });
+    if (err.message.includes('already exists')) {
+      return res.status(409).json({ error: "Username or email already exists" });
+    }
+    return res.status(500).json({ error: "Failed to create admin user" });
   }
 };
 
+// REPLACE your existing loginAdmin function with this sanitized version:
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
-    // Debug logging
-    console.log('=== ADMIN LOGIN DEBUG ===');
-    console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('Full request headers:', JSON.stringify(req.headers, null, 2));
-    console.log('Raw req.body:', req.body);
-    console.log('Body type:', typeof req.body);
-    console.log('Body keys:', req.body ? Object.keys(req.body) : 'undefined');
-
-    // Handle case where body might be undefined
-    if (!req.body) {
-      console.error('req.body is completely undefined!');
-      return res.status(400).json({
-        error: "Request body is missing. Make sure Content-Type is application/json",
-        debug: {
-          headers: req.headers,
-          bodyType: typeof req.body,
-          hasBody: !!req.body
-        }
-      });
-    }
-
     const { email, password } = req.body;
 
+    // SECURITY FIX: Input validation
     if (!email || !password) {
       return res.status(400).json({
-        error: "Email and password are required",
-        receivedBody: req.body
+        error: "Email and password are required"
       });
     }
 
-    const result = await AdminService.authenticateAdmin(email, password);
+    // SECURITY FIX: Sanitize and validate inputs
+    let sanitizedEmail: string;
+    try {
+      sanitizedEmail = InputSanitizer.sanitizeEmail(email);
+      InputSanitizer.validatePassword(password);
+    } catch (error: any) {
+      LoggingService.logSecurity('ADMIN_LOGIN_INVALID_INPUT', { 
+        error: error.message,
+        ip: req.ip 
+      });
+      return res.status(400).json({ 
+        error: "Invalid email or password format" 
+      });
+    }
+
+    const result = await AdminService.authenticateAdmin(sanitizedEmail, password);
 
     if (!result) {
+      // SECURITY: Generic error message
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const { token, admin } = result;
 
-    // Set HTTP-only cookie for admin token
-    // IMPORTANT: use lax in development to allow cross-origin dev (localhost:3000 -> localhost:3005)
     res.cookie("admin_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 8 * 60 * 60 * 1000, // 8 hours in ms
+      maxAge: 8 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
@@ -99,7 +112,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     LoggingService.logError(err, { context: 'loginAdmin' });
-    return res.status(500).json({ error: err.message || "Login failed" });
+    return res.status(500).json({ error: "Login failed" });
   }
 };
 
@@ -302,6 +315,7 @@ export const deactivateAdmin = async (req: Request, res: Response) => {
   }
 };
 
+// REPLACE your changePassword function:
 export const changePassword = async (req: Request, res: Response) => {
   try {
     const adminId = (req as any).admin?.id;
@@ -317,9 +331,17 @@ export const changePassword = async (req: Request, res: Response) => {
       });
     }
 
-    if (newPassword.length < 8) {
-      return res.status(400).json({
-        error: "New password must be at least 8 characters long"
+    // SECURITY FIX: Validate passwords
+    try {
+      InputSanitizer.validatePassword(currentPassword);
+      InputSanitizer.validatePassword(newPassword);
+    } catch (error: any) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ 
+        error: "New password must be different" 
       });
     }
 
@@ -328,7 +350,10 @@ export const changePassword = async (req: Request, res: Response) => {
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (err: any) {
     LoggingService.logError(err, { context: 'changePassword' });
-    return res.status(500).json({ error: err.message || "Failed to change password" });
+    if (err.message.includes('incorrect')) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+    return res.status(500).json({ error: "Failed to change password" });
   }
 };
 

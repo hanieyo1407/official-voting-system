@@ -7,6 +7,7 @@ import electionRoute from './routes/election.route';
 import cookieParser from "cookie-parser";
 import cors from 'cors'; 
 import dotenv from 'dotenv'; // 1. ADDED: Import dotenv
+import helmet from 'helmet';
 
 dotenv.config(); // 2. CONFIGURE: Load environment variables
 
@@ -20,6 +21,17 @@ const corsOptions = {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization','Accept','X-Requested-With'],
 };
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
 
 app.use(cors(corsOptions)); // Apply CORS middleware
 
