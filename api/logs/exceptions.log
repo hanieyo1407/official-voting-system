@@ -1800,3 +1800,429 @@ TSError: ⨯ Unable to compile TypeScript:
     at Module.load (node:internal/modules/cjs/loader:1470:32)
     at Module._load (node:internal/modules/cjs/loader:1290:12)
     at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[2304,2304]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/routes/election.route.ts\u001b[0m:\u001b[93m370\u001b[0m:\u001b[93m32\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'getSchedule'.\n\n\u001b[7m370\u001b[0m electionRoute.get(\"/schedule\", getSchedule);\n\u001b[7m   \u001b[0m \u001b[91m                               ~~~~~~~~~~~\u001b[0m\n\u001b[96msrc/routes/election.route.ts\u001b[0m:\u001b[93m373\u001b[0m:\u001b[93m77\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'upsertSchedule'.\n\n\u001b[7m373\u001b[0m electionRoute.post(\"/schedule\", verifyAdminToken, requireAdminOrSuperAdmin, upsertSchedule);\n\u001b[7m   \u001b[0m \u001b[91m                                                                            ~~~~~~~~~~~~~~\u001b[0m\n\n    at createTSError (/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts:859:12)\n    at reportTSError (/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts:863:19)\n    at getOutput (/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts:1077:36)\n    at Object.compile (/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts:1433:41)\n    at Module.m._compile (/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1871:10\n    at Object.require.extensions.<computed> [as .ts] (/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1470:32)\n    at Module._load (node:internal/modules/cjs/loader:1290:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 00:05:13 GMT+0200 (Central Africa Time)","process":{"pid":89002,"uid":1000,"gid":1000,"cwd":"/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api","execPath":"/home/hanieyo1407/.nvm/versions/node/v24.5.0/bin/node","version":"v24.5.0","argv":["/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/.bin/ts-node","/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/src/index.ts"],"memoryUsage":{"rss":366886912,"heapTotal":274685952,"heapUsed":166747656,"external":8426142,"arrayBuffers":5164550}},"os":{"loadavg":[2.61,1.61,1.35],"uptime":118223.17},"trace":[{"column":12,"file":"/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1871,"method":null,"native":false},{"column":12,"file":"/home/hanieyo1407/Downloads/DMI VOTING SYSTEM/api/node_modules/ts-node/src/index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1470,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Module._load","line":1290,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:29:35 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m10[0m - [91merror[0m[90m TS2304: [0mCannot find name 'async'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m         ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'deletePosition'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m               ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m31[0m - [91merror[0m[90m TS2304: [0mCannot find name 'req'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                              ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m45[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                            ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m137[0m:[93m30[0m - [91merror[0m[90m TS2304: [0mCannot find name 'req'.
+
+[7m137[0m       const { positionId } = req.params;
+[7m   [0m [91m                             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m141[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m141[0m         return res.status(400).json({
+[7m   [0m [91m               ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m148[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'deletePosition' does not exist on type 'AdminService'.
+
+[7m148[0m       const result = await AdminService.deletePosition(positionId);
+[7m   [0m [91m                                        ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m151[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m151[0m         return res.status(404).json({
+[7m   [0m [91m               ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m157[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m157[0m       return res.status(200).json({
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m162[0m:[93m31[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Error'.
+
+[7m162[0m       LoggingService.logError(error, { context: "delete_position_controller" });
+[7m   [0m [91m                              ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m163[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m163[0m       return res.status(500).json({
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m170[0m:[93m10[0m - [91merror[0m[90m TS2552: [0mCannot find name 'adminId'. Did you mean 'admin'?
+
+[7m170[0m     if (!adminId) {
+[7m   [0m [91m         ~~~~~~~[0m
+
+  [96msrc/controllers/admin.controller.ts[0m:[93m174[0m:[93m11[0m
+    [7m174[0m     const admin = await AdminService.getAdminById(adminId);
+    [7m   [0m [96m          ~~~~~[0m
+    'admin' is declared here.
+[96msrc/controllers/admin.controller.ts[0m:[93m171[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m171[0m       return res.status(401).json({ error: "Unauthorized" });
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m174[0m:[93m51[0m - [91merror[0m[90m TS2552: [0mCannot find name 'adminId'. Did you mean 'admin'?
+
+[7m174[0m     const admin = await AdminService.getAdminById(adminId);
+[7m   [0m [91m                                                  ~~~~~~~[0m
+
+  [96msrc/controllers/admin.controller.ts[0m:[93m174[0m:[93m11[0m
+    [7m174[0m     const admin = await AdminService.getAdminById(adminId);
+    [7m   [0m [96m          ~~~~~[0m
+    'admin' is declared here.
+[96msrc/controllers/admin.controller.ts[0m:[93m177[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m177[0m       return res.status(404).json({ error: "Admin not found" });
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m180[0m:[93m12[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m180[0m     return res.status(200).json({ admin });
+[7m   [0m [91m           ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m183[0m:[93m12[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m183[0m     return res.status(500).json({ error: "Failed to fetch admin profile" });
+[7m   [0m [91m           ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m3[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m  ~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m10[0m - [91merror[0m[90m TS1434: [0mUnexpected keyword or identifier.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m         ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m34[0m - [91merror[0m[90m TS1005: [0m',' expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                 ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m48[0m - [91merror[0m[90m TS1005: [0m',' expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                               ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m60[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                                           ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m181[0m:[93m3[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m181[0m   } catch (err: any) {
+[7m   [0m [91m  ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m181[0m:[93m5[0m - [91merror[0m[90m TS1005: [0m'try' expected.
+
+[7m181[0m   } catch (err: any) {
+[7m   [0m [91m    ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m185[0m:[93m1[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m185[0m };
+[7m   [0m [91m~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m10[0m - [91merror[0m[90m TS2304: [0mCannot find name 'async'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m         ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'deletePosition'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m               ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m31[0m - [91merror[0m[90m TS2304: [0mCannot find name 'req'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                              ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m45[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                            ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m137[0m:[93m30[0m - [91merror[0m[90m TS2304: [0mCannot find name 'req'.
+
+[7m137[0m       const { positionId } = req.params;
+[7m   [0m [91m                             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m141[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m141[0m         return res.status(400).json({
+[7m   [0m [91m               ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m148[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'deletePosition' does not exist on type 'AdminService'.
+
+[7m148[0m       const result = await AdminService.deletePosition(positionId);
+[7m   [0m [91m                                        ~~~~~~~~~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m151[0m:[93m16[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m151[0m         return res.status(404).json({
+[7m   [0m [91m               ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m157[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m157[0m       return res.status(200).json({
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m162[0m:[93m31[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Error'.
+
+[7m162[0m       LoggingService.logError(error, { context: "delete_position_controller" });
+[7m   [0m [91m                              ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m163[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m163[0m       return res.status(500).json({
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m170[0m:[93m10[0m - [91merror[0m[90m TS2552: [0mCannot find name 'adminId'. Did you mean 'admin'?
+
+[7m170[0m     if (!adminId) {
+[7m   [0m [91m         ~~~~~~~[0m
+
+  [96msrc/controllers/admin.controller.ts[0m:[93m174[0m:[93m11[0m
+    [7m174[0m     const admin = await AdminService.getAdminById(adminId);
+    [7m   [0m [96m          ~~~~~[0m
+    'admin' is declared here.
+[96msrc/controllers/admin.controller.ts[0m:[93m171[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m171[0m       return res.status(401).json({ error: "Unauthorized" });
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m174[0m:[93m51[0m - [91merror[0m[90m TS2552: [0mCannot find name 'adminId'. Did you mean 'admin'?
+
+[7m174[0m     const admin = await AdminService.getAdminById(adminId);
+[7m   [0m [91m                                                  ~~~~~~~[0m
+
+  [96msrc/controllers/admin.controller.ts[0m:[93m174[0m:[93m11[0m
+    [7m174[0m     const admin = await AdminService.getAdminById(adminId);
+    [7m   [0m [96m          ~~~~~[0m
+    'admin' is declared here.
+[96msrc/controllers/admin.controller.ts[0m:[93m177[0m:[93m14[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m177[0m       return res.status(404).json({ error: "Admin not found" });
+[7m   [0m [91m             ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m180[0m:[93m12[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m180[0m     return res.status(200).json({ admin });
+[7m   [0m [91m           ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m183[0m:[93m12[0m - [91merror[0m[90m TS2304: [0mCannot find name 'res'.
+
+[7m183[0m     return res.status(500).json({ error: "Failed to fetch admin profile" });
+[7m   [0m [91m           ~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m3[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m  ~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m10[0m - [91merror[0m[90m TS1434: [0mUnexpected keyword or identifier.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m         ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m34[0m - [91merror[0m[90m TS1005: [0m',' expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                 ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m48[0m - [91merror[0m[90m TS1005: [0m',' expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                               ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m60[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+[7m135[0m   static async deletePosition(req: Request, res: Response) {
+[7m   [0m [91m                                                           ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m181[0m:[93m3[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m181[0m   } catch (err: any) {
+[7m   [0m [91m  ~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m181[0m:[93m5[0m - [91merror[0m[90m TS1005: [0m'try' expected.
+
+[7m181[0m   } catch (err: any) {
+[7m   [0m [91m    ~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m185[0m:[93m1[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+[7m185[0m };
+[7m   [0m [91m~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[2304,2304,2304,2304,2304,2304,2339,2304,2304,2345,2304,2552,2304,2552,2304,2304,2304,1128,1434,1005,1005,1005,1128,1005,1128]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m10\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'async'.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m         ~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m16\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'deletePosition'.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m               ~~~~~~~~~~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m31\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'req'.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m                              ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m45\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m                                            ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m137\u001b[0m:\u001b[93m30\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'req'.\r\n\r\n\u001b[7m137\u001b[0m       const { positionId } = req.params;\r\n\u001b[7m   \u001b[0m \u001b[91m                             ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m141\u001b[0m:\u001b[93m16\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m141\u001b[0m         return res.status(400).json({\r\n\u001b[7m   \u001b[0m \u001b[91m               ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m148\u001b[0m:\u001b[93m41\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2339: \u001b[0mProperty 'deletePosition' does not exist on type 'AdminService'.\r\n\r\n\u001b[7m148\u001b[0m       const result = await AdminService.deletePosition(positionId);\r\n\u001b[7m   \u001b[0m \u001b[91m                                        ~~~~~~~~~~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m151\u001b[0m:\u001b[93m16\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m151\u001b[0m         return res.status(404).json({\r\n\u001b[7m   \u001b[0m \u001b[91m               ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m157\u001b[0m:\u001b[93m14\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m157\u001b[0m       return res.status(200).json({\r\n\u001b[7m   \u001b[0m \u001b[91m             ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m162\u001b[0m:\u001b[93m31\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2345: \u001b[0mArgument of type 'unknown' is not assignable to parameter of type 'Error'.\r\n\r\n\u001b[7m162\u001b[0m       LoggingService.logError(error, { context: \"delete_position_controller\" });\r\n\u001b[7m   \u001b[0m \u001b[91m                              ~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m163\u001b[0m:\u001b[93m14\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m163\u001b[0m       return res.status(500).json({\r\n\u001b[7m   \u001b[0m \u001b[91m             ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m170\u001b[0m:\u001b[93m10\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2552: \u001b[0mCannot find name 'adminId'. Did you mean 'admin'?\r\n\r\n\u001b[7m170\u001b[0m     if (!adminId) {\r\n\u001b[7m   \u001b[0m \u001b[91m         ~~~~~~~\u001b[0m\r\n\r\n  \u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m174\u001b[0m:\u001b[93m11\u001b[0m\r\n    \u001b[7m174\u001b[0m     const admin = await AdminService.getAdminById(adminId);\r\n    \u001b[7m   \u001b[0m \u001b[96m          ~~~~~\u001b[0m\r\n    'admin' is declared here.\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m171\u001b[0m:\u001b[93m14\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m171\u001b[0m       return res.status(401).json({ error: \"Unauthorized\" });\r\n\u001b[7m   \u001b[0m \u001b[91m             ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m174\u001b[0m:\u001b[93m51\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2552: \u001b[0mCannot find name 'adminId'. Did you mean 'admin'?\r\n\r\n\u001b[7m174\u001b[0m     const admin = await AdminService.getAdminById(adminId);\r\n\u001b[7m   \u001b[0m \u001b[91m                                                  ~~~~~~~\u001b[0m\r\n\r\n  \u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m174\u001b[0m:\u001b[93m11\u001b[0m\r\n    \u001b[7m174\u001b[0m     const admin = await AdminService.getAdminById(adminId);\r\n    \u001b[7m   \u001b[0m \u001b[96m          ~~~~~\u001b[0m\r\n    'admin' is declared here.\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m177\u001b[0m:\u001b[93m14\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m177\u001b[0m       return res.status(404).json({ error: \"Admin not found\" });\r\n\u001b[7m   \u001b[0m \u001b[91m             ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m180\u001b[0m:\u001b[93m12\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m180\u001b[0m     return res.status(200).json({ admin });\r\n\u001b[7m   \u001b[0m \u001b[91m           ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m183\u001b[0m:\u001b[93m12\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'res'.\r\n\r\n\u001b[7m183\u001b[0m     return res.status(500).json({ error: \"Failed to fetch admin profile\" });\r\n\u001b[7m   \u001b[0m \u001b[91m           ~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m3\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1128: \u001b[0mDeclaration or statement expected.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m  ~~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m10\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1434: \u001b[0mUnexpected keyword or identifier.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m         ~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m34\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1005: \u001b[0m',' expected.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m                                 ~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m48\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1005: \u001b[0m',' expected.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m                                               ~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m60\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1005: \u001b[0m';' expected.\r\n\r\n\u001b[7m135\u001b[0m   static async deletePosition(req: Request, res: Response) {\r\n\u001b[7m   \u001b[0m \u001b[91m                                                           ~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m181\u001b[0m:\u001b[93m3\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1128: \u001b[0mDeclaration or statement expected.\r\n\r\n\u001b[7m181\u001b[0m   } catch (err: any) {\r\n\u001b[7m   \u001b[0m \u001b[91m  ~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m181\u001b[0m:\u001b[93m5\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1005: \u001b[0m'try' expected.\r\n\r\n\u001b[7m181\u001b[0m   } catch (err: any) {\r\n\u001b[7m   \u001b[0m \u001b[91m    ~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m185\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1128: \u001b[0mDeclaration or statement expected.\r\n\r\n\u001b[7m185\u001b[0m };\r\n\u001b[7m   \u001b[0m \u001b[91m~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:29:35 GMT+0200 (Central Africa Time)","process":{"pid":6104,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":203894784,"heapTotal":156459008,"heapUsed":119560632,"external":10368832,"arrayBuffers":7302679}},"os":{"loadavg":[0,0,0],"uptime":34511.921},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:30:49 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m3[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m135[0m   export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m  ~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m169[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'deletePosition' does not exist on type 'AdminService'.
+
+[7m169[0m       const result = await AdminService.deletePosition(parseInt(positionId));
+[7m   [0m [91m                                        ~~~~~~~~~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m135[0m:[93m3[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m135[0m   export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m  ~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m169[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'deletePosition' does not exist on type 'AdminService'.
+
+[7m169[0m       const result = await AdminService.deletePosition(parseInt(positionId));
+[7m   [0m [91m                                        ~~~~~~~~~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184,2339]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m135\u001b[0m:\u001b[93m3\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m135\u001b[0m   export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m  ~~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m169\u001b[0m:\u001b[93m41\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2339: \u001b[0mProperty 'deletePosition' does not exist on type 'AdminService'.\r\n\r\n\u001b[7m169\u001b[0m       const result = await AdminService.deletePosition(parseInt(positionId));\r\n\u001b[7m   \u001b[0m \u001b[91m                                        ~~~~~~~~~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:30:49 GMT+0200 (Central Africa Time)","process":{"pid":8540,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":202747904,"heapTotal":155672576,"heapUsed":117659872,"external":10368952,"arrayBuffers":7302799}},"os":{"loadavg":[0,0,0],"uptime":34585.906},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:31:12 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m130[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m130[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m130[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m130[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m130\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m130\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:31:12 GMT+0200 (Central Africa Time)","process":{"pid":7460,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":210845696,"heapTotal":155934720,"heapUsed":130085912,"external":10368960,"arrayBuffers":7320587}},"os":{"loadavg":[0,0,0],"uptime":34609.671},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:31:46 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m130[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m130[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m458[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m458[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m130[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m130[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+[96msrc/controllers/admin.controller.ts[0m:[93m458[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m458[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184,1184]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m130\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m130\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m458\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m458\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:31:46 GMT+0200 (Central Africa Time)","process":{"pid":3096,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":202616832,"heapTotal":155672576,"heapUsed":129048912,"external":10368976,"arrayBuffers":7320603}},"os":{"loadavg":[0,0,0],"uptime":34643.453},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:32:16 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m459\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m459\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:32:16 GMT+0200 (Central Africa Time)","process":{"pid":17236,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":204046336,"heapTotal":155148288,"heapUsed":130179400,"external":10368904,"arrayBuffers":7320531}},"os":{"loadavg":[0,0,0],"uptime":34673.453},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:32:40 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m459\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m459\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:32:40 GMT+0200 (Central Africa Time)","process":{"pid":1776,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":205996032,"heapTotal":155934720,"heapUsed":119754072,"external":10368848,"arrayBuffers":7302695}},"os":{"loadavg":[0,0,0],"uptime":34697.5},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:34:07 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m459\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m459\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:34:07 GMT+0200 (Central Africa Time)","process":{"pid":13140,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":207560704,"heapTotal":155934720,"heapUsed":130945920,"external":10368912,"arrayBuffers":7320539}},"os":{"loadavg":[0,0,0],"uptime":34783.937},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:34:59 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m459\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m459\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:34:59 GMT+0200 (Central Africa Time)","process":{"pid":9628,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":205869056,"heapTotal":156459008,"heapUsed":129010048,"external":10368930,"arrayBuffers":7320557}},"os":{"loadavg":[0,0,0],"uptime":34834.375},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}
+2025-11-20 17:35:35 [ERROR]: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/controllers/admin.controller.ts[0m:[93m459[0m:[93m1[0m - [91merror[0m[90m TS1184: [0mModifiers cannot appear here.
+
+[7m459[0m export const deletePosition = async (req: Request, res: Response) => {
+[7m   [0m [91m~~~~~~[0m
+
+    at createTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1895:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Ghost\projects\official-voting-system\api\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) | {"error":{"diagnosticCodes":[1184]},"stack":"TSError: ⨯ Unable to compile TypeScript:\n\u001b[96msrc/controllers/admin.controller.ts\u001b[0m:\u001b[93m459\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS1184: \u001b[0mModifiers cannot appear here.\r\n\r\n\u001b[7m459\u001b[0m export const deletePosition = async (req: Request, res: Response) => {\r\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~\u001b[0m\r\n\n    at createTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:859:12)\n    at reportTSError (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:863:19)\n    at getOutput (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1077:36)\n    at Object.compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1433:41)\n    at Module.m._compile (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1617:30)\n    at node:internal/modules/cjs/loader:1895:10\n    at Object.require.extensions.<computed> [as .ts] (C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts:1621:12)\n    at Module.load (node:internal/modules/cjs/loader:1465:32)\n    at Function._load (node:internal/modules/cjs/loader:1282:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)","exception":true,"date":"Thu Nov 20 2025 17:35:35 GMT+0200 (Central Africa Time)","process":{"pid":6076,"uid":null,"gid":null,"cwd":"C:\\Users\\Ghost\\projects\\official-voting-system\\api","execPath":"C:\\Program Files\\nodejs\\node.exe","version":"v22.17.0","argv":["C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\dist\\bin.js","C:\\Users\\Ghost\\projects\\official-voting-system\\api\\src\\index.ts"],"memoryUsage":{"rss":207941632,"heapTotal":155410432,"heapUsed":120831912,"external":10369954,"arrayBuffers":7302711}},"os":{"loadavg":[0,0,0],"uptime":34870.906},"trace":[{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"createTSError","line":859,"method":null,"native":false},{"column":19,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"reportTSError","line":863,"method":null,"native":false},{"column":36,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"getOutput","line":1077,"method":null,"native":false},{"column":41,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.compile","line":1433,"method":"compile","native":false},{"column":30,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Module.m._compile","line":1617,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":null,"line":1895,"method":null,"native":false},{"column":12,"file":"C:\\Users\\Ghost\\projects\\official-voting-system\\api\\node_modules\\ts-node\\src\\index.ts","function":"Object.require.extensions.<computed> [as .ts]","line":1621,"method":"ts]","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1465,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Function._load","line":1282,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":322,"method":"traceSync","native":false}],"service":"voting-system"}

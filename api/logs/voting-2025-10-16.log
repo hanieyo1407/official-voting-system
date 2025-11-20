@@ -1,2 +1,0 @@
-2025-10-16 22:23:58 [INFO]: Audit Event | {"service":"voting-system","auditEvent":"CACHE_SET","details":{"key":"vote:verification:JZk5fM8uEZKt","size":97},"category":"AUDIT"}
-2025-10-16 22:23:58 [INFO]: Audit Event | {"service":"voting-system","auditEvent":"CACHE_MISS","details":{"key":"vote:verification:JZk5fM8uEZKt","source":"verifyVoteByCode"},"category":"AUDIT"}

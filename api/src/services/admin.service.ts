@@ -392,6 +392,60 @@ export class AdminService {
       throw new Error(`Failed to fetch admin stats: ${error.message}`);
     }
   }
+  /**
+   * Delete a position by ID
+   * @param positionId - The ID of the position to delete
+   * @returns A promise that resolves to an object indicating success or failure
+   */
+  async deletePosition(positionId: number): Promise<{ success: boolean; message: string }> {
+    try {
+      // First check if there are any candidates for this position
+      const candidateCheck = await pool.query(
+        'SELECT COUNT(*) as count FROM "Candidate" WHERE position_id = $1',
+        [positionId]
+      );
+
+      const candidateCount = parseInt(candidateCheck.rows[0].count);
+
+      // If there are candidates, we can't delete the position
+      if (candidateCount > 0) {
+        return {
+          success: false,
+          message: `Cannot delete position with ${candidateCount} candidate(s). Please delete all candidates first.`
+        };
+      }
+
+      // If no candidates, proceed with deletion
+      const result = await pool.query(
+        'DELETE FROM "Position" WHERE id = $1 RETURNING id',
+        [positionId]
+      );
+
+      // Check if a position was actually deleted
+      if (result.rowCount === 0) {
+        return {
+          success: false,
+          message: "Position not found"
+        };
+      }
+
+      // Log the deletion
+      LoggingService.logAdminAction(
+        'system',
+        'DELETE_POSITION',
+        positionId.toString(),
+        { candidateCount }
+      );
+
+      return {
+        success: true,
+        message: "Position deleted successfully"
+      };
+    } catch (error: any) {
+      LoggingService.logError(error, { context: 'deletePosition', positionId });
+      throw new Error(`Failed to delete position: ${error.message}`);
+    }
+  }
 }
 
 export default new AdminService();
