@@ -152,25 +152,32 @@ const App: React.FC = () => {
     refreshSchedule();
   }, [fetchPositions, refreshSchedule]);
 
-  const renderResultsPage = () => {
-    switch (electionStatus) {
-      case 'LIVE':
-        return <LiveResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
-      case 'POST_ELECTION':
-        return <OfficialResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
-      case 'PRE_ELECTION':
-        return (
-          <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-            <Card className="max-w-2xl mx-auto p-12 text-center">
-              <h2 className="text-3xl font-bold text-dmi-blue-900">The Election Has Not Started</h2>
-              <p className="text-gray-600 mt-4">The voting period has not yet begun. Please check back on the official start date. Results will be available here once the election is live.</p>
-            </Card>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
+const renderResultsPage = () => {
+  switch (electionStatus) {
+    case 'LIVE':
+      return <LiveResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
+    case 'POST_ELECTION':
+      return (
+        <OfficialResultsPage 
+          positions={livePositions as PositionWithCandidates[]} 
+          setPage={setCurrentPage}
+          schedule={appSchedule}
+          scheduleLoading={scheduleLoading}
+        />
+      );
+    case 'PRE_ELECTION':
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+          <Card className="max-w-2xl mx-auto p-12 text-center">
+            <h2 className="text-3xl font-bold text-dmi-blue-900">The Election Has Not Started</h2>
+            <p className="text-gray-600 mt-4">The voting period has not yet begun. Please check back on the official start date. Results will be available here once the election is live.</p>
+          </Card>
+        </div>
+      );
+    default:
+      return null;
+  }
+};
 
   const renderPage = () => {
     const isError = positionsError;

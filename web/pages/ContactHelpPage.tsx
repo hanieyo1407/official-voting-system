@@ -27,15 +27,15 @@ const ContactHelpPage: React.FC = () => {
               <Phone className="w-10 h-10 text-dmi-blue-600 mx-auto mb-3" />
               <h2 className="text-xl font-bold text-dmi-blue-800">Election Committee</h2>
               <p className="text-sm mt-2">Eligibility, rules, voucher distribution, and appeals.</p>
-              <p className="block mt-4 text-dmi-blue-600 font-semibold">+265 999 123 456</p>
-              <p className="text-xs text-gray-500 mt-2">Available: Mon–Fri 09:00–16:00</p>
+              <p className="block mt-4 text-dmi-blue-600 font-semibold">+265 882 760 053</p>
+              <p className="text-xs text-gray-500 mt-2">Available: Fri 08:00–16:00</p>
             </div>
 
             <div className="p-4 border rounded-lg shadow-sm">
               <MapPin className="w-10 h-10 text-dmi-blue-600 mx-auto mb-3" />
               <h2 className="text-xl font-bold text-dmi-blue-800">Physical Location</h2>
               <p className="text-sm mt-2">Official help desk for in-person support and voucher collection.</p>
-              <p className="block mt-4 text-dmi-blue-600 font-semibold">SJBU Main Campus — Student Union Office</p>
+              <p className="block mt-4 text-dmi-blue-600 font-semibold">DMI SJBU Main Campus — Student Union Office</p>
               <p className="text-xs text-gray-500 mt-2">Office hours may vary on election day; follow on-campus notices.</p>
             </div>
           </div>
@@ -50,8 +50,8 @@ const ContactHelpPage: React.FC = () => {
           <div className="pt-4 mt-6 border-t">
             <h3 className="text-lg font-semibold text-dmi-blue-800">Office Hours & Response Expectations</h3>
             <ul className="list-disc list-inside ml-4 text-sm text-gray-600 space-y-2 mt-2">
-              <li>Technical Support: Mon–Fri 08:00–18:00 (email triage outside hours).</li>
-              <li>Election Committee: Mon–Fri 09:00–16:00; extended hours on election days.</li>
+              <li>Technical Support: Fri 08:00–16:00 (email triage outside hours).</li>
+              <li>Election Committee: Fri 09:00–16:00; extended hours on election days.</li>
               <li>In urgent security incidents, expect a response within 1 hour during business hours.</li>
             </ul>
           </div>
