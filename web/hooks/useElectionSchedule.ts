@@ -55,3 +55,4 @@ export default function useElectionSchedule(pollMs = 15000) {
 
   return { schedule, phase, loading, refresh };
 }
+//take note
