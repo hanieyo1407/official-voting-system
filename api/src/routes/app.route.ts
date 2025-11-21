@@ -337,7 +337,7 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *       500:
  *         description: Server error
  */
-appRoute.post("/vote", verifyToken, castVote);
+appRoute.post("/vote", verifyToken, castVote); //removed rate limiter.
 
 //verify vote
 /**
