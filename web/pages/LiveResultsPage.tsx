@@ -88,29 +88,8 @@ const LiveResultsPage: React.FC<LiveResultsPageProps> = ({ positions, setPage })
       </div>
 
       <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900 text-center mb-4">Voting Trends</h2>
 
-        <Card className="p-4 mb-6">
-          <h3 className="text-lg font-semibold text-dmi-blue-900 mb-3">Turnout by Hour</h3>
-          {hourlyTrends && hourlyTrends.length > 0 ? (
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hourlyTrends} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="votes" fill="#1b66c4" name="Votes Cast" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="text-center py-6 text-gray-500">
-              {isTrendsLoading ? <Spinner /> : 'No hourly trend data available from the server.'}
-            </div>
-          )}
-        </Card>
+
 
         <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900 text-center mb-4">Candidate Race Summaries</h2>
         <div className="space-y-6">
