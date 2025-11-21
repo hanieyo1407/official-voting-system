@@ -35,35 +35,6 @@ export class InputSanitizer {
   }
 
   /**
-   * Sanitize voucher code
-   * - Trim whitespace
-   * - Convert to uppercase
-   * - Remove non-alphanumeric except hyphens
-   * - Validate format
-   */
-  static sanitizeVoucher(voucher: string): string {
-    if (!voucher || typeof voucher !== 'string') {
-      throw new Error('Invalid voucher input');
-    }
-
-    // Trim and uppercase
-    let sanitized = voucher.trim().toUpperCase();
-
-    // Remove any characters that aren't letters, numbers, or hyphens
-    sanitized = sanitized.replace(/[^A-Z0-9-]/g, '');
-
-    // Length validation (prevent DoS and invalid formats)
-    if (sanitized.length < 5 || sanitized.length > 50) {
-      throw new Error('Invalid voucher format');
-    }
-
-    // Escape for extra safety
-    sanitized = validator.escape(sanitized);
-
-    return sanitized;
-  }
-
-  /**
    * Sanitize password (validation only, don't modify)
    * - Check length
    * - Check for null bytes

@@ -16,7 +16,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-// REPLACE your existing createUser function with this:
 export const createUser = async (req: Request, res: Response) => {
   try {
     const { voucher } = req.body;
@@ -25,15 +24,7 @@ export const createUser = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "voucher is required" });
     }
 
-    // SECURITY FIX: Sanitize voucher
-    let sanitizedVoucher: string;
-    try {
-      sanitizedVoucher = InputSanitizer.sanitizeVoucher(voucher);
-    } catch (error: any) {
-      return res.status(400).json({ error: "Invalid voucher format" });
-    }
-
-    const user = await AppService.createUser(sanitizedVoucher);
+    const user = await AppService.createUser(voucher);
     
     return res.status(201).json({ user });
   } catch (err) {
@@ -64,7 +55,6 @@ export const getCandidatesByPosition = async (req: Request, res: Response) => {
   }
 };
 
-// REPLACE your existing createPosition function with this:
 export const createPosition = async (req: Request, res: Response) => {
   try {
     const { position_name } = req.body;
@@ -73,7 +63,6 @@ export const createPosition = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "position_name is required" });
     }
 
-    // SECURITY FIX: Sanitize position name
     let sanitizedName: string;
     try {
       sanitizedName = InputSanitizer.sanitizeText(position_name, 100);
@@ -89,7 +78,7 @@ export const createPosition = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Failed to create position" });
   }
 };
-// REPLACE your existing createCandidate function with this:
+
 export const createCandidate = async (req: Request, res: Response) => {
   try {
     const positionId = Number(req.params.positionId);
@@ -104,7 +93,6 @@ export const createCandidate = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "candidate name is required" });
     }
 
-    // SECURITY FIX: Sanitize candidate data
     let sanitizedName: string;
     let sanitizedManifesto: string = '';
     
@@ -130,8 +118,6 @@ export const createCandidate = async (req: Request, res: Response) => {
   }
 };
 
-
-// REPLACE your existing authCheck function with this:
 export const authCheck = async (req: Request, res: Response) => {
   try {
     const body = req.body ?? {};
@@ -141,15 +127,7 @@ export const authCheck = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "voucher is required" });
     }
 
-    // SECURITY FIX: Sanitize voucher
-    let sanitizedVoucher: string;
-    try {
-      sanitizedVoucher = InputSanitizer.sanitizeVoucher(voucher);
-    } catch (error: any) {
-      return res.status(400).json({ error: "Invalid voucher format" });
-    }
-
-    const user = await AppService.findUserByVoucher(sanitizedVoucher);
+    const user = await AppService.findUserByVoucher(voucher);
     
     if (user) {
       return res.status(200).json({ status: "found", data: user });
@@ -162,8 +140,6 @@ export const authCheck = async (req: Request, res: Response) => {
   }
 };
 
-
-// REPLACE your existing loginUser function with this:
 export const loginUser = async (req: Request, res: Response) => {
   try {
     const { voucher } = req.body;
@@ -172,28 +148,14 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Voucher is required" });
     }
 
-    // SECURITY FIX: Sanitize voucher input
-    let sanitizedVoucher: string;
-    try {
-      sanitizedVoucher = InputSanitizer.sanitizeVoucher(voucher);
-    } catch (error: any) {
-      LoggingService.logSecurity('VOTER_LOGIN_INVALID_INPUT', { 
-        error: error.message,
-        ip: req.ip 
-      });
-      return res.status(400).json({ 
-        error: "Invalid voucher format" 
-      });
-    }
-
-    const { token, user } = await AppService.loginUser(sanitizedVoucher);
+    const { token, user } = await AppService.loginUser(voucher);
 
     const isProd = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge: 5 * 60 * 1000, // 5 minutes
+      maxAge: 5 * 60 * 1000,
     });
 
     LoggingService.logAuth(user.id?.toString() || 'unknown', 'VOTER_LOGIN_SUCCESS');
@@ -201,7 +163,6 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(200).json({ message: "Login successful", user });
   } catch (err: any) {
     LoggingService.logError(err as Error, { context: 'loginUser' });
-    // SECURITY: Generic error message
     return res.status(401).json({ error: "Invalid voucher code" });
   }
 };
@@ -221,7 +182,6 @@ export const logoutUser = async (req: Request, res: Response) => {
   }
 };
 
-// REPLACE your existing castVote function with this:
 export const castVote = async (req: Request, res: Response) => {
   try {
     const authUser = (req as any).user;
@@ -235,13 +195,10 @@ export const castVote = async (req: Request, res: Response) => {
       });
     }
 
-    // SECURITY FIX: Sanitize and validate all inputs
-    let sanitizedVoucher: string;
     let sanitizedCandidateId: number;
     let sanitizedPositionId: number;
 
     try {
-      sanitizedVoucher = InputSanitizer.sanitizeVoucher(String(voucher));
       sanitizedCandidateId = InputSanitizer.sanitizeInteger(candidateId, 'candidateId');
       sanitizedPositionId = InputSanitizer.sanitizeInteger(positionId, 'positionId');
     } catch (error: any) {
@@ -253,7 +210,7 @@ export const castVote = async (req: Request, res: Response) => {
     }
 
     const vote = await AppService.castVote(
-      sanitizedVoucher, 
+      voucher, 
       sanitizedCandidateId, 
       sanitizedPositionId
     );
@@ -277,7 +234,6 @@ export const castVote = async (req: Request, res: Response) => {
   }
 };
 
-// REPLACE your existing verifyVote function with this:
 export const verifyVote = async (req: Request, res: Response) => {
   try {
     const { verification_code } = req.body ?? {};
@@ -286,7 +242,6 @@ export const verifyVote = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "verification_code is required" });
     }
 
-    // SECURITY FIX: Sanitize verification code
     let sanitizedCode: string;
     try {
       sanitizedCode = InputSanitizer.sanitizeText(

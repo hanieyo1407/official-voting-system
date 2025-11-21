@@ -152,7 +152,7 @@ export class StatsService {
       const totalVotesQuery = `
         SELECT COUNT(*) as total_votes
         FROM "Vote"
-        WHERE position_id = $1 AND voted_at IS NOT NULL
+        WHERE position_id = $1 
       `;
       const totalVotesResult = await pool.query(totalVotesQuery, [positionId]);
       const totalVotes = Number(totalVotesResult.rows[0].total_votes); // FIXED
