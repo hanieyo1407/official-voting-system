@@ -140,7 +140,7 @@ export class StatsService {
           c.manifesto,
           COUNT(v.id) as vote_count
         FROM "Candidate" c
-        LEFT JOIN "Vote" v ON c.id = v.candidate_id AND c.position_id = $1 AND v.voted_at IS NOT NULL
+        LEFT JOIN "Vote" v ON c.id = v.candidate_id AND c.position_id = $1
         WHERE c.position_id = $1
         GROUP BY c.id, c.name, c.manifesto
         ORDER BY vote_count DESC
