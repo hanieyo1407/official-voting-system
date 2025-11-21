@@ -83,7 +83,7 @@ const appRoute = Router();
  *       429:
  *         description: Too many login attempts
  */
-appRoute.post("/login", authRateLimit, loginUser);
+appRoute.post("/login", loginUser);
 
 /**
  * @swagger
@@ -337,7 +337,7 @@ appRoute.post("/positions/:positionId/candidates", createCandidate);
  *       500:
  *         description: Server error
  */
-appRoute.post("/vote", verifyToken, castVote); //removed rate limiter.
+appRoute.post("/vote", verifyToken, votingRateLimit, castVote);
 
 //verify vote
 /**
