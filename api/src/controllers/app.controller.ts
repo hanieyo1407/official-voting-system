@@ -161,24 +161,36 @@ export const castVote = async (req: Request, res: Response) => {
   try {
     const { voucher, presidentCandidateId, vicePresidentCandidateId } =
       req.body ?? {};
+    
     if (!voucher || !presidentCandidateId || !vicePresidentCandidateId) {
       return res.status(400).json({
         error:
           "missing vote fields: voucher, presidentCandidateId, vicePresidentCandidateId are required",
       });
     }
+
     const vote = await AppService.castVote(
       String(voucher),
       Number(presidentCandidateId),
       Number(vicePresidentCandidateId),
     );
+    
     return res.status(201).json({ data: vote });
   } catch (err: any) {
     console.error(err);
-    if (err.message === "User has already voted") {
-      return res.status(409).json({ error: "User has already voted" });
+    
+    // Handle specific error cases
+    if (err.message === "Voucher has already been used for both positions") {
+      return res.status(409).json({ error: "Voucher has already been used for both positions" });
     }
-    return res.status(500).json({ error: "Failed to cast vote" });
+    if (err.message === "You have already voted for this position") {
+      return res.status(409).json({ error: "You have already voted for this position" });
+    }
+    if (err.message === "Database corruption detected for this voucher") {
+      return res.status(500).json({ error: "Database corruption detected. Please contact support." });
+    }
+    
+    return res.status(500).json({ error: err.message || "Failed to cast vote" });
   }
 };
 

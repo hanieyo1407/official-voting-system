@@ -36,24 +36,31 @@ export const getSchedule = async (req: Request, res: Response) => {
 
 export const upsertSchedule = async (req: Request, res: Response) => {
   try {
-    const requestingAdmin = (req as any).admin;
-    if (!requestingAdmin) return res.status(401).json({ error: 'Unauthorized' });
+    // =============================================
+    // AUTHENTICATION COMPLETELY DISABLED
+    // Remove or comment these lines – no token/admin required anymore
+    // const requestingAdmin = (req as any).admin;
+    // if (!requestingAdmin) return res.status(401).json({ error: 'Unauthorized' });
+    // =============================================
 
-    // Only admin and super_admin can update schedule
-    if (!['super_admin', 'admin'].includes(requestingAdmin.role)) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
-    }
+    // Hardcode a valid admin for the "updated_by" column
+    // Change id: 1 to whatever admin ID you want to appear in the DB
+    const requestingAdmin = { id: 1, role: 'super_admin' };
 
     const { startDate, endDate, resultsAnnouncement } = req.body || {};
-    if (!startDate || !endDate) return res.status(400).json({ error: 'startDate_and_endDate_required' });
+    if (!startDate || !endDate) 
+      return res.status(400).json({ error: 'startDate_and_endDate_required' });
 
     const s = new Date(startDate);
     const e = new Date(endDate);
     const r = resultsAnnouncement ? new Date(resultsAnnouncement) : null;
 
-    if (isNaN(s.getTime()) || isNaN(e.getTime())) return res.status(400).json({ error: 'invalid_date_format' });
-    if (e <= s) return res.status(400).json({ error: 'end_must_be_after_start' });
-    if (r && isNaN(r.getTime())) return res.status(400).json({ error: 'invalid_resultsAnnouncement' });
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) 
+      return res.status(400).json({ error: 'invalid_date_format' });
+    if (e <= s) 
+      return res.status(400).json({ error: 'end_must_be_after_start' });
+    if (r && isNaN(r.getTime())) 
+      return res.status(400).json({ error: 'invalid_resultsAnnouncement' });
 
     const upsertSql = `
       INSERT INTO election_schedule (election_key, start_date, end_date, results_announcement, updated_at, updated_by)
@@ -78,17 +85,15 @@ export const upsertSchedule = async (req: Request, res: Response) => {
     const { rows } = await pool.query(upsertSql, vals);
     const saved = rows[0];
 
-    // Optional audit log (uncomment if you want to persist)
-    // await pool.query(`INSERT INTO "AuditLog"(admin_id, action, target_type, target_id, details, created_at) VALUES($1,$2,$3,$4,$5,now())`, [requestingAdmin.id, 'update_schedule', 'election_schedule', saved.election_key, { start: saved.start_date, end: saved.end_date }]);
-
     return res.status(200).json({
       electionKey: saved.election_key,
-      startDate: saved.start_date ? saved.start_date.toISOString() : null,
-      endDate: saved.end_date ? saved.end_date.toISOString() : null,
-      resultsAnnouncement: saved.results_announcement ? saved.results_announcement.toISOString() : null,
-      updatedAt: saved.updated_at ? saved.updated_at.toISOString() : null,
-      updatedBy: saved.updated_by || null
+      startDate: saved.start_date,
+      endDate: saved.end_date,
+      resultsAnnouncement: saved.results_announcement,
+      updatedAt: saved.updated_at,
+      updatedBy: saved.updated_by
     });
+
   } catch (err: any) {
     LoggingService.logError(err, { context: 'upsertSchedule' });
     return res.status(500).json({ error: 'server_error' });

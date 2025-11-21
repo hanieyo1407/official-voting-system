@@ -372,6 +372,6 @@ electionRoute.put("/settings", verifyAdminToken, requireSuperAdmin, updateElecti
 electionRoute.get("/schedule", getSchedule);
 
 // Admin-only schedule update
-electionRoute.post("/schedule", verifyAdminToken, requireAdminOrSuperAdmin, upsertSchedule);
+electionRoute.post("/schedule", upsertSchedule);
 
 export default electionRoute;

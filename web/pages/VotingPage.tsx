@@ -98,96 +98,134 @@ const VotingPage: React.FC<VotingPageProps> = ({
     }
   };
 
-  // FINAL FIXED SUBMISSION — CORRECTLY EXTRACTS VERIFICATION CODE
-  const handleSubmit = async () => {
-    if (scheduleLoading) {
-      alert('Please wait — election schedule is loading.');
-      return;
+// UPDATED SUBMISSION HANDLER WITH PARTIAL VOTE SUPPORT
+const handleSubmit = async () => {
+  if (scheduleLoading) {
+    alert('Please wait — election schedule is loading.');
+    return;
+  }
+  if (phase !== 'LIVE') {
+    alert('Voting is not currently open.');
+    return;
+  }
+  if (isOffline) {
+    alert('You are offline. Reconnect to submit your vote.');
+    return;
+  }
+  if (Object.keys(selections).length !== positions.length) {
+    alert('You must vote for both positions.');
+    return;
+  }
+
+  setIsSubmitting(true);
+  setIsConfirmModalOpen(false);
+
+  try {
+    // Identify positions
+    const presidentPos = positions.find(p => p.name.toLowerCase().includes('president') && !p.name.toLowerCase().includes('vice'));
+    const vicePos = positions.find(p => 
+      p.name.toLowerCase().includes('vice') || 
+      p.name.toLowerCase().includes('vp')
+    );
+
+    if (!presidentPos || !vicePos) {
+      throw new Error('Could not identify President or Vice President position.');
     }
-    if (phase !== 'LIVE') {
-      alert('Voting is not currently open.');
-      return;
-    }
-    if (isOffline) {
-      alert('You are offline. Reconnect to submit your vote.');
-      return;
-    }
-    if (Object.keys(selections).length !== positions.length) {
-      alert('You must vote for both positions.');
-      return;
-    }
 
-    setIsSubmitting(true);
-    setIsConfirmModalOpen(false);
+    const presidentCandidateId = selections[presidentPos.id];
+    const vicePresidentCandidateId = selections[vicePos.id];
 
-    try {
-      // Identify positions
-      const presidentPos = positions.find(p => p.name.toLowerCase().includes('president'));
-      const vicePos = positions.find(p => 
-        p.name.toLowerCase().includes('vice') || 
-        p.name.toLowerCase().includes('vp')
-      );
-
-      if (!presidentPos || !vicePos) {
-        throw new Error('Could not identify President or Vice President position.');
-      }
-
-      const presidentCandidateId = selections[presidentPos.id];
-      const vicePresidentCandidateId = selections[vicePos.id];
-
-      if (!presidentCandidateId || !vicePresidentCandidateId) {
-        alert('Please complete your ballot.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Submit single vote request
-      const response = await sjbuApi.post('/vote', {
-        voucher: userVoucher,
-        presidentCandidateId,
-        vicePresidentCandidateId,
-      });
-
-      // EXTRACT VERIFICATION CODE FROM ACTUAL BACKEND RESPONSE
-      let verificationCode: string | null = null;
-
-      const data = response.data?.data;
-
-      if (data?.presidentVote?.verificationCode) {
-        verificationCode = data.presidentVote.verificationCode;
-      } else if (data?.vicePresidentVote?.verificationCode) {
-        verificationCode = data.vicePresidentVote.verificationCode;
-      } else if (data?.verificationCode) {
-        verificationCode = data.verificationCode;
-      }
-
-      if (!verificationCode) {
-        console.warn('Vote succeeded but no verification code found', response.data);
-        alert('Your vote was recorded successfully, but no verification code was received. Contact an admin if needed.');
-      } else {
-        setVerificationCode(verificationCode);
-      }
-
-      localStorage.removeItem('dmi-vote-selections');
-      setPage(Page.VoteSuccess);
-
-    } catch (err: any) {
-      console.error('Submission failed:', err);
-
-      let message = 'Failed to submit vote.';
-
-      if (err.response?.status === 409) {
-        message = 'You have already voted.';
-      } else if (err.response?.data?.error) {
-        message = err.response.data.error;
-      }
-
-      alert(message);
-    } finally {
+    if (!presidentCandidateId || !vicePresidentCandidateId) {
+      alert('Please complete your ballot.');
       setIsSubmitting(false);
+      return;
     }
-  };
 
+    // Submit vote request
+    const response = await sjbuApi.post('/vote', {
+      voucher: userVoucher,
+      presidentCandidateId,
+      vicePresidentCandidateId,
+    });
+
+    // EXTRACT VERIFICATION CODE AND MESSAGE FROM BACKEND RESPONSE
+    let verificationCode: string | null = null;
+    let message: string = 'Your vote was recorded successfully!';
+
+    const data = response.data?.data;
+
+    // Try to extract verification code from various response structures
+    if (data?.verificationCode) {
+      verificationCode = data.verificationCode;
+    } else if (data?.presidentVote?.verification_code) {
+      verificationCode = data.presidentVote.verification_code;
+    } else if (data?.vicePresidentVote?.verification_code) {
+      verificationCode = data.vicePresidentVote.verification_code;
+    } else if (data?.presidentVote?.verificationCode) {
+      verificationCode = data.presidentVote.verificationCode;
+    } else if (data?.vicePresidentVote?.verificationCode) {
+      verificationCode = data.vicePresidentVote.verificationCode;
+    }
+
+    // Extract custom message if provided (for partial vote completion)
+    if (data?.message) {
+      message = data.message;
+    }
+
+    // Handle different response scenarios
+    if (!verificationCode) {
+      console.warn('Vote succeeded but no verification code found', response.data);
+      alert('Your vote was recorded successfully, but no verification code was received. Contact an admin if needed.');
+      localStorage.removeItem('dmi-vote-selections');
+      setPage(Page.Home);
+      return;
+    }
+
+    // Show appropriate success message
+    if (message.includes('completed') || message.includes('adding')) {
+      // This was a partial vote completion
+      alert(`✓ ${message}\n\nYour verification code: ${verificationCode}`);
+    }
+
+    setVerificationCode(verificationCode);
+    localStorage.removeItem('dmi-vote-selections');
+    setPage(Page.VoteSuccess);
+
+  } catch (err: any) {
+    console.error('Submission failed:', err);
+
+    let message = 'Failed to submit vote. Please try again.';
+
+    // Handle specific error scenarios
+    if (err.response?.status === 409) {
+      const errorMsg = err.response?.data?.error || '';
+      
+      if (errorMsg.includes('already been used for both positions')) {
+        message = '⚠️ You have already cast your complete vote for both positions. Your voucher cannot be used again.';
+      } else if (errorMsg.includes('already voted for this position')) {
+        message = '⚠️ You have already voted for this position. Please contact support if you believe this is an error.';
+      } else {
+        message = '⚠️ This voucher has already been used to vote.';
+      }
+    } else if (err.response?.status === 500) {
+      const errorMsg = err.response?.data?.error || '';
+      
+      if (errorMsg.includes('Database corruption')) {
+        message = '⚠️ There is an issue with your voting record. Please contact support immediately with your voucher code.';
+      } else if (errorMsg) {
+        message = errorMsg;
+      }
+    } else if (err.response?.data?.error) {
+      message = err.response.data.error;
+    } else if (err.message) {
+      message = err.message;
+    }
+
+    alert(message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   const openManifesto = (candidate: Candidate) => {
     setModalCandidate(candidate);
     setIsManifestoModalOpen(true);

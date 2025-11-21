@@ -166,37 +166,36 @@ export class AppService {
   }
 
   async castVote(voucher: string, presidentCandidateId: number, vicePresidentCandidateId: number) {
-    try {
-      // Check if user has already voted (only one vote per user total)
-      const existingVoteCheck = await pool.query(
-        'SELECT id FROM "Vote" WHERE voucher = $1 LIMIT 1',
-        [voucher]
-      );
+  try {
+    // Step 1: Check how many times this voucher appears in the Vote table
+    const existingVotesCheck = await pool.query(
+      'SELECT id, position_id, verification_code FROM "Vote" WHERE voucher = $1',
+      [voucher]
+    );
 
-      if (existingVoteCheck.rows.length > 0) {
-        throw new Error('User has already voted');
-      }
+    const existingVoteCount = existingVotesCheck.rows.length;
 
-      // Get position IDs for President and Vice President
-      const positionResult = await pool.query(
-        'SELECT id, position_name FROM "Position" WHERE position_name IN (\'President\', \'Vice President\') ORDER BY position_name'
-      );
+    // Step 2: Get position IDs for President and Vice President
+    const positionResult = await pool.query(
+      'SELECT id, position_name FROM "Position" WHERE position_name IN (\'President\', \'Vice President\') ORDER BY position_name'
+    );
 
-      if (positionResult.rows.length !== 2) {
-        throw new Error('President and Vice President positions not found');
-      }
+    if (positionResult.rows.length !== 2) {
+      throw new Error('President and Vice President positions not found');
+    }
 
-      const presidentPositionId = positionResult.rows[0].position_name === 'President'
-        ? positionResult.rows[0].id
-        : positionResult.rows[1].id;
-      const vicePresidentPositionId = positionResult.rows[0].position_name === 'Vice President'
-        ? positionResult.rows[0].id
-        : positionResult.rows[1].id;
+    const presidentPositionId = positionResult.rows.find(p => p.position_name === 'President')?.id;
+    const vicePresidentPositionId = positionResult.rows.find(p => p.position_name === 'Vice President')?.id;
 
-      // Generate unique verification code for the entire vote
+    if (!presidentPositionId || !vicePresidentPositionId) {
+      throw new Error('Could not determine position IDs');
+    }
+
+    // Step 3: Handle different scenarios based on existing vote count
+    if (existingVoteCount === 0) {
+      // No existing votes - insert both new votes
       const code = await this.generateUniqueVerificationCode(12);
 
-      // Cast vote for President
       const presidentResult = await pool.query(
         `INSERT INTO "Vote"(voucher, candidate_id, position_id, verification_code)
          VALUES($1, $2, $3, $4)
@@ -204,7 +203,6 @@ export class AppService {
         [voucher, presidentCandidateId, presidentPositionId, code]
       );
 
-      // Cast vote for Vice President
       const vicePresidentResult = await pool.query(
         `INSERT INTO "Vote"(voucher, candidate_id, position_id, verification_code)
          VALUES($1, $2, $3, $4)
@@ -215,19 +213,17 @@ export class AppService {
       const presidentVote = presidentResult.rows[0];
       const vicePresidentVote = vicePresidentResult.rows[0];
 
-      // Cache the vote verification for quick lookup (using same code for both)
+      // Cache and log
       CacheService.setVoteVerification(code, {
         president: presidentVote,
         vicePresident: vicePresidentVote,
         combinedVote: true
       });
 
-      // Invalidate relevant caches
       CacheService.invalidateStatsCache();
       CacheService.invalidatePositionCache(presidentPositionId);
       CacheService.invalidatePositionCache(vicePresidentPositionId);
 
-      // Log the combined vote
       LoggingService.logVote(voucher, presidentCandidateId, presidentPositionId, code + '-PRESIDENT');
       LoggingService.logVote(voucher, vicePresidentCandidateId, vicePresidentPositionId, code + '-VICE_PRESIDENT');
 
@@ -237,11 +233,79 @@ export class AppService {
         vicePresidentVote,
         message: 'Successfully voted for both President and Vice President'
       };
-    } catch (error: any) {
-      LoggingService.logError(error, { context: 'castCombinedVote', voucher, presidentCandidateId, vicePresidentCandidateId });
-      throw error;
+
+    } else if (existingVoteCount === 1) {
+      // One existing vote - check which position and add the missing one
+      const existingVote = existingVotesCheck.rows[0];
+      const existingPositionId = existingVote.position_id;
+      const existingVerificationCode = existingVote.verification_code;
+
+      // Determine which position is missing
+      if (existingPositionId === presidentPositionId) {
+        // President vote exists, add Vice President vote
+        const vicePresidentResult = await pool.query(
+          `INSERT INTO "Vote"(voucher, candidate_id, position_id, verification_code)
+           VALUES($1, $2, $3, $4)
+           RETURNING id, voucher, candidate_id, position_id, verification_code, voted_at`,
+          [voucher, vicePresidentCandidateId, vicePresidentPositionId, existingVerificationCode]
+        );
+
+        const vicePresidentVote = vicePresidentResult.rows[0];
+
+        // Update cache and invalidate
+        CacheService.invalidateStatsCache();
+        CacheService.invalidatePositionCache(vicePresidentPositionId);
+
+        LoggingService.logVote(voucher, vicePresidentCandidateId, vicePresidentPositionId, existingVerificationCode + '-VICE_PRESIDENT');
+
+        return {
+          verificationCode: existingVerificationCode,
+          vicePresidentVote,
+          message: 'Successfully completed your vote by adding Vice President selection'
+        };
+
+      } else if (existingPositionId === vicePresidentPositionId) {
+        // Vice President vote exists, add President vote
+        const presidentResult = await pool.query(
+          `INSERT INTO "Vote"(voucher, candidate_id, position_id, verification_code)
+           VALUES($1, $2, $3, $4)
+           RETURNING id, voucher, candidate_id, position_id, verification_code, voted_at`,
+          [voucher, presidentCandidateId, presidentPositionId, existingVerificationCode]
+        );
+
+        const presidentVote = presidentResult.rows[0];
+
+        // Update cache and invalidate
+        CacheService.invalidateStatsCache();
+        CacheService.invalidatePositionCache(presidentPositionId);
+
+        LoggingService.logVote(voucher, presidentCandidateId, presidentPositionId, existingVerificationCode + '-PRESIDENT');
+
+        return {
+          verificationCode: existingVerificationCode,
+          presidentVote,
+          message: 'Successfully completed your vote by adding President selection'
+        };
+
+      } else {
+        // Existing vote is for an unknown position - this shouldn't happen
+        throw new Error('Existing vote is for an unexpected position');
+      }
+
+    } else if (existingVoteCount === 2) {
+      // Both votes already exist
+      throw new Error('Voucher has already been used for both positions');
+
+    } else {
+      // More than 2 votes - database corruption
+      throw new Error('Database corruption detected for this voucher');
     }
+
+  } catch (error: any) {
+    LoggingService.logError(error, { context: 'castVote', voucher, presidentCandidateId, vicePresidentCandidateId });
+    throw error;
   }
+}
   
   async verifyVoteByCode(code: string): Promise<any | null> {
     try {
