@@ -36,7 +36,7 @@ function initializePool(): Pool {
       },
 
       // Fixed connection settings
-      max: 15,
+      max: 17,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 10000,
     });
