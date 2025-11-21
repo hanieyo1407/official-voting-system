@@ -1,77 +1,83 @@
 // web/pages/VotingPage.tsx
+
 import React, { useState, useEffect } from 'react';
-import { Page, Candidate, Position } from '../types'; 
+import { Page, Candidate, Position } from '../types';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
-import Spinner from '../components/Spinner'; 
-import sjbuApi from '../src/api/sjbuApi'; 
-import { isAxiosError } from 'axios';
-import { useAllPositions } from '@/hooks/useAllPositions';
+import Spinner from '../components/Spinner';
+import sjbuApi from '../src/api/sjbuApi';
 import useElectionSchedule from '../hooks/useElectionSchedule';
-import CountdownTimer from '../components/CountdownTimer';
 
 interface VoteSelection {
   [positionId: number]: number;
 }
 
-interface PositionWithCandidates extends Position { 
+interface PositionWithCandidates extends Position {
   candidates: Candidate[];
 }
 
 interface VotingPageProps {
-  positions: PositionWithCandidates[]; 
-  userVoucher: string; 
+  positions: PositionWithCandidates[];
+  userVoucher: string;
   setPage: (page: Page) => void;
   setVerificationCode: (code: string) => void;
   isOffline: boolean;
 }
 
-const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage, setVerificationCode, isOffline }) => {
+const VotingPage: React.FC<VotingPageProps> = ({
+  positions,
+  userVoucher,
+  setPage,
+  setVerificationCode,
+  isOffline,
+}) => {
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
-  const [selections, setSelections] = useState<VoteSelection>({}); 
+  const [selections, setSelections] = useState<VoteSelection>({});
   const [view, setView] = useState<'voting' | 'review'>('voting');
-  const [isSubmitting, setIsSubmitting] = useState(false); 
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isManifestoModalOpen, setIsManifestoModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalCandidate, setModalCandidate] = useState<Candidate | null>(null);
 
   const { schedule, phase, loading: scheduleLoading } = useElectionSchedule(10000);
 
+  // Load saved selections
   useEffect(() => {
     try {
-      const savedSelections = localStorage.getItem('dmi-vote-selections');
-      if (savedSelections) {
-        const parsedSelections = JSON.parse(savedSelections);
-        const numericKeySelections = Object.keys(parsedSelections).reduce((acc: VoteSelection, key) => {
-          if (parsedSelections[key] !== 'abstain') {
-            acc[parseInt(key, 10)] = parsedSelections[key];
+      const saved = localStorage.getItem('dmi-vote-selections');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const numeric: VoteSelection = {};
+        Object.keys(parsed).forEach(key => {
+          const val = parsed[key];
+          if (typeof val === 'number') {
+            numeric[parseInt(key, 10)] = val;
           }
-          return acc;
-        }, {} as VoteSelection);
-        setSelections(numericKeySelections);
+        });
+        setSelections(numeric);
       }
-    } catch (error) {
-      console.error("Could not load selections from local storage", error);
+    } catch (err) {
+      console.error('Failed to load saved selections', err);
     }
   }, []);
 
+  // Save selections
   useEffect(() => {
     try {
       localStorage.setItem('dmi-vote-selections', JSON.stringify(selections));
-    } catch (error) {
-      console.error("Could not save selections to local storage", error);
+    } catch (err) {
+      console.error('Failed to save selections', err);
     }
   }, [selections]);
 
   const currentPosition = positions[currentPositionIndex];
 
   const handleSelect = (candidateId: number) => {
-    setSelections({
-      ...selections,
+    setSelections(prev => ({
+      ...prev,
       [currentPosition.id]: candidateId,
-    });
+    }));
   };
 
   const handleNext = () => {
@@ -79,8 +85,8 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
       setCurrentPositionIndex(currentPositionIndex + 1);
     } else {
       if (Object.keys(selections).length < positions.length) {
-         alert("Please select a candidate for all positions.");
-         return;
+        alert('Please select a candidate for all positions.');
+        return;
       }
       setView('review');
     }
@@ -92,24 +98,22 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
     }
   };
 
+  // FINAL FIXED SUBMISSION — CORRECTLY EXTRACTS VERIFICATION CODE
   const handleSubmit = async () => {
     if (scheduleLoading) {
-      alert('Please wait — schedule loading.');
+      alert('Please wait — election schedule is loading.');
       return;
     }
     if (phase !== 'LIVE') {
-      alert('Voting is not currently live. Please try when voting is open.');
+      alert('Voting is not currently open.');
       return;
     }
-
     if (isOffline) {
-      alert("You are offline. Please reconnect to the internet to submit your vote.");
+      alert('You are offline. Reconnect to submit your vote.');
       return;
     }
-
-    if (!positions || positions.length === 0 || Object.keys(selections).length < positions.length) {
-      alert("Submission failed. You must select a candidate for every position.");
-      setIsSubmitting(false);
+    if (Object.keys(selections).length !== positions.length) {
+      alert('You must vote for both positions.');
       return;
     }
 
@@ -117,61 +121,68 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
     setIsConfirmModalOpen(false);
 
     try {
-      const votePromises = Object.keys(selections)
-        .map(key => parseInt(key, 10))
-        .map(positionId => {
-          const candidateId = selections[positionId] as number;
-          return sjbuApi.post('/vote', {
-            voucher: userVoucher,
-            candidateId: candidateId,
-            positionId: positionId,
-          });
-        });
+      // Identify positions
+      const presidentPos = positions.find(p => p.name.toLowerCase().includes('president'));
+      const vicePos = positions.find(p => 
+        p.name.toLowerCase().includes('vice') || 
+        p.name.toLowerCase().includes('vp')
+      );
 
-      const results = await Promise.allSettled(votePromises);
+      if (!presidentPos || !vicePos) {
+        throw new Error('Could not identify President or Vice President position.');
+      }
 
-      let verificationCode = '';
-      let allSuccessful = true;
+      const presidentCandidateId = selections[presidentPos.id];
+      const vicePresidentCandidateId = selections[vicePos.id];
 
-      results.forEach(result => {
-        if (result.status === 'fulfilled' && result.value !== null) {
-          const responseData = result.value.data.data;
-          if (responseData?.verification_code) {
-            verificationCode = responseData.verification_code;
-          }
-        } else if (result.status === 'rejected') {
-          console.error('Vote submission failed:', result.reason);
-          console.error("Failed vote reason (if available):", result.reason.response?.data);
-          allSuccessful = false;
-        }
-      });
-
-      if (!allSuccessful) {
-        alert("One or more votes failed to submit. Please check the console for details.");
+      if (!presidentCandidateId || !vicePresidentCandidateId) {
+        alert('Please complete your ballot.');
         setIsSubmitting(false);
         return;
       }
 
-      if (verificationCode) {
+      // Submit single vote request
+      const response = await sjbuApi.post('/vote', {
+        voucher: userVoucher,
+        presidentCandidateId,
+        vicePresidentCandidateId,
+      });
+
+      // EXTRACT VERIFICATION CODE FROM ACTUAL BACKEND RESPONSE
+      let verificationCode: string | null = null;
+
+      const data = response.data?.data;
+
+      if (data?.presidentVote?.verificationCode) {
+        verificationCode = data.presidentVote.verificationCode;
+      } else if (data?.vicePresidentVote?.verificationCode) {
+        verificationCode = data.vicePresidentVote.verificationCode;
+      } else if (data?.verificationCode) {
+        verificationCode = data.verificationCode;
+      }
+
+      if (!verificationCode) {
+        console.warn('Vote succeeded but no verification code found', response.data);
+        alert('Your vote was recorded successfully, but no verification code was received. Contact an admin if needed.');
+      } else {
         setVerificationCode(verificationCode);
-        setPage(Page.VoteSuccess);
-        localStorage.removeItem('dmi-vote-selections');
-      } else {
-        alert('Submission succeeded but could not retrieve verification code.');
       }
 
-    } catch (err) {
-      let errorDetails = "Unknown error occurred.";
-      if (isAxiosError(err) && err.response) {
-        const errorData = err.response.data;
-        errorDetails = errorData.error || errorData.message || `Server responded with ${err.response.status}.`;
-      } else {
-        errorDetails = "Network connection failed. Check your server.";
+      localStorage.removeItem('dmi-vote-selections');
+      setPage(Page.VoteSuccess);
+
+    } catch (err: any) {
+      console.error('Submission failed:', err);
+
+      let message = 'Failed to submit vote.';
+
+      if (err.response?.status === 409) {
+        message = 'You have already voted.';
+      } else if (err.response?.data?.error) {
+        message = err.response.data.error;
       }
 
-      console.error("FATAL SUBMISSION FAILURE:", errorDetails, err);
-      alert(`Submission Failed: ${errorDetails}`);
-
+      alert(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -182,36 +193,22 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
     setIsManifestoModalOpen(true);
   };
 
+  // Loading & Phase Checks
   if (scheduleLoading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <Card className="max-w-4xl mx-auto p-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900">Loading schedule…</h2>
+          <h2 className="text-xl font-bold text-dmi-blue-900">Loading schedule…</h2>
         </Card>
       </div>
     );
   }
 
   if (phase !== 'LIVE') {
-    const startDate = schedule?.startDate ? new Date(schedule.startDate) : null;
-    const endDate = schedule?.endDate ? new Date(schedule.endDate) : null;
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card className="max-w-4xl mx-auto p-6 text-center">
-          {phase === 'PRE' && startDate && (
-            <>
-              <h2 className="text-xl font-bold">Voting opens soon</h2>
-              <p className="mt-2 text-gray-600">Voting begins at {startDate.toLocaleString()}</p>
-              <CountdownTimer targetDate={startDate} title="Opens in" onCompleteMessage="Voting is now live" />
-            </>
-          )}
-          {phase === 'POST_WAIT' && (
-            <>
-              <h2 className="text-xl font-bold">Voting has closed</h2>
-              {schedule?.resultsAnnouncement ? <CountdownTimer targetDate={new Date(schedule.resultsAnnouncement)} title="Results in" onCompleteMessage="Results announced" /> : <p className="mt-2">Results announcement pending.</p>}
-            </>
-          )}
-          {phase === 'POST' && <p>Results are published. Visit the Results page.</p>}
+      <div className="container mx-auto px-4 py-8 text-center">
+        <Card className="max-w-4xl mx-auto p-6">
+          <h2 className="text-xl font-bold">Voting is {phase === 'PRE' ? 'not yet open' : 'closed'}</h2>
         </Card>
       </div>
     );
@@ -221,8 +218,7 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <Card className="max-w-4xl mx-auto p-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900">Election Data Loading...</h2>
-          <p className="text-gray-600 mt-3 text-sm sm:text-base">If this takes a long time, please refresh the page or contact an administrator.</p>
+          <h2 className="text-xl font-bold text-dmi-blue-900">Loading election data…</h2>
         </Card>
       </div>
     );
@@ -230,39 +226,54 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
 
   const renderVotingView = () => (
     <Card className="max-w-4xl mx-auto">
-      <div className="p-4 sm:p-6 border-b">
-        <p className="text-xs sm:text-sm text-gray-500">Position {currentPositionIndex + 1} of {positions.length}</p>
-        <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900">{currentPosition.name}</h2>
+      <div className="p-6 border-b">
+        <p className="text-sm text-gray-500">Position {currentPositionIndex + 1} of {positions.length}</p>
+        <h2 className="text-2xl font-bold text-dmi-blue-900">{currentPosition.name}</h2>
         <div className="w-full bg-gray-200 rounded-full h-2.5 mt-3">
-          <div className="bg-dmi-blue-600 h-2.5 rounded-full" style={{ width: `${((currentPositionIndex + 1) / positions.length) * 100}%` }} />
+          <div
+            className="bg-dmi-blue-600 h-2.5 rounded-full transition-all"
+            style={{ width: `${((currentPositionIndex + 1) / positions.length) * 100}%` }}
+          />
         </div>
       </div>
-      <div className="p-4 sm:p-6 space-y-3">
-        {currentPosition.candidates.map((candidate) => (
+
+      <div className="p-6 space-y-4">
+        {currentPosition.candidates.map(candidate => (
           <div
             key={candidate.id}
-            className={`p-3 sm:p-4 border rounded-lg cursor-pointer transition-all ${selections[currentPosition.id] === candidate.id ? 'bg-dmi-blue-50 border-dmi-blue-500 ring-2 ring-dmi-blue-500' : 'hover:bg-gray-50'}`}
+            className={`p-4 border rounded-lg cursor-pointer transition-all ${
+              selections[currentPosition.id] === candidate.id
+                ? 'bg-dmi-blue-50 border-dmi-blue-500 ring-2 ring-dmi-blue-500'
+                : 'hover:bg-gray-50'
+            }`}
             onClick={() => handleSelect(candidate.id)}
           >
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <img src={candidate.imageUrl} alt={candidate.name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover" />
-              <div className="flex-grow">
-                <h4 className="text-sm sm:text-lg font-semibold text-dmi-blue-900">{candidate.name}</h4>
-                <div className="mt-1">
-                  <Button variant="secondary" size="sm" className="mt-1" onClick={(e) => { e.stopPropagation(); openManifesto(candidate); }}>View Manifesto</Button>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <img src={candidate.imageUrl} alt={candidate.name} className="w-16 h-16 rounded-full object-cover" />
+                <div>
+                  <h4 className="text-lg font-semibold text-dmi-blue-900">{candidate.name}</h4>
+                  <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); openManifesto(candidate); }}>
+                    View Manifesto
+                  </Button>
                 </div>
               </div>
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selections[currentPosition.id] === candidate.id ? 'bg-dmi-blue-600 border-dmi-blue-600' : 'border-gray-300'}`}>
-                {selections[currentPosition.id] === candidate.id && <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
-              </div>
+              {selections[currentPosition.id] === candidate.id && (
+                <svg className="w-8 h-8 text-dmi-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              )}
             </div>
           </div>
         ))}
       </div>
-      <div className="p-4 sm:p-6 bg-gray-50 flex justify-between items-center">
-        <Button variant="secondary" onClick={handleBack} disabled={currentPositionIndex === 0}>Back</Button>
+
+      <div className="p-6 bg-gray-50 flex justify-between">
+        <Button variant="secondary" onClick={handleBack} disabled={currentPositionIndex === 0}>
+          Back
+        </Button>
         <Button onClick={handleNext} disabled={!selections[currentPosition.id]}>
-          {currentPositionIndex < positions.length - 1 ? 'Next Position' : 'Review Ballot'}
+          {currentPositionIndex < positions.length - 1 ? 'Next' : 'Review Ballot'}
         </Button>
       </div>
     </Card>
@@ -270,28 +281,35 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
 
   const renderReviewView = () => (
     <Card className="max-w-4xl mx-auto">
-      <div className="p-4 sm:p-6 border-b text-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-dmi-blue-900">Review Your Ballot</h2>
-        <p className="text-gray-600 mt-2 text-sm">Please carefully review your selections. Once submitted, votes CANNOT be changed.</p>
+      <div className="p-6 border-b text-center">
+        <h2 className="text-2xl font-bold text-dmi-blue-900">Review Your Ballot</h2>
+        <p className="text-gray-600 mt-2">Once submitted, your vote cannot be changed.</p>
       </div>
-      <div className="p-4 sm:p-6 space-y-3">
-        {positions.map((position, index) => {
-          const selectionId = selections[position.id];
-          const candidate = typeof selectionId === 'number' ? position.candidates.find(c => c.id === selectionId) : null;
-          const selectionName = candidate?.name || 'ERROR: No Selection';
+
+      <div className="p-6 space-y-4">
+        {positions.map(pos => {
+          const selected = pos.candidates.find(c => c.id === selections[pos.id]);
           return (
-            <div key={position.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+            <div key={pos.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
               <div>
-                <p className="font-semibold text-dmi-blue-800">{position.name}</p>
-                <p className={`text-sm sm:text-lg font-medium ${selectionId === undefined ? 'text-red-500 italic' : 'text-dmi-blue-900'}`}>{selectionName}</p>
+                <p className="font-semibold text-dmi-blue-800">{pos.name}</p>
+                <p className="text-lg">{selected?.name || 'No selection'}</p>
               </div>
-              <Button variant="secondary" size="sm" onClick={() => { setCurrentPositionIndex(index); setView('voting'); }}>Change</Button>
+              <Button variant="secondary" size="sm" onClick={() => {
+                setCurrentPositionIndex(positions.findIndex(p => p.id === pos.id));
+                setView('voting');
+              }}>
+                Change
+              </Button>
             </div>
           );
         })}
       </div>
-      <div className="p-4 sm:p-6 bg-gray-50 flex justify-between items-center">
-        <Button variant="secondary" onClick={() => setView('voting')}>Go Back to Ballot</Button>
+
+      <div className="p-6 bg-gray-50 flex justify-between">
+        <Button variant="secondary" onClick={() => setView('voting')}>
+          Back to Ballot
+        </Button>
         <Button onClick={() => setIsConfirmModalOpen(true)} disabled={isSubmitting}>
           {isSubmitting ? <Spinner /> : 'Submit Ballot'}
         </Button>
@@ -302,38 +320,28 @@ const VotingPage: React.FC<VotingPageProps> = ({ positions, userVoucher, setPage
   return (
     <>
       {isOffline && (
-        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-center text-white p-2 z-50 shadow-lg" role="alert">
-          <div className="container mx-auto flex items-center justify-center text-xs sm:text-sm">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636a9 9 0 010 12.728m-12.728 0a9 9 0 010-12.728m12.728 0L5.636 18.364m12.728-12.728L5.636 5.636"></path></svg>
-            <span className="font-semibold">You are currently offline. Your progress is saved on this device. Please reconnect to submit your ballot.</span>
-          </div>
+        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white text-center p-3 z-50">
+          Offline — your progress is saved. Reconnect to submit.
         </div>
       )}
-      <div className={`container mx-auto px-4 py-6 transition-all ${isOffline ? 'pt-20' : ''}`}>
+
+      <div className="container mx-auto px-4 py-8">
         {view === 'voting' && renderVotingView()}
         {view === 'review' && renderReviewView()}
 
-        <Modal 
-          isOpen={isManifestoModalOpen} 
-          onClose={() => setIsManifestoModalOpen(false)}
-          title={`Manifesto: ${modalCandidate?.name || ''}`}
-        >
-          <p className="text-gray-600 whitespace-pre-wrap text-sm">{modalCandidate?.manifesto}</p>
+        <Modal isOpen={isManifestoModalOpen} onClose={() => setIsManifestoModalOpen(false)} title="Manifesto">
+          <p className="whitespace-pre-wrap">{modalCandidate?.manifesto}</p>
         </Modal>
 
-        <Modal
-          isOpen={isConfirmModalOpen}
-          onClose={() => setIsConfirmModalOpen(false)}
-          title="Final Confirmation"
-        >
+        <Modal isOpen={isConfirmModalOpen} onClose={() => setIsConfirmModalOpen(false)} title="Confirm Submission">
           <div className="text-center">
-            <svg className="w-12 h-12 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <p className="text-sm sm:text-base text-gray-600 my-3">Are you sure you want to submit your ballot? This action is final and irreversible.</p>
-            {isOffline && <p className="text-yellow-600 mt-2 p-2 bg-yellow-100 rounded-md font-semibold text-xs">You are currently offline. Please reconnect to the internet to submit your vote.</p>}
-            <div className="flex justify-center space-x-3 mt-4">
-              <Button variant="secondary" onClick={() => setIsConfirmModalOpen(false)}>No, Go Back</Button>
-              <Button variant="danger" onClick={handleSubmit} disabled={isOffline || isSubmitting}>
-                {isSubmitting ? <Spinner /> : 'Yes, Submit Now'}
+            <p className="my-4">This action is final. Submit your vote?</p>
+            <div className="flex justify-center gap-4 mt-6">
+              <Button variant="secondary" onClick={() => setIsConfirmModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? <Spinner /> : 'Yes, Submit Vote'}
               </Button>
             </div>
           </div>

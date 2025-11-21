@@ -2,7 +2,6 @@ import pool from "../db/config";
 import jwt from "jsonwebtoken";
 import CacheService from "./cache.service";
 import { LoggingService } from "./logging.service";
-import * as crypto from 'crypto'; // ADDED: Import native crypto for secure token generation
 
 export class AppService {
   async getAllUsers(): Promise<any[]> {
@@ -51,12 +50,7 @@ export class AppService {
       }
 
       const result = await pool.query('SELECT id, position_name FROM "Position" ORDER BY id');
-      
-      // FIX: Map the backend's raw data (with position_name) to the frontend's Position type (with name)
-      const positions = result.rows.map(row => ({
-          id: row.id,
-          name: row.position_name
-      }));
+      const positions = result.rows;
 
       // Cache the result
       CacheService.setPositions(positions);
@@ -79,7 +73,7 @@ export class AppService {
       }
 
       const result = await pool.query(
-        'SELECT id, name, manifesto, position_id FROM "Candidate" WHERE position_id = $1 ORDER BY id',
+        'SELECT id, name, manifesto, imageurl, position_id FROM "Candidate" WHERE position_id = $1 ORDER BY id',
         [positionId]
       );
       const candidates = result.rows;
@@ -95,6 +89,15 @@ export class AppService {
     }
   }
 
+  // async castVote(voucher: string, candidateId: number, positionId: number, verificationCode: string): Promise<any> {
+  //   const result = await pool.query(
+  //     `INSERT INTO "Vote"(voucher, candidate_id, position_id, verification_code)
+  //      VALUES($1, $2, $3, $4) RETURNING id, voucher, candidate_id, position_id, verification_code`,
+  //     [voucher, candidateId, positionId, verificationCode]
+  //   );
+  //   return result.rows[0];
+  // }
+
   async createPosition(positionName: string) {
     const result = await pool.query(
       `INSERT INTO "Position"(position_name) VALUES($1) RETURNING id, position_name`,
@@ -103,12 +106,12 @@ export class AppService {
     return result.rows[0];
   }
 
-  async createCandidate(positionId: number, name: string, manifesto?: string) {
+  async createCandidate(positionId: number, name: string, manifesto?: string, imageurl?: string) {
     const result = await pool.query(
-      `INSERT INTO "Candidate"(name, position_id, manifesto)
-       VALUES($1, $2, $3)
-       RETURNING id, name, position_id, manifesto`,
-      [name, positionId, manifesto ?? null]
+      `INSERT INTO "Candidate"(name, position_id, manifesto, imageurl)
+       VALUES($1, $2, $3, $4)
+       RETURNING id, name, position_id, manifesto, imageurl`,
+      [name, positionId, manifesto ?? null, imageurl ?? null]
     );
     return result.rows[0];
   }
@@ -123,24 +126,10 @@ export class AppService {
 
   async loginUser(voucher: string) {
     const user = await this.findUserByVoucher(voucher);
-    
-    // STEP 1: Check if the voucher is valid (exists in "User" table)
     if (!user) {
       throw new Error("Invalid voucher");
     }
 
-    // STEP 2: CRITICAL SECURITY CHECK: Check if the voucher has already been used (exists in "Vote" table)
-    const voteCheckResult = await pool.query(
-      `SELECT COUNT(*) AS count FROM "Vote" WHERE voucher = $1`,
-      [voucher]
-    );
-
-    if (Number(voteCheckResult.rows[0].count) > 0) {
-      throw new Error("Voucher already used for voting");
-    }
-
-    // STEP 3: If valid and unused, grant access
-    
     // Generate JWT
     const token = jwt.sign(
       { id: user.id, voucher: user.voucher },
@@ -151,59 +140,106 @@ export class AppService {
     return { token, user };
   }
 
-  // MODIFIED: Use crypto for secure, production-ready token generation
   private generateAlphaNum(len = 12) {
-    return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').slice(0, len).toUpperCase();
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let out = "";
+    for (let i = 0; i < len; i++) {
+      out += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return out;
   }
 
   private async verificationCodeExists(code: string) {
     const r = await pool.query(`SELECT 1 FROM "Vote" WHERE verification_code = $1 LIMIT 1`, [code]);
+    // return r.rowCount > 0;
     return r.rows.length > 0;
   }
 
   private async generateUniqueVerificationCode(len = 12, attempts = 10) {
     for (let i = 0; i < attempts; i++) {
-      // Use a slightly longer code for better uniqueness
-      const code = this.generateAlphaNum(len + 4); 
+      const code = this.generateAlphaNum(len);
       const exists = await this.verificationCodeExists(code);
       if (!exists) return code;
     }
-    // Fallback should ideally throw a fatal error, but for robustness:
-    throw new Error("FATAL: Could not generate a unique verification code after multiple attempts.");
+    // fallback to longer code if collisions keep happening
+    return this.generateAlphaNum(len * 2);
   }
 
-  async castVote(voucher: string, candidateId: number, positionId: number) {
+  async castVote(voucher: string, presidentCandidateId: number, vicePresidentCandidateId: number) {
     try {
-      // REMOVED: Redundant and fragile client-side rate-limit check. 
-      // The express-rate-limit middleware already handles IP-based limits.
+      // Check if user has already voted (only one vote per user total)
+      const existingVoteCheck = await pool.query(
+        'SELECT id FROM "Vote" WHERE voucher = $1 LIMIT 1',
+        [voucher]
+      );
 
-      // generate unique verification code
+      if (existingVoteCheck.rows.length > 0) {
+        throw new Error('User has already voted');
+      }
+
+      // Get position IDs for President and Vice President
+      const positionResult = await pool.query(
+        'SELECT id, position_name FROM "Position" WHERE position_name IN (\'President\', \'Vice President\') ORDER BY position_name'
+      );
+
+      if (positionResult.rows.length !== 2) {
+        throw new Error('President and Vice President positions not found');
+      }
+
+      const presidentPositionId = positionResult.rows[0].position_name === 'President'
+        ? positionResult.rows[0].id
+        : positionResult.rows[1].id;
+      const vicePresidentPositionId = positionResult.rows[0].position_name === 'Vice President'
+        ? positionResult.rows[0].id
+        : positionResult.rows[1].id;
+
+      // Generate unique verification code for the entire vote
       const code = await this.generateUniqueVerificationCode(12);
 
-      const result = await pool.query(
+      // Cast vote for President
+      const presidentResult = await pool.query(
         `INSERT INTO "Vote"(voucher, candidate_id, position_id, verification_code)
          VALUES($1, $2, $3, $4)
          RETURNING id, voucher, candidate_id, position_id, verification_code, voted_at`,
-        [voucher, candidateId, positionId, code]
+        [voucher, presidentCandidateId, presidentPositionId, code]
       );
 
-      const vote = result.rows[0];
+      // Cast vote for Vice President
+      const vicePresidentResult = await pool.query(
+        `INSERT INTO "Vote"(voucher, candidate_id, position_id, verification_code)
+         VALUES($1, $2, $3, $4)
+         RETURNING id, voucher, candidate_id, position_id, verification_code, voted_at`,
+        [voucher, vicePresidentCandidateId, vicePresidentPositionId, code]
+      );
 
-      // Cache the vote verification for quick lookup
-      CacheService.setVoteVerification(code, vote);
+      const presidentVote = presidentResult.rows[0];
+      const vicePresidentVote = vicePresidentResult.rows[0];
+
+      // Cache the vote verification for quick lookup (using same code for both)
+      CacheService.setVoteVerification(code, {
+        president: presidentVote,
+        vicePresident: vicePresidentVote,
+        combinedVote: true
+      });
 
       // Invalidate relevant caches
       CacheService.invalidateStatsCache();
-      CacheService.invalidatePositionCache(positionId);
+      CacheService.invalidatePositionCache(presidentPositionId);
+      CacheService.invalidatePositionCache(vicePresidentPositionId);
 
-      // Log the vote
-      LoggingService.logVote(voucher, candidateId, positionId, code);
+      // Log the combined vote
+      LoggingService.logVote(voucher, presidentCandidateId, presidentPositionId, code + '-PRESIDENT');
+      LoggingService.logVote(voucher, vicePresidentCandidateId, vicePresidentPositionId, code + '-VICE_PRESIDENT');
 
-      return vote;
+      return {
+        verificationCode: code,
+        presidentVote,
+        vicePresidentVote,
+        message: 'Successfully voted for both President and Vice President'
+      };
     } catch (error: any) {
-      LoggingService.logError(error, { context: 'castVote', voucher, candidateId, positionId });
-      // Re-throw generic error message for security
-      throw new Error("Failed to process vote submission.");
+      LoggingService.logError(error, { context: 'castCombinedVote', voucher, presidentCandidateId, vicePresidentCandidateId });
+      throw error;
     }
   }
   
@@ -237,5 +273,6 @@ export class AppService {
     }
   }
 }
+
 
 export default new AppService();

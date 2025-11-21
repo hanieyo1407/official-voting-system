@@ -110,9 +110,9 @@ const VerificationPage: React.FC = () => {
         try {
             const payload: any = {};
             if (searchMode === 'code') {
-                payload.verification_code = searchInput.trim().toUpperCase();
+                payload.verification_code = searchInput.trim();
             } else {
-                payload.voucher = searchInput.trim().toUpperCase();
+                payload.voucher = searchInput.trim();
             }
 
             const response = await sjbuApi.post('/verify', payload);

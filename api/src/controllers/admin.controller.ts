@@ -93,12 +93,12 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const { token, admin } = result;
 
-    res.cookie("admin_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 8 * 60 * 60 * 1000,
-    });
+    //res.cookie("admin_token", token, {
+     // httpOnly: true,
+     // secure: process.env.NODE_ENV === "production",
+     // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      //maxAge: 8 * 60 * 60 * 1000,
+    //});
 
     return res.status(200).json({
       message: "Admin login successful",
