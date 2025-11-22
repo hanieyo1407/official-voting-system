@@ -21,7 +21,7 @@ const cloudinaryUrl = (publicId: string | undefined, options = '') =>
 const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjA0YjY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNDAiIGZpbGw9IiNmZmYiPkRNSSBMRUdFTkQ8L3RleHQ+PC9zdmc+';
 
 const sampleTeam: TeamMember[] = [
-  { id: 1, name: 'Angel T. Kautsi', position: 'Chairperson', role: 'Club Chair, Strategy & Outreach', imagePublicId: 'v1763505591/LILZPICS052_anvt6m', bio: 'Aisha leads the club with a focus on community engagement and STEM outreach across the region.', contact: '' },
+  { id: 1, name: 'Angel T. Kautsi', position: 'Chairperson', role: 'Club Chair, Strategy & Outreach', imagePublicId: 'v1763505591/LILZPICS052_anvt6m', bio: '', contact: '' },
   { id: 2, name: 'Blessings Phiri', position: 'Vice Chairperson', role: 'Operations & Events', imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.08.44_AM_fzppim', bio: 'The strongest people are not those who show strength to us, but those who win battles we know nothing about.', contact: 'blessingsphiri196@gmail.com' },
   { id: 3, name: 'Immanuel Gondwe', position: 'Secretary', role: 'Graphics Designer', imagePublicId: 'v1763505597/LILZPICS033_sgtsgs', bio: 'Lillian oversees platform development, security audits, and technical integrations.', contact: 'immanuelgondwe0@gmail.com' },
   { id: 4, name: 'Athony Phiri', position: 'Vice Secretary', role: 'Backend Developer', imagePublicId: 'v1763505599/LILZPICS028_owmga5', bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.', contact: '' },
