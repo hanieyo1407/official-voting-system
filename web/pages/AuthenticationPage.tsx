@@ -1,6 +1,7 @@
 // web/pages/AuthenticationPage.tsx
 
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Page, ElectionStatus } from '../types';
 import Button from '../components/Button';
 import Card from '../components/Card';

@@ -1,6 +1,7 @@
 // web/pages/CandidateGalleryPage.tsx
 
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useAllPositions } from '../hooks/useAllPositions';
 import Card from '../components/Card';
 import Spinner from '../components/Spinner';

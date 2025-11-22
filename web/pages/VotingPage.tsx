@@ -1,6 +1,6 @@
 // web/pages/VotingPage.tsx
-
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Page, Candidate, Position } from '../types';
 import Button from '../components/Button';
 import Card from '../components/Card';

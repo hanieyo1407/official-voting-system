@@ -1,5 +1,6 @@
 // web/components/Footer.tsx
-import React from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Page } from '../types';
 
 interface FooterProps {

@@ -1,16 +1,15 @@
 // web/pages/MeetTheTeamPage.tsx
-import React, { useState } from 'react';
-import Card from '../components/Card';
-import Modal from '../components/Modal';
-import Button from '../components/Button';
+// FINAL MASTERPIECE — Clean white background + dark blue accents only
+
+import { useState } from 'react';
 
 type TeamMember = {
   id: string | number;
   name: string;
   position: string;
   role: string;
-  imagePublicId?: string; // Cloudinary public ID (used to build URL)
-  imageUrl?: string; // Optional direct URL override
+  imagePublicId?: string;
+  imageUrl?: string;
   bio?: string;
   contact?: string;
 };
@@ -18,171 +17,78 @@ type TeamMember = {
 const cloudinaryUrl = (publicId: string | undefined, options = '') =>
   publicId ? `https://res.cloudinary.com/unihousingmw/image/upload/${options}/${publicId}.jpg` : '';
 
+// Your original DMI LEGEND placeholder — restored
+const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjA0YjY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNDAiIGZpbGw9IiNmZmYiPkRNSSBMRUdFTkQ8L3RleHQ+PC9zdmc+';
+
 const sampleTeam: TeamMember[] = [
-  {
-    id: 1,
-    name: 'Angel T. Kautsi',
-    position: 'Chaiperson',
-    role: 'Club Chair, Strategy & Outreach',
-    imagePublicId: 'v1763505591/LILZPICS052_anvt6m',
-    bio: 'Aisha leads the club with a focus on community engagement and STEM outreach across the region.',
-    contact: 'aisha@dmi-sjbu.edu',
-  },
-  {
-    id: 2,
-    name: 'Blessings Phiri',
-    position: 'Vice Chairperson',
-    role: 'Operations & Events',
-    imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.08.44_AM_fzppim',
-    bio: 'The strongest people are not those who show strength to us, but those who win battles we know nothing about.',
-    contact: 'blessingsphiri196@gmail.com',
-  },
-  {
-    id: 3,
-    name: 'Immanuel Gondwe',
-    position: 'Secretary',
-    role: 'Graphics Designer',
-    imagePublicId: 'v1763505597/LILZPICS033_sgtsgs',
-    bio: 'Lillian oversees platform development, security audits, and technical integrations.',
-    contact: 'lillian@dmi-sjbu.edu',
-  },
-  {
-    id: 4,
-    name: 'Athony Phiri',
-    position: 'Vice Secretary',
-    role: 'Backend Developer',
-    imagePublicId: 'v1763505599/LILZPICS028_owmga5',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-    {
-    id: 5,
-    name: 'Jane Alex',
-    position: 'Project Coordinator',
-    role: 'Project Coordinator',
-    imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.48.06_AM_zwwmkk',
-    bio: 'Finding success in hardship.',
-    contact: 'Welonasi@gmail.com',
-  },
-      {
-    id: 6,
-    name: 'Benson Bauleni',
-    position: 'Discipline Officer',
-    role: 'Discipline Oficer',
-    imagePublicId: 'v1763505109/LILZPICS030_w54dao',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-      {
-    id: 7,
-    name: 'Yohane H. Maluwa',
-    position: 'Comms Officer',
-    role: 'Frontend Developer',
-    imagePublicId: 'v1763505603/LILZPICS034_ta6x2n',
-    bio: 'Finding residence in pixels.',
-    contact: 'ymaluwa@outlook.com',
-  },
-      {
-    id:8 ,
-    name: 'Emmanuel Noel Kakwera',
-    position: 'Member',
-    role: 'Discipline Assistant and Security Officer',
-    imagePublicId: 'dmi/team/samuel_zulu',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-      {
-    id: 9,
-    name: 'Cedric Bakali',
-    position: 'Member',
-    role: 'Graphics designer',
-    imagePublicId: 'dmi/team/samuel_zulu',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-      {
-    id: 10,
-    name: 'Alfred ',
-    position: 'Member',
-    role: 'Frontend & Backend Assistant - Emotional Support',
-    imagePublicId: 'dmi/team/samuel_zulu',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-      {
-    id: 11,
-    name: 'Lester',
-    position: 'Member',
-    role: 'No Role Assigned',
-    imagePublicId: 'dmi/team/samuel_zulu',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-      {
-    id: 12,
-    name: 'Keith Chiwaula',
-    position: 'Member',
-    role: 'No Role Assigned',
-    imagePublicId: 'dmi/team/samuel_zulu',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-      {
-    id: 13,
-    name: 'Adam Wasili',
-    position: 'Membber',
-    role: 'No Role Assigned',
-    imagePublicId: 'dmi/team/samuel_zulu',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
-      {
-    id: 14,
-    name: 'Akim Amini',
-    position: 'Member',
-    role: 'No Role Assigned',
-    imagePublicId: 'v1763505104/LILZPICS056_1_nmxci7',
-    bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.',
-    contact: 'samuel@dmi-sjbu.edu',
-  },
+  { id: 1, name: 'Angel T. Kautsi', position: 'Chairperson', role: 'Club Chair, Strategy & Outreach', imagePublicId: 'v1763505591/LILZPICS052_anvt6m', bio: 'Aisha leads the club with a focus on community engagement and STEM outreach across the region.', contact: '' },
+  { id: 2, name: 'Blessings Phiri', position: 'Vice Chairperson', role: 'Operations & Events', imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.08.44_AM_fzppim', bio: 'The strongest people are not those who show strength to us, but those who win battles we know nothing about.', contact: 'blessingsphiri196@gmail.com' },
+  { id: 3, name: 'Immanuel Gondwe', position: 'Secretary', role: 'Graphics Designer', imagePublicId: 'v1763505597/LILZPICS033_sgtsgs', bio: 'Lillian oversees platform development, security audits, and technical integrations.', contact: 'immanuelgondwe0@gmail.com' },
+  { id: 4, name: 'Athony Phiri', position: 'Vice Secretary', role: 'Backend Developer', imagePublicId: 'v1763505599/LILZPICS028_owmga5', bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.', contact: '' },
+  { id: 5, name: 'Jane Alex', position: 'Project Coordinator', role: 'Project Coordinator', imagePublicId: 'v1763535212/WhatsApp_Image_2025-11-19_at_8.48.06_AM_zwwmkk', bio: 'Finding success in hardship.', contact: 'Welonasi@gmail.com' },
+  { id: 6, name: 'Benson Bauleni', position: 'Discipline Officer', role: 'Discipline Officer', imagePublicId: 'v1763505109/LILZPICS030_w54dao', bio: 'Samuel crafts the club visual identity and ensures accessible, emotional design.', contact: 'baulenibenson206@gmail.com' },
+  { id: 7, name: 'Yohane H. Maluwa', position: 'Comms Officer', role: 'Frontend Developer', imagePublicId: 'v1763772550/1763772181519_2_dhj4xk', bio: 'Finding residence in pixels.', contact: 'ymaluwa@outlook.com' },
+  { id: 8, name: 'Emmanuel Noel Kakwera', position: 'Member', role: 'Discipline Assistant and Security Officer', imagePublicId: 'v1763770779/WhatsApp_Image_2025-11-22_at_2.15.44_AM_djtnfm', bio: '', contact: 'emmanuelkakwera4@mail.com' },
+  { id: 9, name: 'Cedric Bakali', position: 'Member', role: 'Graphics designer', imagePublicId: 'v1763770783/WhatsApp_Image_2025-11-22_at_2.15.45_AM_hl7l3w', bio: '', contact: 'bakalicedric@gmail.com' },
+  { id: 10, name: 'Alfred Banda', position: 'Member', role: 'Frontend & Backend Assistant - Emotional Support', imagePublicId: 'v1763770778/WhatsApp_Image_2025-11-22_at_2.15.45_AM_1_kcrd8q', bio: 'to learn, know, and act with the power of faith, hope and courage', contact: 'bandaalfred303@gmail.com' },
+  { id: 11, name: 'Lester', position: 'Member', role: 'No Role Assigned', imagePublicId: '', bio: '', contact: '' },
+  { id: 12, name: 'Keith Chiwaula', position: 'Member', role: 'No Role Assigned', imagePublicId: 'dmi/team/samuel_zulu', bio: '', contact: 'keithchiwaula36@gmail.com' },
+  { id: 13, name: 'Adam Wasili', position: 'Member', role: 'No Role Assigned', imagePublicId: 'dmi/team/samuel_zulu', bio: '', contact: 'wasiliadam.mw@gmail.comm' },
+  { id: 14, name: 'Akim Amini', position: 'Member', role: 'No Role Assigned', imagePublicId: 'v1763505104/LILZPICS056_1_nmxci7', bio: '', contact: 'akimamin@gmail.com' },
+  { id: 15, name: 'Esther Masiye', position: 'Member', role: 'Voucher Distribution', imagePublicId: '', bio: '', contact: '' },
 ];
 
 const MeetTheTeamPage: React.FC = () => {
   const [selected, setSelected] = useState<TeamMember | null>(null);
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-[70vh]">
-      <Card title="Meet The Team" className="max-w-6xl mx-auto">
-        <p className="text-gray-700 mb-6">
-          The DMI-SJBU Science & Engineering Club team that powers the election platform. Tap any member to view more details.
+    <>
+      {/* Clean white hero with dark blue & gold text */}
+      <div className="bg-white py-20 px-6 text-center">
+        <h1 className="text-5xl md:text-6xl font-black text-dmi-blue-950">
+          MEET THE TEAM
+        </h1>
+        <p className="mt-4 text-lg md:text-xl text-dmi-blue-700 font-light">
+          Architects of Tomorrow • Legends of Today
         </p>
+        <div className="mt-6 flex justify-center gap-10">
+          <div className="h-px w-24 bg-dmi-blue-950"></div>
+          <div className="h-px w-24 bg-dmi-gold-500"></div>
+          <div className="h-px w-24 bg-dmi-blue-950"></div>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {sampleTeam.map(member => {
-            const img = member.imageUrl || cloudinaryUrl(member.imagePublicId, 'c_fill,g_auto,w_400,h_400,q_auto,f_auto');
-            const placeholder = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="100%" height="100%" fill="%23e5e7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="18" fill="%236b7280">No Image</text></svg>';
+      {/* Pure white background gallery */}
+      <div className="bg-white py-16 px-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 max-w-7xl mx-auto">
+          {sampleTeam.map((member, i) => {
+            const img = member.imageUrl || (member.imagePublicId ? cloudinaryUrl(member.imagePublicId, 'c_fill,g_face,w_800,h_800,q_auto:best') : null);
 
             return (
               <button
                 key={member.id}
                 onClick={() => setSelected(member)}
-                className="text-left bg-white rounded-lg shadow-sm p-3 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-dmi-blue-500 transition"
-                aria-labelledby={`team-${member.id}-name`}
+                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+                style={{ animation: 'fadeInScale 0.8s ease-out forwards', animationDelay: `${i * 70}ms`, opacity: 0 }}
               >
-                <div className="flex flex-col items-center">
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                    <img
-                      src={img || placeholder}
-                      alt={`${member.name} photo`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = placeholder; }}
-                    />
-                  </div>
+                <div className="aspect-[3/4] relative bg-gray-100">
+                  <img
+                    src={img || placeholder}
+                    alt={member.name}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 
+                               transition-all duration-700 group-hover:scale-110 group-hover:rotate-3"
+                  />
+                  {/* Dark overlay fade */}
+                  <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-all duration-700"></div>
 
-                  <div className="mt-3 text-center">
-                    <h3 id={`team-${member.id}-name`} className="text-sm font-semibold text-dmi-blue-900">{member.name}</h3>
-                    <p className="text-xs text-gray-500">{member.position}</p>
-                    <p className="text-xs text-gray-400 mt-1">{member.role}</p>
+                  {/* Clean text slide-up */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5 text-center transform translate-y-10 group-hover:translate-y-0 transition-transform duration-700">
+                    <h3 className="text-white font-bold text-lg drop-shadow-2xl">
+                      {member.name}
+                    </h3>
+                    <p className="text-dmi-gold-400 text-sm font-medium mt-1 drop-shadow-lg">
+                      {member.position}
+                    </p>
                   </div>
                 </div>
               </button>
@@ -190,46 +96,66 @@ const MeetTheTeamPage: React.FC = () => {
           })}
         </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">Want to join the team? Contact the Election Committee or use the Help Center.</p>
-        </div>
-      </Card>
+        <p className="text-center mt-20 text-xl font-medium text-dmi-blue-950">
+          Your Name Belongs Here —{' '}
+          <span className="text-dmi-gold-600">Contact the Election Committee</span>
+        </p>
+      </div>
 
-      <Modal
-        isOpen={!!selected}
-        onClose={() => setSelected(null)}
-        title={selected ? selected.name : ''}
-      >
-        {selected && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                <img
-                  src={selected.imageUrl || cloudinaryUrl(selected.imagePublicId, 'c_fill,g_auto,w_600,h_600,q_auto,f_auto')}
-                  alt={`${selected.name} photo`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width=\"600\" height=\"600\"><rect width=\"100%\" height=\"100%\" fill=\"%23e5e7eb\"/><text x=\"50%\" y=\"50%\" dominant-baseline=\"middle\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"20\" fill=\"%236b7280\">No Image</text></svg>'; }}
-                />
+      {/* Clean white modal with dark blue & gold */}
+      {selected && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-6" onClick={() => setSelected(null)}>
+          <div
+            className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Gold accent line */}
+            <div className="h-2 bg-gradient-to-r from-dmi-blue-950 via-dmi-gold-500 to-dmi-blue-950"></div>
+
+            <div className="p-10">
+              <div className="flex flex-col md:flex-row items-center gap-10">
+                <div className="w-48 h-48 rounded-2xl overflow-hidden ring-8 ring-dmi-blue-100 shadow-xl">
+                  <img
+                    src={selected.imageUrl || (selected.imagePublicId ? cloudinaryUrl(selected.imagePublicId, 'c_fill,g_face,w_1000,h_1000,q_auto:best') : placeholder)}
+                    alt={selected.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="text-center md:text-left flex-1">
+                  <h2 className="text-4xl font-black text-dmi-blue-950">{selected.name}</h2>
+                  <p className="text-2xl text-dmi-gold-600 font-medium mt-2">{selected.position}</p>
+                  <p className="text-lg text-dmi-blue-700 italic mt-1">{selected.role}</p>
+
+                  {selected.contact && (
+                    <a
+                      href={`mailto:${selected.contact}`}
+                      className="inline-block mt-6 px-8 py-3 bg-dmi-blue-950 text-white font-bold rounded-full hover:bg-dmi-blue-900 transition shadow-lg"
+                    >
+                      Contact Member
+                    </a>
+                  )}
+                </div>
               </div>
-              <div className="text-center sm:text-left">
-                <h4 className="text-xl font-bold text-dmi-blue-900">{selected.name}</h4>
-                <p className="text-sm text-gray-500">{selected.position} • <span className="text-dmi-blue-700 font-medium">{selected.role}</span></p>
-                {selected.contact && <p className="text-sm text-gray-600 mt-2">Contact: <a className="text-dmi-blue-600 underline" href={`mailto:${selected.contact}`}>{selected.contact}</a></p>}
+
+              <div className="mt-10 pt-8 border-t border-gray-200">
+                <h3 className="text-xl font-bold text-dmi-blue-950 mb-4">Bio</h3>
+                <p className="text-gray-700 leading-relaxed text-base">
+                  {selected.bio || 'This team member lets their work and dedication speak for itself.'}
+                </p>
               </div>
             </div>
 
-            <div className="pt-2">
-              <h5 className="text-sm font-semibold text-dmi-blue-900">About {selected.name}</h5>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{selected.bio || 'No biography available.'}</p>
-            </div>
-
-            <div className="pt-4 flex justify-end">
-              <Button variant="secondary" onClick={() => setSelected(null)}>Close</Button>
-            </div>
+            <button
+              onClick={() => setSelected(null)}
+              className="absolute top-6 right-6 w-12 h-12 bg-dmi-blue-950 text-white rounded-full flex items-center justify-center text-3xl hover:bg-dmi-blue-900 transition shadow-lg"
+            >
+              ×
+            </button>
           </div>
-        )}
-      </Modal>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 // web/pages/TermsOfUsePage.tsx (UPDATED)
-import React from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/Card';
 
 const TermsOfUsePage: React.FC = () => {

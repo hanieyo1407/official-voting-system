@@ -1,5 +1,6 @@
 // web/pages/ContactHelpPage.tsx (UPDATED)
-import React from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import { Mail, Phone, MapPin } from 'lucide-react';
 

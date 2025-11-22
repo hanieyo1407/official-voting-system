@@ -1,5 +1,6 @@
 // web/pages/HowToVotePage.tsx (UPDATED)
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Modal from '../components/Modal';

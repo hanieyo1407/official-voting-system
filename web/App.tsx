@@ -1,5 +1,6 @@
 // web/App.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Page, Position, Candidate, AdminUser, ElectionStatus } from './types';
 import { ELECTION_START_DATE, ELECTION_END_DATE } from './constants';
 import Header from './components/Header';
@@ -21,13 +22,13 @@ import TermsOfUsePage from './pages/TermsOfUsePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import ContactHelpPage from './pages/ContactHelpPage';
 import MeetTheTeamPage from './pages/MeetTheTeamPage';
+import WelcomeTeamModal from './components/WelcomeTeamModal'; // ← NEW
 import Card from './components/Card';
 import Button from './components/Button';
 import { useAllPositions } from './hooks/useAllPositions';
 import useElectionSchedule from './hooks/useElectionSchedule';
 import sjbuApi from './src/api/sjbuApi';
 
-// Define the expected structure for VotingPage data
 interface PositionWithCandidates extends Position {
   candidates: Candidate[];
   totalVotes?: number;
@@ -38,6 +39,9 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Intro);
   const [verificationCode, setVerificationCode] = useState<string>('');
   const [userVoucher, setUserVoucher] = useState<string>('');
+
+  // Welcome Modal State — shows only once per user
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const {
     positions: livePositions,
@@ -52,10 +56,8 @@ const App: React.FC = () => {
   const [electionStartDate, setElectionStartDate] = useState<Date>(ELECTION_START_DATE);
   const [electionEndDate, setElectionEndDate] = useState<Date>(ELECTION_END_DATE);
 
-  // Server-driven schedule hook (polls server for authoritative schedule)
   const { schedule: appSchedule, phase: appPhase, loading: scheduleLoading, refresh: refreshSchedule } = useElectionSchedule(15000);
 
-  // Map server phase string into the app's ElectionStatus enum
   const mapPhaseToElectionStatus = (phase: string | undefined): ElectionStatus => {
     switch (phase) {
       case 'PRE':
@@ -74,7 +76,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Mirror server phase into local electionStatus and update start/end dates when provided
   useEffect(() => {
     if (!scheduleLoading) {
       setElectionStatus(mapPhaseToElectionStatus(appPhase));
@@ -83,9 +84,6 @@ const App: React.FC = () => {
           if (appSchedule.startDate) setElectionStartDate(new Date(appSchedule.startDate));
           if (appSchedule.endDate) setElectionEndDate(new Date(appSchedule.endDate));
         } catch (err) {
-          // ignore parse errors; keep existing dates
-          // keep console log for debugging
-          // eslint-disable-next-line no-console
           console.warn('Failed to parse server schedule dates', err);
         }
       }
@@ -103,7 +101,15 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // User auth handlers
+  // Show Welcome Modal only once per user
+  useEffect(() => {
+    const hasSeen = localStorage.getItem('hasSeenTeamWelcome');
+    if (!hasSeen) {
+      setShowWelcomeModal(true);
+      localStorage.setItem('hasSeenTeamWelcome', 'true');
+    }
+  }, []);
+
   const handleUserLoginSuccess = (voucher: string) => {
     setUserVoucher(voucher);
     setCurrentPage(Page.Voting);
@@ -122,7 +128,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Admin handlers
   const handleStartCountdown = (hours: number) => {
     const now = new Date();
     const newStartDate = new Date(now.getTime() + hours * 60 * 60 * 1000);
@@ -152,32 +157,32 @@ const App: React.FC = () => {
     refreshSchedule();
   }, [fetchPositions, refreshSchedule]);
 
-const renderResultsPage = () => {
-  switch (electionStatus) {
-    case 'LIVE':
-      return <LiveResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
-    case 'POST_ELECTION':
-      return (
-        <OfficialResultsPage 
-          positions={livePositions as PositionWithCandidates[]} 
-          setPage={setCurrentPage}
-          schedule={appSchedule}
-          scheduleLoading={scheduleLoading}
-        />
-      );
-    case 'PRE_ELECTION':
-      return (
-        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-          <Card className="max-w-2xl mx-auto p-12 text-center">
-            <h2 className="text-3xl font-bold text-dmi-blue-900">The Election Has Not Started</h2>
-            <p className="text-gray-600 mt-4">The voting period has not yet begun. Please check back on the official start date. Results will be available here once the election is live.</p>
-          </Card>
-        </div>
-      );
-    default:
-      return null;
-  }
-};
+  const renderResultsPage = () => {
+    switch (electionStatus) {
+      case 'LIVE':
+        return <LiveResultsPage positions={livePositions as PositionWithCandidates[]} setPage={setCurrentPage} />;
+      case 'POST_ELECTION':
+        return (
+          <OfficialResultsPage 
+            positions={livePositions as PositionWithCandidates[]} 
+            setPage={setCurrentPage}
+            schedule={appSchedule}
+            scheduleLoading={scheduleLoading}
+          />
+        );
+      case 'PRE_ELECTION':
+        return (
+          <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+            <Card className="max-w-2xl mx-auto p-12 text-center">
+              <h2 className="text-3xl font-bold text-dmi-blue-900">The Election Has Not Started</h2>
+              <p className="text-gray-600 mt-4">The voting period has not yet begun. Please check back on the official start date. Results will be available here once the election is live.</p>
+            </Card>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   const renderPage = () => {
     const isError = positionsError;
@@ -252,6 +257,16 @@ const renderResultsPage = () => {
         {renderPage()}
       </main>
       {currentPage !== Page.Intro && <Footer setPage={setCurrentPage} />}
+
+      {/* Welcome Modal — appears once per user */}
+      <WelcomeTeamModal
+        isOpen={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
+        onGoToTeam={() => {
+          setShowWelcomeModal(false);
+          setCurrentPage(Page.MeetTheTeam);
+        }}
+      />
     </div>
   );
 };

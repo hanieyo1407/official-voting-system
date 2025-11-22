@@ -1,6 +1,6 @@
 // web/pages/HomePage.tsx
 
-import React from 'react';
+import { FC } from 'react';
 import { Page, ElectionStatus } from '../types';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -13,7 +13,7 @@ interface HomePageProps {
   electionEndDate: Date;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ setPage, electionStatus, electionStartDate, electionEndDate }) => {
+const HomePage: FC<HomePageProps> = ({ setPage, electionStatus, electionStartDate, electionEndDate }) => {
   const phases = [
     {
       icon: <svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#2580e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="m9 12 2 2 4-4"/></svg>,

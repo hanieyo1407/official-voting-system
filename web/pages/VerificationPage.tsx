@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Spinner from '../components/Spinner';

@@ -1,6 +1,6 @@
 // web/pages/WinnersPage.tsx
-
-import React from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { ElectionStatus } from '../types';
 import Card from '../components/Card';
 import { useOverallStats } from '../hooks/useOverallStats';

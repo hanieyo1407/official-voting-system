@@ -1,5 +1,6 @@
 // web/pages/OfficialResultsPage.tsx
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Position, Page, Candidate } from '../types';
 import Card from '../components/Card';
 import Button from '../components/Button';
