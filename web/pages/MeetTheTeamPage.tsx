@@ -98,7 +98,13 @@ const MeetTheTeamPage: React.FC = () => {
 
         <p className="text-center mt-20 text-xl font-medium text-dmi-blue-950">
           Your Name Belongs Here —{' '}
-          <span className="text-dmi-gold-600">Contact the Election Committee</span>
+          <span className="text-dmi-gold-600"><a
+                      href={`mailto:ymaluwa@gmail.com`}
+                      className="inline-block mt-6 px-8 py-3 bg-dmi-blue-950 text-white font-bold rounded-full hover:bg-dmi-blue-900 transition shadow-lg"
+                    >
+                      Contanct Us
+                    </a>
+                  </span>
         </p>
       </div>
 

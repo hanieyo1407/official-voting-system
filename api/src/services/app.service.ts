@@ -336,6 +336,51 @@ export class AppService {
       throw error;
     }
   }
+  async verifyVoteByVoucher(voucher: string): Promise<any | null> {
+    try {
+      const sanitizedVoucher = voucher.trim().toUpperCase();
+
+      const cacheKey = `vote:voucher:${sanitizedVoucher}`;
+      const cached = CacheService.get<any>(cacheKey);
+      if (cached) {
+        LoggingService.logAudit('CACHE_HIT', { key: cacheKey });
+        return cached;
+      }
+
+      const result = await pool.query(
+        `SELECT 
+            id, voucher, candidate_id, position_id, 
+            verification_code, voted_at
+         FROM "Vote" 
+         WHERE voucher = $1 
+         ORDER BY position_id`,
+        [sanitizedVoucher]
+      );
+
+      if (result.rows.length === 0) return null;
+
+      const votes = result.rows;
+      const verificationCode = votes[0].verification_code;
+
+      const payload = {
+        verification_code: verificationCode,
+        voucher: sanitizedVoucher,
+        vote: votes[0],           // for backward compatibility
+        votes,                    // full array
+      };
+
+      CacheService.setVoteVerification(verificationCode, payload);
+      CacheService.set(cacheKey, payload, 1800);
+
+      return payload;
+    } catch (error: any) {
+      LoggingService.logError(error, {
+        context: 'verifyVoteByVoucher',
+        voucher,
+      });
+      throw error;
+    }
+  }
 }
 
 

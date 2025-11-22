@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import AppService from "../services/app.service";
+import { InputSanitizer } from "../utils/sanitizer";
+import { LoggingService } from "../services/logging.service";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -196,18 +198,41 @@ export const castVote = async (req: Request, res: Response) => {
 
 export const verifyVote = async (req: Request, res: Response) => {
   try {
-    const { verification_code } = req.body ?? {};
-    if (!verification_code)
-      return res.status(400).json({ error: "verification_code is required" });
+    const { verification_code, voucher } = req.body ?? {};
 
-    const vote = await AppService.verifyVoteByCode(String(verification_code));
-    if (vote) {
-      return res.status(200).json({ status: "found", vote });
+    if (!verification_code && !voucher) {
+      return res.status(400).json({
+        error: "Either 'verification_code' or 'voucher' is required",
+      });
+    }
+    if (verification_code && voucher) {
+      return res.status(400).json({
+        error: "Provide only one of the two fields",
+      });
+    }
+
+    let result;
+    if (verification_code) {
+      const sanitized = InputSanitizer.sanitizeText(String(verification_code).trim(), 100);
+      result = await AppService.verifyVoteByCode(sanitized);
     } else {
+      const sanitized = InputSanitizer.sanitizeText(String(voucher).trim(), 50);
+      result = await AppService.verifyVoteByVoucher(sanitized);
+    }
+
+    if (!result) {
       return res.status(404).json({ status: "not found" });
     }
+
+    return res.status(200).json({
+      status: "found",
+      vote: result.vote,           // backward compatible with current UI
+      verification_code: result.verification_code,
+      voucher: result.voucher,
+      // optional: votes: result.votes   // if you ever want to expose both
+    });
   } catch (err) {
-    console.error(err);
+    LoggingService.logError(err as Error, { context: "verifyVote" });
     return res.status(500).json({ error: "Verification failed" });
   }
 };
