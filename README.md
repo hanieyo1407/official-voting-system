@@ -42,7 +42,7 @@ This platform was created to make voting simple, secure, and transparent for eve
 
 ## 👩‍💻 Behind the Scenes
 
-This project was led by **UDMI Science & Engineering Club** guiding the creative vision.  
+This project was led by **DMI St John the Baptist University Science & Engineering Club** guiding the creative vision.  
 It blends technology with student values, ensuring elections feel professional yet personal.
 
 ---
