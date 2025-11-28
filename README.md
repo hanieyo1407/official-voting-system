@@ -42,7 +42,7 @@ This platform was created to make voting simple, secure, and transparent for eve
 
 ## 👩‍💻 Behind the Scenes
 
-This project was led by **UNIHOUSING MW, K & C Logistics, and DMI Science & Engineering Club**, with Yohane guiding the creative vision.  
+This project was led by **UDMI Science & Engineering Club** guiding the creative vision.  
 It blends technology with student values, ensuring elections feel professional yet personal.
 
 ---
@@ -76,7 +76,7 @@ We believe in:
 
 ## 🌍 Credits
 
-This platform is a collaboration of passionate students and leaders in Mangochi and beyond.  
+This platform is a collaboration of passionate students and leaders at DMI St John the Baptist University and beyond.  
 It’s more than software — it’s a symbol of trust, innovation, and the future of student leadership.
 
 ---
