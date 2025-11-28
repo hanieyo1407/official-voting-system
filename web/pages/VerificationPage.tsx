@@ -214,7 +214,7 @@ const VerificationPage: React.FC = () => {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full text-center text-lg font-mono bg-gray-100 border-2 border-gray-300 rounded-card p-4 focus:outline-none focus:shadow-focus-ring focus:border-dmi-blue-500 text-dmi-blue-900 font-semibold placeholder-gray-400"
-                placeholder={searchMode === 'code' ? 'SJBU-XXXX-XXXX' : 'BCOM60166BH'}
+                placeholder={searchMode === 'code' ? 'SJBU-XXXX-XXXX' : 'XXXX-11111-XX'}
                 autoFocus
                 disabled={!!lockoutUntil}
             />

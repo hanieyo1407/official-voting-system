@@ -38,7 +38,7 @@ function initializePool(): Pool {
       // Fixed connection settings
       max: 18,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 50000,
     });
 
     // CRITICAL FIX: Only log an error and DO NOT crash the entire application

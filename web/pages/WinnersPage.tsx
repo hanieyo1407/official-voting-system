@@ -1,8 +1,6 @@
 // web/pages/WinnersPage.tsx
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { ElectionStatus } from '../types';
-import Card from '../components/Card';
 import { useOverallStats } from '../hooks/useOverallStats';
 import { useAllPositions } from '../hooks/useAllPositions';
 
@@ -10,15 +8,17 @@ interface WinnersPageProps {
   electionStatus: ElectionStatus;
 }
 
+// Crown for the winner
 const CrownIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
     <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/>
     <path d="M5 21h14"/>
   </svg>
 );
 
+// Bicycle Icon – proudly back for every runner-up
 const BicycleIcon = () => (
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" id="Fart-Farting--Streamline-Nasty" height="48" width="48">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" id="Fart-Farting--Streamline-Nasty" height="30" width="30">
   <desc>
     Fart Farting Streamline Icon: https://streamlinehq.com
   </desc>
@@ -34,145 +34,156 @@ const BicycleIcon = () => (
 );
 
 const WinnersPage: React.FC<WinnersPageProps> = ({ electionStatus }) => {
-  const { positions, isLoading: positionsLoading, error: positionsError } = useAllPositions();
-  const { stats, isLoading: statsLoading, error: statsError } = useOverallStats();
+  const { positions, isLoading: positionsLoading } = useAllPositions();
+  const { stats, isLoading: statsLoading } = useOverallStats();
 
   if (positionsLoading || statsLoading) {
-    return <div className="container mx-auto px-4 py-8 text-center">Loading results...</div>;
-  }
-
-  if (positionsError || statsError) {
-    return <div className="container mx-auto px-4 py-8 text-center text-red-500">Error loading results: {positionsError || statsError}</div>;
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-dmi-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-xl text-dmi-blue-900 font-medium">Loading official results...</p>
+        </div>
+      </div>
+    );
   }
 
   if (electionStatus !== 'POST_ELECTION') {
     return (
-      <div className="container mx-auto px-4 py-8 min-h-[60vh] flex items-center justify-center">
-        <Card className="text-center p-6 max-w-2xl">
-          <h1 className="text-2xl sm:text-3xl font-bold text-dmi-blue-900">Election Not Concluded</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-3">Winners will be displayed once the election ends.</p>
-        </Card>
+      <div className="min-h-screen bg-white flex items-center justify-center py-20 px-4">
+        <div className="text-center max-w-2xl">
+          <h1 className="text-4xl font-black text-dmi-blue-950 mb-4">Election Still Ongoing</h1>
+          <p className="text-lg text-gray-700">Official winners will be announced here once voting has concluded.</p>
+          <div className="mt-8 h-1 w-32 bg-dmi-gold-500 mx-auto rounded-full"></div>
+        </div>
       </div>
     );
   }
 
   const enrichedPositions = positions.map(pos => {
     const posStats = stats?.positionsWithStats.find(ps => ps.positionId === pos.id);
-    if (!posStats) return pos;
+    if (!posStats) return { ...pos, candidates: [] };
 
-    type EnrichedCandidate = typeof pos.candidates[0] & { voteCount: number; votePercentage: number };
-
-    const enrichedCands: EnrichedCandidate[] = pos.candidates
+    const enriched = pos.candidates
       .map(cand => {
         const candStats = posStats.candidates.find(cs => cs.candidateId === cand.id);
         return {
           ...cand,
           voteCount: candStats?.voteCount || 0,
-          votePercentage: candStats?.votePercentage || 0
-        } as EnrichedCandidate;
+          votePercentage: candStats?.votePercentage || 0,
+        };
       })
       .sort((a, b) => b.voteCount - a.voteCount);
 
-    return {
-      ...pos,
-      candidates: enrichedCands
-    };
+    return { ...pos, candidates: enriched };
   });
 
-  const placeholder = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="100%" height="100%" fill="%23e5e7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%236b7280">No Image</text></svg>';
+  const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjA0YjY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNDAiIGZpbGw9IiNmZmYiPkRNSSBMRUdFTkQ8L3RleHQ+PC9zdmc+';
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-dmi-blue-900">Official Election Winners</h1>
-        <p className="text-sm sm:text-base text-gray-600 mt-2">Congratulations to the newly elected student leaders for 2025!</p>
+    <div className="min-h-screen bg-white py-16 px-4">
+      {/* Hero */}
+      <div className="text-center mb-16">
+        <h1 className="text-5xl md:text-6xl font-black text-dmi-blue-950">OFFICIAL WINNERS</h1>
+        <p className="text-xl md:text-2xl text-dmi-blue-700 font-light mt-4">
+          2025–2026 Student Leadership Election Results
+        </p>
+        <div className="flex justify-center gap-8 mt-6">
+          <div className="h-px w-32 bg-dmi-gold-500"></div>
+          <div className="h-px w-32 bg-dmi-gold-500"></div>
+        </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="max-w-6xl mx-auto space-y-14">
         {enrichedPositions.map(position => {
-          const winner = position.candidates[0] as typeof position.candidates[0] & { voteCount: number; votePercentage: number };
-          const runnersUp = position.candidates.slice(1) as (typeof position.candidates[0] & { voteCount: number; votePercentage: number })[];
+          const winner = position.candidates[0];
+          const runnersUp = position.candidates.slice(1);
 
-          if (!winner) {
-            return (
-              <Card key={position.id} className="p-4 text-center">
-                <h2 className="text-lg sm:text-2xl font-bold text-dmi-blue-900">{position.name}</h2>
-                <p className="text-sm text-gray-500 mt-2">No results or candidates found for this position.</p>
-              </Card>
-            );
-          }
+          if (!winner) return null;
 
-          const winnerSrc = winner.imageUrl && winner.imageUrl.trim().length > 0 ? winner.imageUrl : placeholder;
+          const winnerImg = winner.imageUrl?.trim() ? winner.imageUrl : placeholder;
 
           return (
-            <Card key={position.id} className="overflow-hidden">
-              <div className="p-4 sm:p-6 bg-gray-50 border-b">
-                <h2 className="text-lg sm:text-2xl font-bold text-dmi-blue-900">{position.name}</h2>
+            <div
+              key={position.id}
+              className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 hover:shadow-3xl transition-all duration-500"
+            >
+              {/* Position Title */}
+              <div className="bg-gradient-to-r from-dmi-blue-950 to-dmi-blue-900 text-white py-6 px-8">
+                <h2 className="text-2xl md:text-3xl font-black text-center tracking-wide">
+                  {position.name.toUpperCase()}
+                </h2>
               </div>
 
-              <div className="p-4 sm:p-6 bg-gradient-to-br from-dmi-blue-50 to-white">
-                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-                  <img
-                    src={winnerSrc}
-                    alt={winner.name}
-                    className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover shadow-xl border-4 border-dmi-gold-500"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (target.src !== placeholder) {
-                        target.src = placeholder;
-                      }
-                    }}
-                  />
-                  <div className="text-center sm:text-left">
-                    <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                      <CrownIcon />
-                      <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-yellow-600">Winner</span>
+              {/* Winner */}
+              <div className="p-8 md:p-12 bg-gradient-to-br from-dmi-blue-50 via-white to-dmi-gold-50">
+                <div className="flex flex-col md:flex-row items-center gap-10">
+                  <div className="relative">
+                    <div className="w-48 h-48 rounded-3xl overflow-hidden ring-8 ring-dmi-gold-400 shadow-2xl">
+                      <img src={winnerImg} alt={winner.name} className="w-full h-full object-cover" />
                     </div>
-                    <h3 className="text-xl sm:text-3xl font-extrabold text-dmi-blue-900">{winner.name}</h3>
-                    <p className="text-sm sm:text-lg font-semibold text-dmi-blue-700 mt-1">
-                      {winner.voteCount.toLocaleString()} Votes ({winner.votePercentage.toFixed(2)}%)
+                    <div className="absolute -top-4 -right-4 bg-dmi-gold-500 text-dmi-blue-950 rounded-full p-4 shadow-xl">
+                      <CrownIcon />
+                    </div>
+                  </div>
+
+                  <div className="text-center md:text-left flex-1">
+                    <p className="text-sm font-bold uppercase tracking-wider text-dmi-gold-600 mb-2">
+                      Elected Winner
                     </p>
+                    <h3 className="text-4xl md:text-5xl font-black text-dmi-blue-950">
+                      {winner.name}
+                    </h3>
+                    <div className="mt-6 space-y-3">
+                      <p className="text-2xl font-bold text-dmi-blue-800">
+                        {winner.voteCount.toLocaleString()} Votes
+                      </p>
+                      <p className="text-lg text-dmi-blue-700">
+                        ({winner.votePercentage.toFixed(2)}% of total votes)
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              {/* Runners-Up – Bicycle Icon, no numbering */}
               {runnersUp.length > 0 && (
-                <div className="p-4 sm:p-6">
-                  <h4 className="text-sm sm:text-lg font-semibold text-gray-700 mb-3">Runners-Up (Wainvera Fungo)</h4>
-                  <ul className="space-y-2">
-                    {runnersUp.map(runner => {
-                      const runnerSrc = runner.imageUrl && runner.imageUrl.trim().length > 0 ? runner.imageUrl : placeholder;
-                      return (
-                        <li key={runner.name} className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 rounded-lg border">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={runnerSrc}
-                              alt={runner.name}
-                              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-300"
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== placeholder) {
-                                  target.src = placeholder;
-                                }
-                              }}
-                            />
-                            <div className="flex items-center gap-2">
-                              <BicycleIcon />
-                              <p className="font-semibold text-gray-800 text-sm sm:text-base">{runner.name}</p>
-                            </div>
-                          </div>
-                          <p className="text-xs sm:text-sm text-gray-600">
-                            {runner.voteCount.toLocaleString()} Votes ({runner.votePercentage.toFixed(2)}%)
+                <div className="px-8 pb-10 pt-6 bg-gray-50">
+                  <h4 className="text-xl font-bold text-dmi-blue-900 text-center mb-6 flex items-center justify-center gap-3">
+                    
+                    <span>Wainvera Fungo (Runners-Up)</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {runnersUp.map(runner => (
+                      <div
+                        key={runner.id}
+                        className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-md hover:shadow-lg transition"
+                      >
+                        <BicycleIcon />
+                        <div className="flex-1">
+                          <p className="font-bold text-dmi-blue-900 text-lg">{runner.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {runner.voteCount.toLocaleString()} votes ({runner.votePercentage.toFixed(1)}%)
                           </p>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </Card>
+            </div>
           );
         })}
+      </div>
+
+      {/* Closing Message */}
+      <div className="text-center mt-20 text-gray-700">
+        <p className="text-lg font-medium">
+          Congratulations to all winners and participants.
+          <br />
+          <span className="text-dmi-blue-900 font-bold">DMI–SJBU • Leadership in Motion</span>
+        </p>
       </div>
     </div>
   );
