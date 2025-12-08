@@ -35,7 +35,7 @@ const sampleTeam: TeamMember[] = [
   { id: 12, name: 'Keith Chiwaula', position: 'Member', role: 'No Role Assigned', imagePublicId: 'dmi/team/samuel_zulu', bio: '', contact: 'keithchiwaula36@gmail.com' },
   { id: 13, name: 'Adam Wasili', position: 'Member', role: 'No Role Assigned', imagePublicId: 'dmi/team/samuel_zulu', bio: '', contact: 'wasiliadam.mw@gmail.comm' },
   { id: 14, name: 'Akim Amini', position: 'Member', role: 'No Role Assigned', imagePublicId: 'v1763505104/LILZPICS056_1_nmxci7', bio: '', contact: 'akimamin@gmail.com' },
-  { id: 15, name: 'Esther Masiye', position: 'Member', role: 'Voucher Distribution', imagePublicId: '', bio: '', contact: '' },
+  { id: 15, name: 'Esther Masiye', position: 'Member', role: 'Voucher Distribution', imagePublicId: 'v1765185812/IMG-20251010-WA0035_aad6gw', bio: 'Graphics designer | Always learning | Creating visual stories | Passionate about branding & identity', contact: 'esthermasiye64@gmail.com' },
 ];
 
 const MeetTheTeamPage: React.FC = () => {
